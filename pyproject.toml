@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "bobbie"
+version = "0.1.0"
+description = "flexible, easy python project configuration"
+authors = ["corey rayburn yung <coreyrayburnyung@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/WithPrecedent/bobbie"
+repository = "https://github.com/WithPrecedent/bobbie"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+amos = "^0.1.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.extras]
+formats = ["toml", "pyyaml"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
