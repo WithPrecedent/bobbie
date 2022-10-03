@@ -18,6 +18,9 @@ License: Apache-2.0
     
     
 ToDo:
+   Add tests for dict, yaml, and toml (and figure out optional import of yaml
+    and toml dependencies)
+   
    
 """
 

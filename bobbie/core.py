@@ -17,9 +17,8 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    Settings (amos.Dictionary, amos.SourceFactory): stores 
-        configuration settings after either loading them from disk or by the 
-        passed arguments.
+    Settings (amos.Dictionary, amos.SourceFactory): stores configuration 
+        settings after either loading them from disk or by the passed arguments.
 
 ToDo:
        
@@ -38,7 +37,7 @@ import amos
 
 
 @dataclasses.dataclass
-class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
+class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     """Loads and stores configuration settings.
 
     To create settings instance, a user can pass as the 'contents' parameter a:

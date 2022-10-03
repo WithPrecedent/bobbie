@@ -10,7 +10,7 @@ repository = "https://github.com/WithPrecedent/bobbie"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-amos = "^0.1.6"
+amos = "^0.1.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
