@@ -27,6 +27,7 @@ ToDo:
 from __future__ import annotations
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
 import configparser
+import contextlib
 import dataclasses
 import importlib
 import importlib.util
@@ -37,7 +38,7 @@ import amos
 
 
 @dataclasses.dataclass
-class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
+class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
     """Loads and stores configuration settings.
 
     To create settings instance, a user can pass as the 'contents' parameter a:
@@ -93,10 +94,8 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     def __post_init__(self) -> None:
         """Initializes class instance attributes."""
         # Calls parent and/or mixin initialization method(s).
-        try:
-            super().__post_init__()
-        except AttributeError:
-            pass
+        with contextlib.suppress(AttributeError):
+            super().__post_init__(*args, **kwargs) # type: ignore
         # Converts 'contents' if it is not a dict.
         if not (self.contents, Mapping):
             self = self.create(
@@ -116,56 +115,59 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     @classmethod
     def from_dictionary(
         cls, 
-        dictionary: MutableMapping[Hashable, Any], 
+        source: MutableMapping[Hashable, Any], 
         **kwargs: Any) -> Settings:
         """[recap]
 
         Args:
-            path (Union[str, pathlib.Path]): [description]
+            source (MutableMapping[Hashable, Any]): dict with settings to store
+                in a Settings instance.
 
         Returns:
-            settings: [description]
+            Settings: an instance derived from 'source'.
             
         """        
-        return cls(contents = dictionary, **kwargs)
+        return cls(contents = source, **kwargs)
         
     @classmethod
     def from_path(
         cls, 
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """[summary]
 
         Args:
-            path (Union[str, pathlib.Path]): [description]
-
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance.
+                
         Returns:
-            settings: [description]
+            Settings: an instance derived from 'source'.
             
         """
-        path = amos.pathlibify(item = path)   
+        path = amos.pathlibify(item = source)   
         extension = path.suffix[1:]
         load_method = getattr(cls, f'from_{extension}')
-        return load_method(path = path, **kwargs)
+        return load_method(source = path, **kwargs)
     
     @classmethod
     def from_ini(
         cls, 
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """Returns settings from an .ini file.
 
         Args:
-            path (str): path to configparser-compatible .ini file.
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance.
 
         Returns:
-            Mapping[Any, Any] of contents.
+            Settings: an instance derived from 'source'.
 
         Raises:
             FileNotFoundError: if the path does not correspond to a file.
 
         """
-        path = amos.pathlibify(item = path) 
+        path = amos.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -179,22 +181,23 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     @classmethod
     def from_json(
         cls,
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """Returns settings from an .json file.
 
         Args:
-            path (str): path to configparser-compatible .json file.
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance.
 
         Returns:
-            Mapping[Any, Any] of contents.
+            Settings: an instance derived from 'source'.
 
         Raises:
             FileNotFoundError: if the path does not correspond to a file.
 
         """
         import json
-        path = amos.pathlibify(item = path) 
+        path = amos.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -207,24 +210,25 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     @classmethod
     def from_py(
         cls,
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """Returns a settings dictionary from a .py file.
 
         Args:
-            path (str): path to python module with '__dict__' defined and an 
-                attribute named 'settings' that contains the settings to use for 
-                creating a settings instance..
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance. The path to a python module must
+                have a '__dict__' defined and an attribute named 'settings' that 
+                contains the settings to use for creating an instance.
 
         Returns:
-            Mapping[Any, Any] of contents.
+            Settings: an instance derived from 'source'.
 
         Raises:
             FileNotFoundError: if the path does not correspond to a
                 file.
 
         """
-        path = amos.pathlibify(item = path) 
+        path = amos.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = False
         try:
@@ -241,22 +245,23 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     @classmethod
     def from_toml(
         cls,
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """Returns settings from a .toml file.
 
         Args:
-            path (str): path to configparser-compatible .toml file.
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance.
 
         Returns:
-            Mapping[Any, Any] of contents.
+            Settings: an instance derived from 'source'.
 
         Raises:
             FileNotFoundError: if the path does not correspond to a file.
 
         """
         import toml
-        path = amos.pathlibify(item = path) 
+        path = amos.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -267,22 +272,23 @@ class Settings(amos.Dictionary, amos.SourcesFactory): # type: ignore
     @classmethod
     def from_yaml(
         cls, 
-        path: Union[str, pathlib.Path], 
+        source: Union[str, pathlib.Path], 
         **kwargs: Any) -> Settings:
         """Returns settings from a .yaml file.
 
         Args:
-            path (str): path to configparser-compatible .toml file.
+            source (Union[str, pathlib.Path]): path to file with settings to 
+                store in a Settings instance.
 
         Returns:
-            Mapping[Any, Any] of contents.
+            Settings: an instance derived from 'source'.
 
         Raises:
             FileNotFoundError: if the path does not correspond to a file.
 
         """
         import yaml
-        path = amos.pathlibify(item = path) 
+        path = amos.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = False
         try:

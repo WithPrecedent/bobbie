@@ -47,19 +47,19 @@ dict_settings = {
 
 def test_settings():
     ini_settings = bobbie.Settings.create(
-        item = pathlib.Path('tests') / 'project_settings.ini')
+        source = pathlib.Path('tests') / 'project_settings.ini')
     assert ini_settings['general']['verbose'] is True
     assert isinstance(ini_settings['tasks']['things_to_do'], list)
     assert ini_settings['files']['test_chunk'] == 500
     assert ini_settings['files']['float_format'] == '%.4f'
     py_settings = bobbie.Settings.create(
-        item = pathlib.Path('tests') / 'project_settings.py')
+        source = pathlib.Path('tests') / 'project_settings.py')
     assert py_settings['general']['verbose'] is True
     assert isinstance(py_settings['tasks']['things_to_do'], list)
     assert py_settings['files']['test_chunk'] == 500
     assert py_settings['files']['float_format'] == '%.4f'
     py_settings = bobbie.Settings.create(
-        item = pathlib.Path('tests') / 'project_settings.py')
+        source = pathlib.Path('tests') / 'project_settings.py')
     assert dict_settings['general']['verbose'] is True
     assert isinstance(dict_settings['tasks']['things_to_do'], list)
     assert dict_settings['files']['test_chunk'] == 500
