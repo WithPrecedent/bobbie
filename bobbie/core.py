@@ -17,7 +17,7 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    Settings (amos.Dictionary, amos.SourceFactory): stores configuration 
+    Settings (camina.Dictionary, ashford.SourceFactory): stores configuration 
         settings after either loading them from disk or by the passed arguments.
 
 ToDo:
@@ -34,11 +34,12 @@ import importlib.util
 import pathlib
 from typing import Any, ClassVar, Optional, Type, Union
 
-import amos
+import ashford
+import camina
 
 
 @dataclasses.dataclass
-class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
+class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     """Loads and stores configuration settings.
 
     To create settings instance, a user can pass as the 'contents' parameter a:
@@ -144,7 +145,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
             Settings: an instance derived from 'source'.
             
         """
-        path = amos.pathlibify(item = source)   
+        path = camina.pathlibify(item = source)   
         extension = path.suffix[1:]
         load_method = getattr(cls, f'from_{extension}')
         return load_method(source = path, **kwargs)
@@ -167,7 +168,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
             FileNotFoundError: if the path does not correspond to a file.
 
         """
-        path = amos.pathlibify(item = source) 
+        path = camina.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -197,7 +198,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
 
         """
         import json
-        path = amos.pathlibify(item = source) 
+        path = camina.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -228,7 +229,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
                 file.
 
         """
-        path = amos.pathlibify(item = source) 
+        path = camina.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = False
         try:
@@ -261,7 +262,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
 
         """
         import toml
-        path = amos.pathlibify(item = source) 
+        path = camina.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -288,7 +289,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
 
         """
         import yaml
-        path = amos.pathlibify(item = source) 
+        path = camina.pathlibify(item = source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = False
         try:
@@ -325,7 +326,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
         attributes.
 
         Args:
-            instance (object): amos class instance to be modified.
+            instance (object): class instance to be modified.
             additional (Union[Sequence[str], str]]): other section(s) in 
                 'contents' to inject into 'instance'. Defaults to None.
             overwrite (bool]): whether to overwrite a local attribute in 
@@ -342,7 +343,7 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
         except AttributeError:
             pass
         if additional:
-            sections.extend(amos.iterify(additional))
+            sections.extend(camina.iterify(additional))
         for section in sections:
             try:
                 for key, value in self.contents[section].items():
@@ -375,11 +376,11 @@ class Settings(amos.Dictionary, amos.SourceFactory): # type: ignore
         for key, value in contents.items():
             if isinstance(value, dict):
                 inner_bundle = {
-                    inner_key: amos.typify(inner_value)
+                    inner_key: camina.typify(inner_value)
                     for inner_key, inner_value in value.items()}
                 new_contents[key] = inner_bundle
             else:
-                new_contents[key] = amos.typify(value)
+                new_contents[key] = camina.typify(value)
         return new_contents
 
     def _add_default(
