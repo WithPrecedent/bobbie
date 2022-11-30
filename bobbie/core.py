@@ -25,6 +25,7 @@ ToDo:
        
 """
 from __future__ import annotations
+import abc
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
 import configparser
 import contextlib
@@ -425,3 +426,112 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
                 raise TypeError(
                     'key must be a str and value must be a dict type')
         return
+
+
+@dataclasses.dataclass
+class Parser(abc.ABC):
+    """
+
+    Args:
+        
+        
+    """
+    name: str
+    terms: Optional[tuple[str, ...]] = tuple()
+    match: Optional[str] = 'complete'
+    scope: Optional[str] = 'both'
+    divider: Optional[str] = ''
+
+    """ Required Subclass Methods """
+    
+    @abc.abstractmethod
+    def apply(self, settings: Settings) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            settings (Settings): configuration settings to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+    
+    """ Private Nethods """
+
+    def _match_complete(self, setting: dict[Hashable, Any]) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            setting (dict[Hashable, Any]): configuration setting to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+
+    def _match_prefix(self, item: Any) -> Any:
+        """Applies the parser to 'item'.
+
+        Args:
+            item (Any: configuration setting to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        for term in self.terms:
+            prefix = term + self.divider
+            if item.startswith(prefix):
+                return True
+        return False
+    
+    def _match_suffix(self, setting: dict[Hashable, Any]) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            setting (dict[Hashable, Any]): configuration setting to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+    
+    def _search_both(self, settings: Settings) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            settings (Settings): configuration settings to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+    
+    def _search_inner(self, settings: Settings) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            settings (Settings): configuration settings to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+
+    def _search_outer(self, settings: Settings) -> Any:
+        """Applies the parser to a Settings instance.
+
+        Args:
+            settings (Settings): configuration settings to parse.
+
+        Returns:
+            Any: information derived from parsing.
+            
+        """
+        pass
+           

@@ -55,3 +55,4 @@ __author__ = 'Corey Rayburn Yung'
 
 
 from .core import *
+from .parsers import *
