@@ -17,10 +17,7 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    Outline
-    Workflow
-    Summary
-    Results
+
 
 To Do:
 
@@ -37,37 +34,144 @@ from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
 import camina
 import holden
 
-from ..core import framework
-from ..core import keystones
-from ..core import nodes
+from . import extensions
+from . import workshop
+
+
+DEFAULT_PARSERS: dict[str, tuple[str]] = {
+    'general': ('general',),
+    'files': ('files', 'filer', 'clerk'),
+    'parameters': ('parameters',)}
 
 
 @dataclasses.dataclass
-class Outline(keystones.View):
-    """Provides a different view of data stored in 'project.idea'.
-    
-    The properties in Outline are used in the construction of a Workflow. So,
-    even if you do not have any interest in using its view of the configuration
-    settings, it shouldn't be cut out of a Project (unless you also replace the
-    functions for creating a Workflow). 
+class BasicView(extensions.View, abc.ABC):
+    """Provides a different view of settings data.
 
     Args:
-        name
-        project (framework.Project): a related project instance which has data
-            from which the properties of an Outline can be derived.
+        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
+            being the name of the parsers and values being the matching str in a
+            tuple. Defaults to an empty dict.
 
     """
-    name: Optional[str] = None
-    project: Optional[framework.Project] = dataclasses.field(
-        default = None, repr = False, compare = False)
-    rules: Optional[dict[str, tuple[str]]] = dataclasses.field(
-        default_factory = lambda: framework.Rules.parsers)
+    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
+        default_factory = dict)
+    
+    """ Properties """       
+                   
+    @property
+    def files(self) -> dict[str, Any]:
+        """Returns file settings.
+
+        Returns:
+            dict[str, Any]: dict of file settings.
+            
+        """
+        terms = self.parsers.get('files', DEFAULT_PARSERS['files'])
+        return workshop.accumulate_section_contents(
+            settings = self, 
+            terms = terms, 
+            matching = 'complete') 
+        
+    @files.setter
+    def files(self, value: dict[str, Any]) -> None:
+        """_summary_
+
+        Args:
+            value (dict[str, Any]): _description_
+        """
+        terms = self.parsers.get('files', DEFAULT_PARSERS['files'])
+        key = None
+        for term in terms:
+            if term in self.contents.keys():
+                key = term
+                break
+        key = key or self.parsers.get('files', DEFAULT_PARSERS['files'])[0]
+        self.contents[key] = value
+        return
+        
+    @property
+    def general(self) -> dict[str, Any]:
+        """Returns general settings.
+
+        Returns:
+            dict[str, Any]: dict of general settings.
+            
+        """       
+        terms = self.parsers.get('general', DEFAULT_PARSERS['general'])
+        return workshop.accumulate_section_contents(
+            settings = self, 
+            terms = terms, 
+            matching = 'complete') 
+        
+    @general.setter
+    def general(self, value: dict[str, Any]) -> None:
+        """_summary_
+
+        Args:
+            value (dict[str, Any]): _description_
+        """
+        terms = self.parsers.get('general', DEFAULT_PARSERS['general'])
+        key = None
+        for term in terms:
+            if term in self.contents.keys():
+                key = term
+                break
+        key = key or self.parsers.get('general', DEFAULT_PARSERS['general'])[0]
+        self.contents[key] = value
+        return
+    
+
+@dataclasses.dataclass
+class ParametersView(extensions.View):
+    """Provides a different view of settings data.
+
+    Args:
+        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
+            being the name of the parsers and values being the matching str in a
+            tuple. Defaults to an empty dict.
+
+    """
+    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
+        default_factory = dict)
+    
+    """ Properties """  
+                                    
+    @property
+    def parameters(self) -> dict[str, dict[str, Any]]:
+        """Returns sections that have parameters suffixes.
+
+        Returns:
+            dict[str, dict[str, Any]]: keys are node names and values are dicts
+                of parameters.
+            
+        """
+        terms = self.parsers.get('parameters', DEFAULT_PARSERS['parameters'])
+        suffixes = camina.add_prefix_to_list(item = terms, prefix = '_')
+        return workshop.accumulate_sections(
+            settings = self, 
+            terms = suffixes, 
+            matching = 'suffix')
+                  
+
+@dataclasses.dataclass
+class WorkflowView(extensions.View):
+    """Provides a different view of settings data.
+
+    Args:
+        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
+            being the name of the parsers and values being the matching str in a
+            tuple. Defaults to an empty dict.
+
+    """
+    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
+        default_factory = dict)
     
     """ Properties """       
                      
     @property
     def associations(self) -> dict[str, str]:
-        """Returns associated parent of nodes in a chrisjen project.
+        """Returns associated parent of nodes.
 
         Returns:
             dict[str, str]: keys are node names and values are associated worker 
@@ -114,7 +218,7 @@ class Outline(keystones.View):
                      
     @property
     def designs(self) -> dict[str, str]:
-        """Returns designs of nodes in a chrisjen project.
+        """Returns designs of nodes.
 
         Returns:
             dict[str, str]: keys are node names and values are design names.
@@ -124,7 +228,7 @@ class Outline(keystones.View):
         for key, section in self.workers.items():
             design_keys = [
                 k for k in section.keys() 
-                if k.endswith(self.rules['design'])]
+                if k.endswith(self.parsers['design'])]
             for design_key in design_keys:
                 prefix, suffix = camina.cleave_str(design_key)
                 if prefix == suffix:
@@ -132,74 +236,7 @@ class Outline(keystones.View):
                 else:
                     designs[prefix] = section[design_key]
         return designs
-                            
-    @property
-    def files(self) -> dict[str, Any]:
-        """Returns file settings in a chrisjen project.
-
-        Returns:
-            dict[str, Any]: dict of file settings.
-            
-        """
-        for name in self.rules['files']:
-            try:
-                return self[name]
-            except KeyError:
-                pass
-        return {} 
-                            
-    @property
-    def manager(self) -> dict[str, Any]:
-        """Returns manager settings of a chrisjen project.
-
-        Returns:
-            dict[str, Any]: manager settings for a chrisjen project
-            
-        """
-        for name, section in self.project.idea.items():
-            if name.endswith(self.rules['manager']):
-                return section
-        for name, section in self.project.idea.items():
-            suffixes = itertools.chain_from_iterable(self.rules.values()) 
-            if not name.endswith(suffixes):
-                return section
-        return {}
-     
-    @property
-    def general(self) -> dict[str, Any]:
-        """Returns general settings in a chrisjen project.
-
-        Returns:
-            dict[str, Any]: dict of general settings.
-            
-        """       
-        for name in self.rules['general']:
-            try:
-                return self[name]
-            except KeyError:
-                pass
-        return {}  
-                                    
-    @property
-    def implementation(self) -> dict[str, dict[str, Any]]:
-        """Returns implementation parameters for nodes.
-        
-        These values will be parsed into arguments and attributes once the nodes
-        are instanced.
-
-        Returns:
-            dict[str, dict[str, Any]]: keys are node names and values are dicts
-                of the implementation arguments and attributes.
-            
-        """
-        implementation = {}      
-        for name, section in self.project.idea.items():
-            for suffix in self.rules['parameters']:
-                if name.endswith(suffix):
-                    key = name.removesuffix('_' + suffix)
-                    implementation[key] = section
-        return implementation
-                                                             
+                                                   
     @property
     def initialization(self) -> dict[str, dict[str, Any]]:
         """Returns initialization arguments and attributes for nodes.
@@ -215,8 +252,8 @@ class Outline(keystones.View):
         initialization = {}
         all_plurals = (
             self.plurals
-            + self.rules['design']
-            + self.rules['manager'])
+            + self.parsers['design']
+            + self.parsers['manager'])
         for key, section in self.workers.items():   
             initialization[key] = {
                 k: v for k, v in section.items() if not k.endswith(all_plurals)}
@@ -261,18 +298,23 @@ class Outline(keystones.View):
             labels.append(key)
             labels.extend(values)
         return camina.deduplicate_list(item = labels)    
-
+                            
     @property
-    def plurals(self) -> tuple[str]:
-        """Returns all node names as naive plurals of those names.
-        
+    def manager(self) -> dict[str, Any]:
+        """Returns manager settings of a chrisjen project.
+
         Returns:
-            tuple[str]: all node names with an 's' added in order to create 
-                simple plurals combined with the stored keys.
-                
+            dict[str, Any]: manager settings for a chrisjen project
+            
         """
-        plurals = [k + 's' for k in self.project.library.node.keys()]
-        return tuple(plurals ) 
+        for name, section in self.project.idea.items():
+            if name.endswith(self.parsers['manager']):
+                return section
+        for name, section in self.project.idea.items():
+            suffixes = itertools.chain_from_iterable(self.parsers.values()) 
+            if not name.endswith(suffixes):
+                return section
+        return {}
     
     @property
     def workers(self) -> dict[str, dict[str, Any]]:
@@ -296,17 +338,17 @@ class Outline(keystones.View):
     
 
 @dataclasses.dataclass
-class Workflow(keystones.View):
-    """Provides a different view of data stored in 'project.idea'.
+class Workflow(holden.System):
+    """Provides a different view of settings data.
 
     Args:
-        project (framework.Project): a related project instance which has data
-            from which the properties of an Outline can be derived.
+        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
+            being the name of the parsers and values being the matching str in a
+            tuple. Defaults to an empty dict.
 
     """
-    name: Optional[str] = None
-    project: Optional[framework.Project] = dataclasses.field(
-        default = None, repr = False, compare = False)
+    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
+        default_factory = dict)
 
     """ Required Subclass Property """
     

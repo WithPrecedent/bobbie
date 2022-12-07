@@ -25,7 +25,6 @@ ToDo:
        
 """
 from __future__ import annotations
-import abc
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
 import configparser
 import contextlib
@@ -33,7 +32,7 @@ import dataclasses
 import importlib
 import importlib.util
 import pathlib
-from typing import Any, ClassVar, Optional, Type, Union
+from typing import Any, ClassVar, Optional, Type
 
 import ashford
 import camina
@@ -134,12 +133,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_path(
         cls, 
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """[summary]
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance.
                 
         Returns:
@@ -154,12 +153,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_ini(
         cls, 
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """Returns settings from an .ini file.
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance.
 
         Returns:
@@ -183,12 +182,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_json(
         cls,
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """Returns settings from an .json file.
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance.
 
         Returns:
@@ -212,12 +211,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_py(
         cls,
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """Returns a settings dictionary from a .py file.
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance. The path to a python module must
                 have a '__dict__' defined and an attribute named 'settings' that 
                 contains the settings to use for creating an instance.
@@ -247,12 +246,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_toml(
         cls,
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """Returns settings from a .toml file.
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance.
 
         Returns:
@@ -274,12 +273,12 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     @classmethod
     def from_yaml(
         cls, 
-        source: Union[str, pathlib.Path], 
+        source: str | pathlib.Path, 
         **kwargs: Any) -> Settings:
         """Returns settings from a .yaml file.
 
         Args:
-            source (Union[str, pathlib.Path]): path to file with settings to 
+            source (str | pathlib.Path): path to file with settings to 
                 store in a Settings instance.
 
         Returns:
@@ -318,7 +317,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     def inject(
         self, 
         instance: object,
-        additional: Optional[Union[Sequence[str], str]] = None,
+        additional: Optional[Sequence[str] | str] = None,
         overwrite: bool = False) -> object:
         """Injects appropriate items into 'instance' from 'contents'.
         
@@ -328,7 +327,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
 
         Args:
             instance (object): class instance to be modified.
-            additional (Union[Sequence[str], str]]): other section(s) in 
+            additional (Optional[Sequence[str] | str]): other section(s) in 
                 'contents' to inject into 'instance'. Defaults to None.
             overwrite (bool]): whether to overwrite a local attribute in 
                 'instance' if there are existing values stored in that 
@@ -426,112 +425,3 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
                 raise TypeError(
                     'key must be a str and value must be a dict type')
         return
-
-
-@dataclasses.dataclass
-class Parser(abc.ABC):
-    """
-
-    Args:
-        
-        
-    """
-    name: str
-    terms: Optional[tuple[str, ...]] = tuple()
-    match: Optional[str] = 'complete'
-    scope: Optional[str] = 'both'
-    divider: Optional[str] = ''
-
-    """ Required Subclass Methods """
-    
-    @abc.abstractmethod
-    def apply(self, settings: Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-    
-    """ Private Nethods """
-
-    def _match_complete(self, setting: dict[Hashable, Any]) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            setting (dict[Hashable, Any]): configuration setting to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-
-    def _match_prefix(self, item: Any) -> Any:
-        """Applies the parser to 'item'.
-
-        Args:
-            item (Any: configuration setting to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        for term in self.terms:
-            prefix = term + self.divider
-            if item.startswith(prefix):
-                return True
-        return False
-    
-    def _match_suffix(self, setting: dict[Hashable, Any]) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            setting (dict[Hashable, Any]): configuration setting to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-    
-    def _search_both(self, settings: Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-    
-    def _search_inner(self, settings: Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-
-    def _search_outer(self, settings: Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-           

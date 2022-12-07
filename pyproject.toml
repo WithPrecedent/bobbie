@@ -10,8 +10,9 @@ repository = "https://github.com/WithPrecedent/bobbie"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ashford = "^0.1.0"
+ashford = "^0.1.2"
 camina = "^0.1.10"
+holden = "^0.1.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -1,6 +1,6 @@
 [[package]]
 name = "ashford"
-version = "0.1.0"
+version = "0.1.2"
 description = "factory, registration, and validation tools for python"
 category = "main"
 optional = false
@@ -8,7 +8,7 @@ python-versions = ">=3.9,<4.0"
 
 [package.dependencies]
 camina = ">=0.1.10,<0.2.0"
-miller = ">=0.1.5,<0.2.0"
+miller = ">=0.1.6,<0.2.0"
 
 [[package]]
 name = "atomicwrites"
@@ -50,6 +50,18 @@ description = "Cross-platform colored terminal text."
 category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+
+[[package]]
+name = "holden"
+version = "0.1.6"
+description = "lightweight, accessible, flexible composite data structures"
+category = "main"
+optional = false
+python-versions = ">=3.9,<4.0"
+
+[package.dependencies]
+camina = ">=0.1.10,<0.2.0"
+miller = ">=0.1.2,<0.2.0"
 
 [[package]]
 name = "miller"
@@ -160,12 +172,12 @@ formats = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "161d271d8f8b32346feb71fc62052fc6769c157c4d19a2ba19d7a4c29ff4d0b5"
+content-hash = "da21a290169ba86c091b2b40b0b32f3838a3d9989d8de04b57c6c9e1c60b5173"
 
 [metadata.files]
 ashford = [
-    {file = "ashford-0.1.0-py3-none-any.whl", hash = "sha256:68d3f3a247efd1655b02966bd5a406509ade5788fb163793c61f0280a79fde1f"},
-    {file = "ashford-0.1.0.tar.gz", hash = "sha256:cf2e9793f00a10d0799c7546606519e26e8da718bc97fa75e4b744fc1c3b2fdf"},
+    {file = "ashford-0.1.2-py3-none-any.whl", hash = "sha256:a59c199871fa1c92891274aadaf45ea9895496191030a09e7098a2b1f826112e"},
+    {file = "ashford-0.1.2.tar.gz", hash = "sha256:59e664e0b1049057305aefaae3814c189063e6d7a649d9e062f295f2f7aa3d23"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.1.tar.gz", hash = "sha256:81b2c9071a49367a7f770170e5eec8cb66567cfbbc8c73d20ce5ca4a8d71cf11"},
@@ -181,6 +193,10 @@ camina = [
 colorama = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+holden = [
+    {file = "holden-0.1.6-py3-none-any.whl", hash = "sha256:7ce35138eb097d1140cb814cad43085fad5804c906fd2eb892c849cd9d43029a"},
+    {file = "holden-0.1.6.tar.gz", hash = "sha256:12b681526759948036bb093f68b5511cf47e5e7fe3a9f9a8b5b309bfd37c5a26"},
 ]
 miller = [
     {file = "miller-0.1.6-py3-none-any.whl", hash = "sha256:8983a0fc27e1ebd9d7be15e1261e4ff9c2d5814e07f337c485d25cd9d2ac2deb"},

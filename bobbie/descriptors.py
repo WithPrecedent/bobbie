@@ -1,5 +1,5 @@
 """
-parsers: parse parts of settings
+descriptors: descriptors for accessing settings data
 Corey Rayburn Yung <coreyrayburnyung@gmail.com>
 Copyright 2020-2022, Corey Rayburn Yung
 License: Apache-2.0
@@ -31,7 +31,25 @@ from . import core
 from . import extensions
 from . import workshop
 
+class Maximizer(object):
 
+    def __set_name__(self, owner: Type[Any], name: str) -> None:
+        """_summary_
+
+        Args:
+            owner (Type[Any]): _description_
+            name (str): _description_
+            
+        """
+        pass
+
+    def __get__(self, obj: object, objtype = None):
+        return conn.execute(self.fetch, [obj.key]).fetchone()[0]
+
+    def __set__(self, obj: object, value: Any):
+        conn.execute(self.store, [value, obj.key])
+        conn.commit()
+        
 class Maximizer(extensions.Parser):
     
     name: str
