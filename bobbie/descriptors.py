@@ -25,13 +25,39 @@ ToDo:
 """
 from __future__ import annotations
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
+import contextlib
+import dataclasses
 from typing import Any, ClassVar, Optional, Type, Union
 
 from . import core
 from . import extensions
 from . import workshop
 
-class Maximizer(object):
+
+DEFAULT_PARSERS: dict[str, tuple[str]] = {
+    'general': ('general',),
+    'files': ('files', 'filer', 'clerk'),
+    'parameters': ('parameters',)}
+
+
+@dataclasses.dataclass
+class Maximizer(extensions.Parser):
+    """
+    """
+    terms: tuple[str, ...]
+    match: Optional[extensions.MatchOptions] = 'complete'
+    scope: Optional[extensions.ScopeOptions] = 'outer'
+    returns: Optional[extensions.ReturnsOptions] = 'sections'
+    divider: Optional[str] = ''
+    
+    """ Initialization Methods """
+
+    def __post_init__(self) -> None:
+        """Initializes and validates an instance."""
+        # Calls parent and/or mixin initialization method(s).
+        with contextlib.suppress(AttributeError):
+            super().__post_init__()
+        self.set_parser()
 
     def __set_name__(self, owner: Type[Any], name: str) -> None:
         """_summary_
@@ -41,14 +67,47 @@ class Maximizer(object):
             name (str): _description_
             
         """
-        pass
+        self.name = name
+        return
 
-    def __get__(self, obj: object, objtype = None):
-        return conn.execute(self.fetch, [obj.key]).fetchone()[0]
+    """ Public Methods """
+    
+    def set_parser(self) -> None:
+        """Sets 'parser' attribute to the appropriate function."""
+        parser_name = f'accumulate_{self.returns}_{self.scope}'
+        self.parser = getattr(workshop, parser_name)     
+        return self        
 
-    def __set__(self, obj: object, value: Any):
-        conn.execute(self.store, [value, obj.key])
-        conn.commit()
+    """ Dunder Methods """
+    
+    def __get__(self, obj: object) -> Any:
+        """_summary_
+
+        Args:
+            obj (object): _description_
+
+        Returns:
+            Any: _description_
+        """
+        return self.parser(
+            settings = obj.settings, 
+            terms = self.terms, 
+            matching = self.match)
+
+    def __set__(self, obj: object, value: Any) -> None:
+        """_summary_
+
+        Args:
+            obj (object): _description_
+            value (Any): _description_
+        """
+        key = self.terms[0]
+        for term in self.terms:
+            if term in obj.settings.contents.keys():
+                key = term
+                break
+        obj.settings[key] = value
+        return
         
 class Maximizer(extensions.Parser):
     

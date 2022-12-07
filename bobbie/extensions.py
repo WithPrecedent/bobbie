@@ -43,14 +43,12 @@ class Parser(abc.ABC):
     """
 
     Args:
-        name (str): name of parser.
         terms (tuple[str, ...]): strings to match against entries in a Settings
             instance.
         match (Optional[MatchOptions]): how much of the str must be matched.
         scope (Optional[ScopeOptions]):
         
     """
-    name: str
     terms: tuple[str, ...]
     match: Optional[MatchOptions] = 'complete'
     scope: Optional[ScopeOptions] = 'outer'
