@@ -36,7 +36,7 @@ class Maximizer(extensions.Parser):
     
     name: str
     terms: tuple[str, ...]
-    match: Optional[extensions.MatchOptions] = 'complete'
+    match: Optional[extensions.MatchOptions] = 'all'
     scope: Optional[extensions.ScopeOptions] = 'outer'
     returns: Optional[extensions.ReturnsOptions] = 'sections'
     divider: Optional[str] = ''
@@ -69,7 +69,7 @@ class Satisficer(extensions.Parser):
     
     name: str
     terms: tuple[str, ...]
-    match: Optional[extensions.MatchOptions] = 'complete'
+    match: Optional[extensions.MatchOptions] = 'all'
     scope: Optional[extensions.ScopeOptions] = 'outer'
     returns: Optional[extensions.ReturnsOptions] = 'sections'
     divider: Optional[str] = ''
@@ -97,7 +97,7 @@ class Satisficer(extensions.Parser):
 files = extensions.Parser(
     name = 'files',
     terms = ('files', 'filer', 'clerk'),
-    match = 'complete',
+    match = 'all',
     scope = 'outer',
     returns = 'section_contents',
     divider = '')
@@ -105,7 +105,7 @@ files = extensions.Parser(
 general = extensions.Parser(
     name = 'general',
     terms = ('general',),
-    match = 'complete',
+    match = 'all',
     scope = 'outer',
     returns = 'section_contents',
     divider = '')

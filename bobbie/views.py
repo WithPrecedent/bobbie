@@ -71,7 +71,7 @@ class BasicView(extensions.View, abc.ABC):
         return workshop.accumulate_section_contents(
             settings = self, 
             terms = terms, 
-            matching = 'complete') 
+            matching = 'all') 
         
     @files.setter
     def files(self, value: dict[str, Any]) -> None:
@@ -102,7 +102,7 @@ class BasicView(extensions.View, abc.ABC):
         return workshop.accumulate_section_contents(
             settings = self, 
             terms = terms, 
-            matching = 'complete') 
+            matching = 'all') 
         
     @general.setter
     def general(self, value: dict[str, Any]) -> None:

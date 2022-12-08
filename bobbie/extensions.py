@@ -26,6 +26,7 @@ ToDo:
 from __future__ import annotations
 import abc
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
+import contextlib
 import dataclasses
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -36,6 +37,7 @@ from . import workshop
 MatchOptions = Literal['all', 'prefix', 'suffix']
 ScopeOptions = Literal['both', 'inner', 'outer']
 ReturnsOptions = Literal['sections', 'section_contents']
+ExciseOptions = Literal['terms', 'remainder', 'none']
 
 
 @dataclasses.dataclass
@@ -50,11 +52,32 @@ class Parser(abc.ABC):
         
     """
     terms: tuple[str, ...]
-    match: Optional[MatchOptions] = 'complete'
+    match: Optional[MatchOptions] = 'all'
     scope: Optional[ScopeOptions] = 'outer'
     returns: Optional[ReturnsOptions] = 'sections'
+    excise: Optional[ExciseOptions] = 'none'
     divider: Optional[str] = ''
+    
+    """ Initialization Methods """
 
+    def __post_init__(self) -> None:
+        """Initializes and validates an instance."""
+        # Calls parent and/or mixin initialization method(s).
+        with contextlib.suppress(AttributeError):
+            super().__post_init__()
+        self.set_parser()
+
+    def __set_name__(self, owner: Type[Any], name: str) -> None:
+        """_summary_
+
+        Args:
+            owner (Type[Any]): _description_
+            name (str): _description_
+            
+        """
+        self.name = name
+        return
+    
     """ Required Subclass Methods """
     
     @abc.abstractmethod
@@ -73,85 +96,51 @@ class Parser(abc.ABC):
         return func(
             settings = settings, 
             terms = self.terms, 
-            matching = self.match)
+            match = self.match)
+        
+    """ Public Methods """
     
-    """ Private Nethods """
+    def set_parser(self) -> None:
+        """Sets 'parser' attribute to the appropriate function."""
+        parser_name = f'accumulate_{self.scope}_{self.returns}'
+        self.parser = getattr(workshop, parser_name)     
+        return self        
 
-    def _match_complete(self, setting: dict[Hashable, Any]) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            setting (dict[Hashable, Any]): configuration setting to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-
-    def _match_prefix(self, item: Any) -> Any:
-        """Applies the parser to 'item'.
-
-        Args:
-            item (Any: configuration setting to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        for term in self.terms:
-            prefix = term + self.divider
-            if item.startswith(prefix):
-                return True
-        return False
+    """ Dunder Methods """
     
-    def _match_suffix(self, setting: dict[Hashable, Any]) -> Any:
-        """Applies the parser to a Settings instance.
+    def __get__(self, obj: object) -> Any:
+        """_summary_
 
         Args:
-            setting (dict[Hashable, Any]): configuration setting to parse.
+            obj (object): _description_
 
         Returns:
-            Any: information derived from parsing.
+            Any: _description_
             
         """
-        pass
-    
-    def _search_both(self, settings: core.Settings) -> Any:
-        """Applies the parser to a Settings instance.
+        return self.parser(
+            settings = obj.settings, 
+            terms = self.terms, 
+            match = self.match)
+
+    def __set__(self, obj: object, value: Any) -> None:
+        """_summary_
 
         Args:
-            settings (core.Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
+            obj (object): _description_
+            value (Any): _description_
             
         """
-        pass
-    
-    def _search_inner(self, settings: core.Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (core.Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
-
-    def _search_outer(self, settings: core.Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (core.Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        pass
+        keys = workshop.get_matching_outer_keys(
+            settings = obj.settings,
+            terms = self.terms,
+            match = self.match)
+        try:
+            key = keys[0]
+        except IndexError:
+            key = self.terms[0]
+        obj.settings[key] = value
+        return
 
 
 @dataclasses.dataclass

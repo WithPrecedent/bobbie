@@ -45,7 +45,7 @@ class Maximizer(extensions.Parser):
     """
     """
     terms: tuple[str, ...]
-    match: Optional[extensions.MatchOptions] = 'complete'
+    match: Optional[extensions.MatchOptions] = 'all'
     scope: Optional[extensions.ScopeOptions] = 'outer'
     returns: Optional[extensions.ReturnsOptions] = 'sections'
     divider: Optional[str] = ''
@@ -74,7 +74,7 @@ class Maximizer(extensions.Parser):
     
     def set_parser(self) -> None:
         """Sets 'parser' attribute to the appropriate function."""
-        parser_name = f'accumulate_{self.returns}_{self.scope}'
+        parser_name = f'accumulate_{self.scope}_{self.returns}'
         self.parser = getattr(workshop, parser_name)     
         return self        
 
@@ -88,6 +88,7 @@ class Maximizer(extensions.Parser):
 
         Returns:
             Any: _description_
+            
         """
         return self.parser(
             settings = obj.settings, 
@@ -100,12 +101,16 @@ class Maximizer(extensions.Parser):
         Args:
             obj (object): _description_
             value (Any): _description_
+            
         """
-        key = self.terms[0]
-        for term in self.terms:
-            if term in obj.settings.contents.keys():
-                key = term
-                break
+        keys = workshop.get_matching_outer_keys(
+            settings = obj.settings,
+            terms = self.terms,
+            matching = self.match)
+        try:
+            key = keys[0]
+        except IndexError:
+            key = self.terms[0]
         obj.settings[key] = value
         return
         
@@ -113,7 +118,7 @@ class Maximizer(extensions.Parser):
     
     name: str
     terms: tuple[str, ...]
-    match: Optional[extensions.MatchOptions] = 'complete'
+    match: Optional[extensions.MatchOptions] = 'all'
     scope: Optional[extensions.ScopeOptions] = 'outer'
     returns: Optional[extensions.ReturnsOptions] = 'sections'
     divider: Optional[str] = ''
@@ -146,7 +151,7 @@ class Satisficer(extensions.Parser):
     
     name: str
     terms: tuple[str, ...]
-    match: Optional[extensions.MatchOptions] = 'complete'
+    match: Optional[extensions.MatchOptions] = 'all'
     scope: Optional[extensions.ScopeOptions] = 'outer'
     returns: Optional[extensions.ReturnsOptions] = 'sections'
     divider: Optional[str] = ''
@@ -174,7 +179,7 @@ class Satisficer(extensions.Parser):
 files = extensions.Parser(
     name = 'files',
     terms = ('files', 'filer', 'clerk'),
-    match = 'complete',
+    match = 'all',
     scope = 'outer',
     returns = 'section_contents',
     divider = '')
@@ -182,7 +187,7 @@ files = extensions.Parser(
 general = extensions.Parser(
     name = 'general',
     terms = ('general',),
-    match = 'complete',
+    match = 'all',
     scope = 'outer',
     returns = 'section_contents',
     divider = '')

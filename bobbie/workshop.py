@@ -33,17 +33,17 @@ if TYPE_CHECKING:
     from . import core
 
 
-def accumulate_sections(
+def accumulate_outer_sections(
     settings: core.Settings, 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> dict[str, dict[str, Any]]:
+    match: Optional[str] = 'all') -> dict[str, dict[str, Any]]:
     """_summary_
 
     Args:
         settings (core.Settings): a Settings instance with raw data to use.
         terms (Sequence[str]): str to match against entries in 'settings'.
-        matching (Optional[str]): the scope of the match to look for. Options
-            are 'complete', 'prefix', and 'suffix'. Defaults to 'complete'.
+        match (Optional[str]): the scope of the match to look for. Options
+            are 'all', 'prefix', and 'suffix'. Defaults to 'all'.
 
     Returns:
         dict[str, dict[str, Any]]: sections that match 'terms'.
@@ -52,20 +52,20 @@ def accumulate_sections(
     keys = get_matching_outer_keys(
         settings = settings, 
         terms = terms, 
-        matching = matching)
+        match = match)
     return {k: settings[k] for k in keys}
 
-def accumulate_section_contents(
+def accumulate_outer_section_contents(
     settings: core.Settings, 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> dict[str, Any]:
+    match: Optional[str] = 'all') -> dict[str, Any]:
     """_summary_
 
     Args:
         settings (core.Settings): a Settings instance with raw data to use.
         terms (Sequence[str]): str to match against entries in 'settings'.
-        matching (Optional[str]): the scope of the match to look for. Options
-            are 'complete', 'prefix', and 'suffix'. Defaults to 'complete'.
+        match (Optional[str]): the scope of the match to look for. Options
+            are 'all', 'prefix', and 'suffix'. Defaults to 'all'.
 
     Returns:
         dict[str, Any]: key/value pairs from sections that match 'terms'.
@@ -74,7 +74,7 @@ def accumulate_section_contents(
     keys = get_matching_outer_keys(
         settings = settings, 
         terms = terms, 
-        matching = matching)
+        match = match)
     relevant = {}
     for key in keys:
         relevant.update(settings[key])
@@ -83,13 +83,13 @@ def accumulate_section_contents(
 def get_matching_all_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> Optional[str]:
+    match: Optional[str] = 'all') -> Optional[str]:
     """_summary_
 
     Args:
         item (Any): _description_
         terms (Sequence[str]): _description_
-        matching (Optional[str], optional): _description_. Defaults to 'complete'.
+        match (Optional[str], optional): _description_. Defaults to 'all'.
 
     Returns:
         Optional[str]: _description_
@@ -98,23 +98,23 @@ def get_matching_all_keys(
     matches = get_matching_outer_keys(
         settings = settings, 
         terms = terms, 
-        matching = matching)
+        match = match)
     matches.extend(get_matching_inner_keys(
         settings = settings, 
         terms = terms, 
-        matching = matching))
+        match = match))
     return matches
 
 def get_matching_inner_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> Optional[str]:
+    match: Optional[str] = 'all') -> Optional[str]:
     """_summary_
 
     Args:
         item (Any): _description_
         terms (Sequence[str]): _description_
-        matching (Optional[str], optional): _description_. Defaults to 'complete'.
+        match (Optional[str], optional): _description_. Defaults to 'all'.
 
     Returns:
         Optional[str]: _description_
@@ -125,36 +125,36 @@ def get_matching_inner_keys(
             get_matching_outer_keys(
                 settings = section, 
                 terms = terms, 
-                matching = matching))
+                match = match))
     return matches
 
 def get_matching_outer_keys(
     settings: dict[str, Any], 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> Optional[str]:
+    match: Optional[str] = 'all') -> Optional[str]:
     """_summary_
 
     Args:
         item (Any): _description_
         terms (Sequence[str]): _description_
-        matching (Optional[str], optional): _description_. Defaults to 'complete'.
+        match (Optional[str], optional): _description_. Defaults to 'all'.
 
     Returns:
         Optional[str]: _description_
     """
-    matcher = globals()[f'match_{matching}']
+    matcher = globals()[f'match_{match}']
     return [k for k in settings.keys() if matcher(k, terms)]
 
 def get_matching_section_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
-    matching: Optional[str] = 'complete') -> dict[str, list[str]]:
+    match: Optional[str] = 'all') -> dict[str, list[str]]:
     """_summary_
 
     Args:
         item (Any): _description_
         terms (Sequence[str]): _description_
-        matching (Optional[str], optional): _description_. Defaults to 'complete'.
+        match (Optional[str], optional): _description_. Defaults to 'all'.
 
     Returns:
         Optional[str]: _description_
@@ -166,7 +166,7 @@ def get_matching_section_keys(
             get_matching_outer_keys(
                 settings = section, 
                 terms = terms, 
-                matching = matching))
+                match = match))
     return matches
 
 def match_complete(item: Any, terms: Sequence[str]) -> bool:
