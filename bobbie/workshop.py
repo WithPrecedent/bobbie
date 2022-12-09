@@ -31,7 +31,51 @@ import camina
 
 if TYPE_CHECKING:
     from . import core
+    from . import extensions
+    
 
+def parse(
+    terms: tuple[str, ...],
+    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'outer',
+    returns: Optional[extensions.ReturnsOptions] = 'sections',
+    excise: Optional[extensions.ExciseOptions] = 'none',
+    accumulate: Optional[bool] = True,
+    divider: Optional[str] = '') -> Any:
+    """_summary_
+
+    Args:
+        terms (tuple[str, ...]): _description_
+        match (Optional[extensions.MatchOptions], optional): _description_. 
+            Defaults to 'all'.
+        scope (Optional[extensions.ScopeOptions], optional): _description_. 
+            Defaults to 'outer'.
+        returns (Optional[extensions.ReturnsOptions], optional): _description_. 
+            Defaults to 'sections'.
+        excise (Optional[extensions.ExciseOptions], optional): _description_. 
+            Defaults to 'none'.
+        accumulate (Optional[bool]): Defaults to True.
+        divider (Optional[str], optional): _description_. Defaults to ''.
+
+    Returns:
+        Any: _description_
+        
+    """
+    key_getter = globals()[f'get_{scope}_keys']
+    keys = key_getter(
+        terms = terms, 
+        match = match, 
+        accumuldate = accumulate,
+        divider = divider)
+    if returns == 'keys':
+        return keys
+    else:
+        final_getter = globals()[f'get_{returns}']
+        return final_getter(
+            terms = terms,
+            keys = keys,
+            excise = excise,
+            divider = divider)
 
 def accumulate_outer_sections(
     settings: core.Settings, 

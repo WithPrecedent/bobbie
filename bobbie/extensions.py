@@ -36,7 +36,7 @@ from . import workshop
 
 MatchOptions = Literal['all', 'prefix', 'suffix']
 ScopeOptions = Literal['both', 'inner', 'outer']
-ReturnsOptions = Literal['sections', 'section_contents']
+ReturnsOptions = Literal['keys','sections', 'section_contents']
 ExciseOptions = Literal['terms', 'remainder', 'none']
 
 
@@ -56,6 +56,7 @@ class Parser(abc.ABC):
     scope: Optional[ScopeOptions] = 'outer'
     returns: Optional[ReturnsOptions] = 'sections'
     excise: Optional[ExciseOptions] = 'none'
+    accumulate: Optional[bool] = True
     divider: Optional[str] = ''
     
     """ Initialization Methods """
