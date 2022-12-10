@@ -58,54 +58,6 @@ class Parser(abc.ABC):
     excise: Optional[ExciseOptions] = 'none'
     accumulate: Optional[bool] = True
     divider: Optional[str] = ''
-    
-    """ Initialization Methods """
-
-    def __post_init__(self) -> None:
-        """Initializes and validates an instance."""
-        # Calls parent and/or mixin initialization method(s).
-        with contextlib.suppress(AttributeError):
-            super().__post_init__()
-        self.set_parser()
-
-    def __set_name__(self, owner: Type[Any], name: str) -> None:
-        """_summary_
-
-        Args:
-            owner (Type[Any]): _description_
-            name (str): _description_
-            
-        """
-        self.name = name
-        return
-    
-    """ Required Subclass Methods """
-    
-    @abc.abstractmethod
-    def apply(self, settings: core.Settings) -> Any:
-        """Applies the parser to a Settings instance.
-
-        Args:
-            settings (core.Settings): configuration settings to parse.
-
-        Returns:
-            Any: information derived from parsing.
-            
-        """
-        func_name = f'get_{self.returns}_{self.scope}'
-        func = getattr(workshop, func_name)
-        return func(
-            settings = settings, 
-            terms = self.terms, 
-            match = self.match)
-        
-    """ Public Methods """
-    
-    def set_parser(self) -> None:
-        """Sets 'parser' attribute to the appropriate function."""
-        parser_name = f'accumulate_{self.scope}_{self.returns}'
-        self.parser = getattr(workshop, parser_name)     
-        return self        
 
     """ Dunder Methods """
     
@@ -119,10 +71,15 @@ class Parser(abc.ABC):
             Any: _description_
             
         """
-        return self.parser(
+        return workshop.parse(
             settings = obj.settings, 
             terms = self.terms, 
-            match = self.match)
+            match = self.match,
+            scope = self.scope,
+            returns = self.returns,
+            excise = self.excise,
+            accumualte = self.accumulate,
+            divider = self.divider)
 
     def __set__(self, obj: object, value: Any) -> None:
         """_summary_
@@ -132,7 +89,7 @@ class Parser(abc.ABC):
             value (Any): _description_
             
         """
-        keys = workshop.get_matching_outer_keys(
+        keys = workshop.get_outer_keys(
             settings = obj.settings,
             terms = self.terms,
             match = self.match)
@@ -141,6 +98,17 @@ class Parser(abc.ABC):
         except IndexError:
             key = self.terms[0]
         obj.settings[key] = value
+        return
+
+    def __set_name__(self, owner: Type[Any], name: str) -> None:
+        """_summary_
+
+        Args:
+            owner (Type[Any]): _description_
+            name (str): _description_
+            
+        """
+        self.name = name
         return
 
 

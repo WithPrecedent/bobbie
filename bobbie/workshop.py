@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     
 
 def parse(
+    settings: core.Settings,
     terms: tuple[str, ...],
     match: Optional[extensions.MatchOptions] = 'all',
     scope: Optional[extensions.ScopeOptions] = 'outer',
@@ -63,6 +64,7 @@ def parse(
     """
     key_getter = globals()[f'get_{scope}_keys']
     keys = key_getter(
+        settings = settings,
         terms = terms, 
         match = match, 
         accumuldate = accumulate,
@@ -72,12 +74,13 @@ def parse(
     else:
         final_getter = globals()[f'get_{returns}']
         return final_getter(
+            settings = settings,
             terms = terms,
             keys = keys,
             excise = excise,
             divider = divider)
 
-def accumulate_outer_sections(
+def get_outer_sections(
     settings: core.Settings, 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> dict[str, dict[str, Any]]:
@@ -93,13 +96,13 @@ def accumulate_outer_sections(
         dict[str, dict[str, Any]]: sections that match 'terms'.
         
     """
-    keys = get_matching_outer_keys(
+    keys = get_outer_keys(
         settings = settings, 
         terms = terms, 
         match = match)
     return {k: settings[k] for k in keys}
 
-def accumulate_outer_section_contents(
+def get_outer_section_contents(
     settings: core.Settings, 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> dict[str, Any]:
@@ -115,7 +118,7 @@ def accumulate_outer_section_contents(
         dict[str, Any]: key/value pairs from sections that match 'terms'.
         
     """
-    keys = get_matching_outer_keys(
+    keys = get_outer_keys(
         settings = settings, 
         terms = terms, 
         match = match)
@@ -124,7 +127,7 @@ def accumulate_outer_section_contents(
         relevant.update(settings[key])
     return relevant
 
-def get_matching_all_keys(
+def get_all_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> Optional[str]:
@@ -139,17 +142,17 @@ def get_matching_all_keys(
         Optional[str]: _description_
         
     """
-    matches = get_matching_outer_keys(
+    matches = get_outer_keys(
         settings = settings, 
         terms = terms, 
         match = match)
-    matches.extend(get_matching_inner_keys(
+    matches.extend(get_inner_keys(
         settings = settings, 
         terms = terms, 
         match = match))
     return matches
 
-def get_matching_inner_keys(
+def get_inner_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> Optional[str]:
@@ -166,13 +169,13 @@ def get_matching_inner_keys(
     matches = []
     for _, section in settings.items():
         matches.extend(
-            get_matching_outer_keys(
+            get_outer_keys(
                 settings = section, 
                 terms = terms, 
                 match = match))
     return matches
 
-def get_matching_outer_keys(
+def get_outer_keys(
     settings: dict[str, Any], 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> Optional[str]:
@@ -189,7 +192,7 @@ def get_matching_outer_keys(
     matcher = globals()[f'match_{match}']
     return [k for k in settings.keys() if matcher(k, terms)]
 
-def get_matching_section_keys(
+def get_section_keys(
     settings: core.Settings, 
     terms: Sequence[str], 
     match: Optional[str] = 'all') -> dict[str, list[str]]:
@@ -207,7 +210,7 @@ def get_matching_section_keys(
     matches = {}
     for key, section in settings.items():
         matches[key] = (
-            get_matching_outer_keys(
+            get_outer_keys(
                 settings = section, 
                 terms = terms, 
                 match = match))
@@ -224,7 +227,7 @@ def match_complete(item: Any, terms: Sequence[str]) -> bool:
         bool: the matching term or None (if there is no matching term).
         
     """
-    return any(item == t for t in camina.terms)
+    return any(item == t for t in terms)
 
 def match_prefix(
     item: Any, 

@@ -49,78 +49,24 @@ class BasicView(extensions.View, abc.ABC):
     """Provides a different view of settings data.
 
     Args:
-        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
-            being the name of the parsers and values being the matching str in a
-            tuple. Defaults to an empty dict.
+
 
     """
-    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
-        default_factory = dict)
-    
-    """ Properties """       
-                   
-    @property
-    def files(self) -> dict[str, Any]:
-        """Returns file settings.
-
-        Returns:
-            dict[str, Any]: dict of file settings.
-            
-        """
-        terms = self.parsers.get('files', DEFAULT_PARSERS['files'])
-        return workshop.accumulate_section_contents(
-            settings = self, 
-            terms = terms, 
-            matching = 'all') 
-        
-    @files.setter
-    def files(self, value: dict[str, Any]) -> None:
-        """_summary_
-
-        Args:
-            value (dict[str, Any]): _description_
-        """
-        terms = self.parsers.get('files', DEFAULT_PARSERS['files'])
-        key = None
-        for term in terms:
-            if term in self.contents.keys():
-                key = term
-                break
-        key = key or self.parsers.get('files', DEFAULT_PARSERS['files'])[0]
-        self.contents[key] = value
-        return
-        
-    @property
-    def general(self) -> dict[str, Any]:
-        """Returns general settings.
-
-        Returns:
-            dict[str, Any]: dict of general settings.
-            
-        """       
-        terms = self.parsers.get('general', DEFAULT_PARSERS['general'])
-        return workshop.accumulate_section_contents(
-            settings = self, 
-            terms = terms, 
-            matching = 'all') 
-        
-    @general.setter
-    def general(self, value: dict[str, Any]) -> None:
-        """_summary_
-
-        Args:
-            value (dict[str, Any]): _description_
-        """
-        terms = self.parsers.get('general', DEFAULT_PARSERS['general'])
-        key = None
-        for term in terms:
-            if term in self.contents.keys():
-                key = term
-                break
-        key = key or self.parsers.get('general', DEFAULT_PARSERS['general'])[0]
-        self.contents[key] = value
-        return
-    
+    files: ClassVar[extensions.Parser] = extensions.Parser(
+        terms = extensions.Rules.parsers['files'],
+        match = 'complete',
+        scope = 'outer',
+        returns = 'section_contents',
+        excise = 'none',
+        accumulate = False)
+    general: ClassVar[extensions.Parser] = extensions.Parser(
+        terms = extensions.Rules.parsers['general'],
+        match = 'complete',
+        scope = 'outer',
+        returns = 'section_contents',
+        excise = 'none',
+        accumulate = False) 
+       
 
 @dataclasses.dataclass
 class ParametersView(extensions.View):
