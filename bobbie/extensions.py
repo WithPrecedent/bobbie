@@ -36,7 +36,7 @@ from . import workshop
 
 MatchOptions = Literal['all', 'prefix', 'suffix']
 ScopeOptions = Literal['both', 'inner', 'outer']
-ReturnsOptions = Literal['keys','sections', 'section_contents']
+ReturnsOptions = Literal['keys','sections', 'section_contents', 'contents']
 ExciseOptions = Literal['terms', 'remainder', 'none']
 
 
@@ -138,15 +138,31 @@ class Rules(abc.ABC):
             a null node should be used. Defaults to ['none', 'None', None].   
         
     """
-    parsers: ClassVar[dict[str, tuple[str, ...]]] = {
-        'criteria': ('criteria',),
-        'design': ('design', 'structure'),
-        'manager': ('manager', 'project'),
-        'files': ('filer', 'files', 'clerk'),
-        'general': ('general',),
-        'librarian': ('efficiency', 'librarian'),
-        'parameters': ('parameters',), 
-        'workers': ('workers',)}
+    parsers: ClassVar[dict[str, Parser]] = {
+        'files': Parser(
+            terms = ('filer', 'files', 'clerk'),
+            match = 'all',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'none',
+            accumulate = False,
+            divider = ''),
+        'general': Parser(
+            terms = ('general',),
+            match = 'all',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'none',
+            accumulate = False,
+            divider = ''),
+        'parameters': Parser(
+            terms = ('parameters',),
+            match = 'suffix',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'terms',
+            accumulate = True,
+            divider = '_')}
     default_settings: ClassVar[dict[Hashable, dict[Hashable, Any]]] = {
         'general': {
             'verbose': False,
