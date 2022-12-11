@@ -81,7 +81,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
     """
     contents: MutableMapping[Hashable, Any] = dataclasses.field(
         default_factory = dict)
-    default_factory: Optional[Any] = dict
+    default_factory: Optional[Any] = camina.Dictionary
     default: Mapping[Hashable, Any] = dataclasses.field(
         default_factory = dict)
     infer_types: bool = True

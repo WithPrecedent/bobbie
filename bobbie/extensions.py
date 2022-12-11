@@ -114,28 +114,16 @@ class Parser(abc.ABC):
 
 @dataclasses.dataclass
 class Rules(abc.ABC):
-    """Default values and rules for building a chrisjen project.
+    """Default values and rules for parsing a Settings instance.
     
     Every attribute in Rules should be a class attribute so that it is 
     accessible without instancing it (which it cannot be).
 
     Args:
-        parsers (ClassVar[dict[str, tuple[str]]]): keys are the names of
-            special categories of settings and values are tuples of suffixes or
-            whole words that are associated with those special categories in
-            user settings.
+        parsers (ClassVar[dict[str, Parser]]): keys are the names of parsers and
+            values are Parser instances.
         default_settings (ClassVar[dict[Hashable, dict[Hashable, Any]]]):
-            default settings for a chrisjen project's idea. 
-        default_manager (ClassVar[str]): key name of the default manager.
-            Defaults to 'publisher'.
-        default_librarian (ClassVar[str]): key name of the default librarian.
-            Defaults to 'as_needed'.
-        default_task (ClassVar[str]): key name of the default task design.
-            Defaults to 'technique'.
-        default_workflow (ClassVar[str]): key name of the default worker design.
-            Defaults to 'waterfall'.
-        null_node_names (ClassVar[list[Any]]): lists of key names that indicate 
-            a null node should be used. Defaults to ['none', 'None', None].   
+            default settings for a python project.  
         
     """
     parsers: ClassVar[dict[str, Parser]] = {
@@ -183,7 +171,21 @@ class View(abc.ABC):
             tuple. Defaults to an empty dict.
 
     """
-    parsers: Optional[dict[str, tuple[str]]] = dataclasses.field(
-        default_factory = dict)
+    rules: Rules
+        
+    """ Initialization Methods """
+
+    def __post_init__(self) -> None:
+        """Initializes and validates an instance."""
+        # Calls parent and/or mixin initialization method(s).
+        with contextlib.suppress(AttributeError):
+            super().__post_init__()
+        self.activate()
+        
+    def activate(self) -> None:
+        """Adds parsers in 'rules' as attributes."""
+        for key, parser in self.rules.parsers.items():
+            setattr(self, key, parser)
+        return self
 
           
