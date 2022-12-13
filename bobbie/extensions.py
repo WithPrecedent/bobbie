@@ -17,61 +17,78 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-
+    Parser (object): a descriptor for parsing Settings data.
+    Parsers (camina.Dictionary): a dict-like class to store Parser instances. It
+        can be passed as an argument to Settings to automatically add Parser
+        instances as attributes to Settings.
 
 ToDo:
        
        
 """
 from __future__ import annotations
-import abc
-from collections.abc import Hashable, Mapping, MutableMapping, Sequence
-import contextlib
+from collections.abc import Hashable, MutableMapping
 import dataclasses
-from typing import Any, ClassVar, Literal, Optional, Type
+from typing import Any, Literal, Optional, Type
 
-from . import core
-from . import workshop
+import camina
 
+from . import parsers
 
-MatchOptions = Literal['all', 'prefix', 'suffix']
+""" Limited Option Types for Static Type Checkers """
+
+MatchOptions = Literal['all', 'prefix', 'substring', 'suffix']
 ScopeOptions = Literal['both', 'inner', 'outer']
-ReturnsOptions = Literal['keys','sections', 'section_contents', 'contents']
-ExciseOptions = Literal['terms', 'remainder', 'none']
+ReturnsOptions = Literal['contents', 'keys', 'kinds', 'sections', 
+                         'section_contents', 'section_keys', 'section_kinds']
 
 
 @dataclasses.dataclass
-class Parser(abc.ABC):
-    """
+class Parser(object):
+    """A descriptor which supports a different view of Settigs data.
 
     Args:
         terms (tuple[str, ...]): strings to match against entries in a Settings
             instance.
         match (Optional[MatchOptions]): how much of the str must be matched.
-        scope (Optional[ScopeOptions]):
+            Defaults to 'all'.
+        scope (Optional[ScopeOptions]): whether to match outer, inner, or all
+            keys. Defaults to 'outer'.
+        returns (Optional[ReturnOptions]): the type of data that should be 
+            returned after parsing. Defaults to 'section'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        accumulate (Optional[bool]): whether to return all matching items (True)
+            or just the first (False). Defaults to True.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
         
     """
     terms: tuple[str, ...]
     match: Optional[MatchOptions] = 'all'
     scope: Optional[ScopeOptions] = 'outer'
     returns: Optional[ReturnsOptions] = 'sections'
-    excise: Optional[ExciseOptions] = 'none'
+    excise: Optional[bool] = True
     accumulate: Optional[bool] = True
     divider: Optional[str] = ''
 
     """ Dunder Methods """
     
     def __get__(self, obj: object) -> Any:
-        """_summary_
+        """Getter for use as a descriptor.
 
         Args:
-            obj (object): _description_
+            obj (object): the object which has a Parser instance as a 
+                descriptor.
 
         Returns:
-            Any: _description_
+            Any: stored value(s).
             
         """
-        return workshop.parse(
+        return parsers.parse(
             settings = obj.settings, 
             terms = self.terms, 
             match = self.match,
@@ -82,14 +99,15 @@ class Parser(abc.ABC):
             divider = self.divider)
 
     def __set__(self, obj: object, value: Any) -> None:
-        """_summary_
+        """Setter for use as a descriptor.
 
         Args:
-            obj (object): _description_
-            value (Any): _description_
+            obj (object): the object which has a Parser instance as a 
+                descriptor.
+            value (Any): the value to assign when accessed.
             
         """
-        keys = workshop.get_outer_keys(
+        keys = parsers.get_outer_keys(
             settings = obj.settings,
             terms = self.terms,
             match = self.match)
@@ -101,11 +119,12 @@ class Parser(abc.ABC):
         return
 
     def __set_name__(self, owner: Type[Any], name: str) -> None:
-        """_summary_
+        """Stores the attribute name in 'owner' of the Parser descriptor.
 
         Args:
-            owner (Type[Any]): _description_
-            name (str): _description_
+            owner (Type[Any]): the class which has a Parser instance as a 
+                descriptor.
+            name (str): the str name of the descriptor.
             
         """
         self.name = name
@@ -113,79 +132,34 @@ class Parser(abc.ABC):
 
 
 @dataclasses.dataclass
-class Rules(abc.ABC):
-    """Default values and rules for parsing a Settings instance.
+class Parsers(camina.Dictionary):
+    """Rules for parsing a Settings instance.
+
+    Args:
+        contents (MutableMapping[Hashable, Any]): a dict for storing 
+            configuration options. Defaults to en empty dict.
+        default_factory (Optional[Any]): default value to return when the 'get' 
+            method is used. Defaults to an empty camina.Dictionary.
+        
+    """
+    contents: MutableMapping[Hashable, Any] = dataclasses.field(
+        default_factory = dict)
+    default_factory: Optional[Any] = camina.Dictionary
     
-    Every attribute in Rules should be a class attribute so that it is 
-    accessible without instancing it (which it cannot be).
-
-    Args:
-        parsers (ClassVar[dict[str, Parser]]): keys are the names of parsers and
-            values are Parser instances.
-        default_settings (ClassVar[dict[Hashable, dict[Hashable, Any]]]):
-            default settings for a python project.  
+    """ Instance Methods """
+    
+    def validate(self) -> None:
+        """Validates types in 'contents'.
         
-    """
-    parsers: ClassVar[dict[str, Parser]] = {
-        'files': Parser(
-            terms = ('filer', 'files', 'clerk'),
-            match = 'all',
-            scope = 'outer',
-            returns = 'sections',
-            excise = 'none',
-            accumulate = False,
-            divider = ''),
-        'general': Parser(
-            terms = ('general',),
-            match = 'all',
-            scope = 'outer',
-            returns = 'sections',
-            excise = 'none',
-            accumulate = False,
-            divider = ''),
-        'parameters': Parser(
-            terms = ('parameters',),
-            match = 'suffix',
-            scope = 'outer',
-            returns = 'sections',
-            excise = 'terms',
-            accumulate = True,
-            divider = '_')}
-    default_settings: ClassVar[dict[Hashable, dict[Hashable, Any]]] = {
-        'general': {
-            'verbose': False,
-            'parallelize': False,
-            'efficiency': 'up_front'},
-        'files': {
-            'file_encoding': 'windows-1252',
-            'threads': -1}}
+        Raises:
+            TypeError: if not all keys are Hashable or all values are not Parser
+                instances.
+                
+        """
+        if not all(isinstance(k, Hashable) for k in self.contents.keys()):
+            raise TypeError('All keys in Parsers must be Hashable')
+        if not all(isinstance(v, Parser) for v in self.contents.values()):
+            raise TypeError('All values in Parsers must be Parser instances')
+        return
 
-
-@dataclasses.dataclass
-class View(abc.ABC):
-    """Provides a different view of settings data.
-
-    Args:
-        parsers (Optional[dict[str, tuple[str]]]): dict of parsers with keys
-            being the name of the parsers and values being the matching str in a
-            tuple. Defaults to an empty dict.
-
-    """
-    rules: Rules
-        
-    """ Initialization Methods """
-
-    def __post_init__(self) -> None:
-        """Initializes and validates an instance."""
-        # Calls parent and/or mixin initialization method(s).
-        with contextlib.suppress(AttributeError):
-            super().__post_init__()
-        self.activate()
-        
-    def activate(self) -> None:
-        """Adds parsers in 'rules' as attributes."""
-        for key, parser in self.rules.parsers.items():
-            setattr(self, key, parser)
-        return self
-
-          
+   

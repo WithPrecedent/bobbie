@@ -45,6 +45,32 @@ dict_settings = {
     'tasks': {
         'things_to_do': ['stop', 'drop', 'roll']}}
 
+parsers = {
+        'files': bobbie.Parser(
+            terms = ('filer', 'files', 'clerk'),
+            match = 'all',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'none',
+            accumulate = False,
+            divider = ''),
+        'general': bobbie.Parser(
+            terms = ('general',),
+            match = 'all',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'none',
+            accumulate = False,
+            divider = ''),
+        'parameters': bobbie.Parser(
+            terms = ('parameters',),
+            match = 'suffix',
+            scope = 'outer',
+            returns = 'sections',
+            excise = 'terms',
+            accumulate = True,
+            divider = '_')}
+
 def test_settings():
     ini_settings = bobbie.Settings.create(
         source = pathlib.Path('tests') / 'project_settings.ini')

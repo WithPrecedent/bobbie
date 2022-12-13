@@ -18,8 +18,6 @@ License: Apache-2.0
     
     
 ToDo:
-   Add tests for dict, yaml, and toml (and figure out optional import of yaml
-    and toml dependencies)
    
    
 For Developers:
@@ -56,5 +54,4 @@ __author__ = 'Corey Rayburn Yung'
 
 from .core import *
 from .extensions import *
-from .views import *
-from .workshop import *
+from .parsers import *

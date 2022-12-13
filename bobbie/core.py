@@ -32,14 +32,16 @@ import dataclasses
 import importlib
 import importlib.util
 import pathlib
-from typing import Any, ClassVar, Optional, Type
+from typing import Any, ClassVar, Optional, Type, TYPE_CHECKING
 
-import ashford
 import camina
 
+if TYPE_CHECKING:
+     from . import extensions
+     
 
 @dataclasses.dataclass
-class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
+class Settings(camina.Dictionary): 
     """Loads and stores configuration settings.
 
     To create settings instance, a user can pass as the 'contents' parameter a:
@@ -70,25 +72,26 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
         contents (MutableMapping[Hashable, Any]): a dict for storing 
             configuration options. Defaults to en empty dict.
         default_factory (Optional[Any]): default value to return when the 'get' 
-            method is used. Defaults to an empty dict.
-        default (Mapping[str, Mapping[str]]): any default options that should
-            be used when a user does not provide the corresponding options in 
-            their configuration settings. Defaults to an empty dict.
-        infer_types (bool): whether values in 'contents' are converted to other 
-            datatypes (True) or left alone (False). If 'contents' was imported 
-            from an .ini file, all values will be strings. Defaults to True.
+            method is used. Defaults to an empty camina.Dictionary.
+        defaults (Optional[Mapping[str, Mapping[str]]]): any default options 
+            that should be used when a user does not provide the corresponding 
+            options in their configuration settings. Defaults to an empty dict.
+        infer_types (Optional[bool]): whether values in 'contents' are converted 
+            to other datatypes (True) or left alone (False). If 'contents' was 
+            imported from an .ini file, all values will be strings. Defaults to 
+            True.
+        parsers (Optional[extensions.Parsers]): an instance of Parsers which 
+            includes descriptors to add to this Settings instance. Defaults to
+            None.
 
     """
     contents: MutableMapping[Hashable, Any] = dataclasses.field(
         default_factory = dict)
     default_factory: Optional[Any] = camina.Dictionary
-    default: Mapping[Hashable, Any] = dataclasses.field(
+    defaults: Optional[Mapping[Hashable, Any]] = dataclasses.field(
         default_factory = dict)
-    infer_types: bool = True
-    sources: ClassVar[Mapping[Type, str]] = {
-        MutableMapping: 'dictionary', 
-        pathlib.Path: 'path',  
-        str: 'path'}
+    infer_types: Optional[bool] = True
+    parsers: Optional[extensions.Parsers] = None
 
     """ Initialization Methods """
 
@@ -96,22 +99,45 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
         """Initializes class instance attributes."""
         # Calls parent and/or mixin initialization method(s).
         with contextlib.suppress(AttributeError):
-            super().__post_init__(*args, **kwargs) # type: ignore
+            super().__post_init__() 
         # Converts 'contents' if it is not a dict.
-        if not (self.contents, Mapping):
+        if not (self.contents, MutableMapping):
             self = self.create(
                 item = self.contents,
                 default_factory = self.default_factory,
-                default = self.default,
-                infer_types = self.infer_types)
+                defaults = self.defaults,
+                infer_types = self.infer_types,
+                parsers = self.parsers)
         # Infers types for values in 'contents', if the 'infer_types' option is 
         # selected.
         if self.infer_types:
             self.contents = self._infer_types(contents = self.contents)
         # Adds default settings as backup settings to 'contents'.
-        self.contents = self._add_default(contents = self.contents)
+        self.contents = self._add_defaults(contents = self.contents)
+        # Adds descriptora from 'parsers',
+        self.parse()
 
     """ Class Methods """
+
+    @classmethod
+    def create(cls, source: Any, **kwargs: Any) -> Settings:
+        """Calls corresponding creation class method to instance a class.
+
+        Raises:
+            TypeError: if 'source' is not a str, pathlib.Path, or dict-like 
+                object.
+
+        Returns:
+            Settings: instance of a Settings.
+            
+        """
+        if isinstance(source, (str, pathlib.Path)):
+            return cls.from_path(source = source, **kwargs)
+        elif isinstance(source, MutableMapping):
+            return cls.from_dictionary(source = source, **kwargs)
+        else:
+            raise TypeError(
+                f'source must be a str, Path, or dict-like object')
 
     @classmethod
     def from_dictionary(
@@ -230,8 +256,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
 
         """
         path = camina.pathlibify(item = source) 
-        if 'infer_types' not in kwargs:
-            kwargs['infer_types'] = False
+        kwargs['infer_types'] = False
         try:
             path = pathlib.Path(path)
             import_path = importlib.util.spec_from_file_location(
@@ -290,8 +315,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
         """
         import yaml
         path = camina.pathlibify(item = source) 
-        if 'infer_types' not in kwargs:
-            kwargs['infer_types'] = False
+        kwargs['infer_types'] = False
         try:
             with open(path, 'r') as config:
                 return cls(contents = yaml.safe_load(config, **kwargs))
@@ -354,6 +378,15 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
             except KeyError:
                 pass
         return instance
+
+    """ Instance Methods """
+    
+    def parse(self) -> None:
+        """Adds key/value pairs in 'parsers' as class attributes."""
+        if self.parsers:
+            for key, parser in self.parsers.items():
+                setattr(self.__class__, key, parser)
+        return self
        
     """ Private Methods """
 
@@ -383,7 +416,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
                 new_contents[key] = camina.typify(value)
         return new_contents
 
-    def _add_default(
+    def _add_defaults(
         self, 
         contents: MutableMapping[Hashable, Any]) -> (
             MutableMapping[Hashable, Any]):
@@ -398,7 +431,7 @@ class Settings(camina.Dictionary, ashford.SourceFactory): # type: ignore
             MutableMapping[Hashable, Any]: with stored default added.
 
         """
-        new_contents = self.default
+        new_contents = self.defaults
         new_contents.update(contents)
         return new_contents
 
