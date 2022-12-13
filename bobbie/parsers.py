@@ -243,20 +243,87 @@ def get_section_keys(
                 match = match))
     return matches
 
-def get_kinds(
-    settings: MutableMapping[str, Any], 
+def get_both_kinds(
+    settings: MutableMapping[str, dict[str, Any]], 
     terms: Sequence[str],
     match: extensions.MatchOptions,
-    scope: extensions.ScopeOptions,
     excise: Optional[extensions.ExciseOptions] = True,
     divider: Optional[str] = '') -> MutableMapping[str, Any]:
-    """_summary_
+    """Returns a dict of kinds for inner and outer keys.
 
     Args:
         settings (MutableMapping[str, Any]): _description_
         terms (Sequence[str]): _description_
-        excise (extensions.ExciseOptions): _description_
-        divider (str): _description_
+        match (extensions.MatchOptions): _description_
+        excise (Optional[extensions.ExciseOptions], optional): _description_. 
+            Defaults to True.
+        divider (Optional[str], optional): _description_. Defaults to ''.
+
+    Returns:
+        MutableMapping[str, Any]: _description_
+        
+    """
+    kinds = get_outer_kinds(
+            settings = settings,
+            terms = terms,
+            match = match,
+            excise = excise,
+            divider = divider)
+    inner_kinds = get_inner_kinds(
+            settings = settings,
+            terms = terms,
+            match = match,
+            excise = excise,
+            divider = divider)
+    kinds.update(inner_kinds)
+    return kinds
+
+def get_inner_kinds(
+    settings: MutableMapping[str, dict[str, Any]], 
+    terms: Sequence[str],
+    match: extensions.MatchOptions,
+    excise: Optional[extensions.ExciseOptions] = True,
+    divider: Optional[str] = '') -> MutableMapping[str, Any]:
+    """Returns a dict of kinds for inner keys.
+
+    Args:
+        settings (MutableMapping[str, Any]): _description_
+        terms (Sequence[str]): _description_
+        match (extensions.MatchOptions): _description_
+        excise (Optional[extensions.ExciseOptions], optional): _description_. 
+            Defaults to True.
+        divider (Optional[str], optional): _description_. Defaults to ''.
+
+    Returns:
+        MutableMapping[str, Any]: _description_
+        
+    """
+    kinds = {}
+    for section in settings.values():
+        new_kinds = get_outer_kinds(
+            settings = section,
+            terms = terms,
+            match = match,
+            excise = excise,
+            divider = divider)
+        kinds.update(new_kinds)
+    return kinds
+
+def get_outer_kinds(
+    settings: MutableMapping[str, Any], 
+    terms: Sequence[str],
+    match: extensions.MatchOptions,
+    excise: Optional[extensions.ExciseOptions] = True,
+    divider: Optional[str] = '') -> MutableMapping[str, Any]:
+    """Returns a dict of kinds for outer keys.
+
+    Args:
+        settings (MutableMapping[str, Any]): _description_
+        terms (Sequence[str]): _description_
+        match (extensions.MatchOptions): _description_
+        excise (Optional[extensions.ExciseOptions], optional): _description_. 
+            Defaults to True.
+        divider (Optional[str], optional): _description_. Defaults to ''.
 
     Returns:
         MutableMapping[str, Any]: _description_
@@ -455,11 +522,3 @@ def excise_terms_prefix(
                 if term.startswith(prefix):
                     excised.update(key, term)    
     return excised
-
-
-    
-    
-    
-    
-
-    

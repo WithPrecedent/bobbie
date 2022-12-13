@@ -91,7 +91,7 @@ class Settings(camina.Dictionary):
     defaults: Optional[Mapping[Hashable, Any]] = dataclasses.field(
         default_factory = dict)
     infer_types: Optional[bool] = True
-    parsers: Optional[extensions.Parsers] = None
+    parsers: MutableMapping[Hashable, ] = None
 
     """ Initialization Methods """
 
@@ -164,8 +164,8 @@ class Settings(camina.Dictionary):
         """[summary]
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance.
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance.
                 
         Returns:
             Settings: an instance derived from 'source'.
@@ -184,8 +184,8 @@ class Settings(camina.Dictionary):
         """Returns settings from an .ini file.
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance.
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance.
 
         Returns:
             Settings: an instance derived from 'source'.
@@ -213,8 +213,8 @@ class Settings(camina.Dictionary):
         """Returns settings from an .json file.
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance.
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance.
 
         Returns:
             Settings: an instance derived from 'source'.
@@ -242,9 +242,9 @@ class Settings(camina.Dictionary):
         """Returns a settings dictionary from a .py file.
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance. The path to a python module must
-                have a '__dict__' defined and an attribute named 'settings' that 
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance. The path to a python module must have a 
+                '__dict__' defined and an attribute named 'settings' that 
                 contains the settings to use for creating an instance.
 
         Returns:
@@ -276,8 +276,8 @@ class Settings(camina.Dictionary):
         """Returns settings from a .toml file.
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance.
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance.
 
         Returns:
             Settings: an instance derived from 'source'.
@@ -303,8 +303,8 @@ class Settings(camina.Dictionary):
         """Returns settings from a .yaml file.
 
         Args:
-            source (str | pathlib.Path): path to file with settings to 
-                store in a Settings instance.
+            source (str | pathlib.Path): path to file with settings to store in 
+                a Settings instance.
 
         Returns:
             Settings: an instance derived from 'source'.
@@ -322,14 +322,22 @@ class Settings(camina.Dictionary):
         except FileNotFoundError:
             raise FileNotFoundError(f'settings file {path} not found')
         
-    """ Public Methods """
+    """ Instance Methods """
 
-    def add(self, section: Hashable, contents: Mapping[Hashable, Any]) -> None:
-        """Adds 'settings' to 'contents'.
+    def add(
+        self, 
+        section: Hashable, 
+        contents: MutableMapping[Hashable, Any]) -> None:
+        """Adds 'section' to 'contents'.
+        
+        If 'section' is already a key in 'contents', the contents associated
+        with that key are updated. If 'section' doesn't exist, a new key/value
+        pair is added to 'contents'.
 
         Args:
             section (Hashable): name of section to add 'contents' to.
-            contents (Mapping[Hashable, Any]): a dict to store in 'section'.
+            contents (MutableMapping[Hashable, Any]): a dict to store in 
+            'section'.
 
         """
         try:
@@ -379,8 +387,6 @@ class Settings(camina.Dictionary):
                 pass
         return instance
 
-    """ Instance Methods """
-    
     def parse(self) -> None:
         """Adds key/value pairs in 'parsers' as class attributes."""
         if self.parsers:
@@ -389,6 +395,25 @@ class Settings(camina.Dictionary):
         return self
        
     """ Private Methods """
+
+    def _add_defaults(
+        self, 
+        contents: MutableMapping[Hashable, Any]) -> (
+            MutableMapping[Hashable, Any]):
+        """Creates a backup set of mappings for bobbie settings lookup.
+
+
+        Args:
+            contents (MutableMapping[Hashable, Any]): a nested contents dict to 
+                add default to.
+
+        Returns:
+            MutableMapping[Hashable, Any]: with stored default added.
+
+        """
+        new_contents = self.defaults
+        new_contents.update(contents)
+        return new_contents
 
     def _infer_types(
         self, 
@@ -414,25 +439,6 @@ class Settings(camina.Dictionary):
                 new_contents[key] = inner_bundle
             else:
                 new_contents[key] = camina.typify(value)
-        return new_contents
-
-    def _add_defaults(
-        self, 
-        contents: MutableMapping[Hashable, Any]) -> (
-            MutableMapping[Hashable, Any]):
-        """Creates a backup set of mappings for bobbie settings lookup.
-
-
-        Args:
-            contents (MutableMapping[Hashable, Any]): a nested contents dict to 
-                add default to.
-
-        Returns:
-            MutableMapping[Hashable, Any]: with stored default added.
-
-        """
-        new_contents = self.defaults
-        new_contents.update(contents)
         return new_contents
 
     """ Dunder Methods """
