@@ -17,15 +17,31 @@ License: Apache-2.0
     limitations under the License.
 
 Contents:
-    parse: general 
+    parse: general parsing function.
+    get_contents: returns dict of settings sections with matching keys in those
+        sections.
+    get_keys: returns list of settings keys that match. 
+    get_kinds: returns a dict with keys as the matching str and values as the 
+        term which those keys are associated.
+    get_sections: returns dict of settings sections with matching section names.
+    get_section_keys: returns dict of section names and settings keys within
+        those sections that match. 
+    get_section_kinds: returns a dict with keys that are section names and 
+        values which are dicts returned by 'get_kinds'.
+    match_all: returns a matching str (possibly modified based on arguments) and
+        the term which matches by matching the entire str.
+    match_prefix: returns a matching str (possibly modified based on arguments) 
+        and the term which matches by matching a str prefix.
+    match_suffix: returns a matching str (possibly modified based on arguments) 
+        and the term which matches by matching a str suffix.
 
 ToDo:
        
        
 """
 from __future__ import annotations
-from collections.abc import Hashable, Mapping, MutableMapping, Sequence
-from typing import Any, ClassVar, Optional, Type, TYPE_CHECKING
+from collections.abc import MutableMapping, Sequence
+from typing import Any, Optional, TYPE_CHECKING
 
 import camina
 
@@ -39,7 +55,6 @@ def parse(
     parser: Optional[extensions.Parser] = None,
     terms: Optional[tuple[str, ...]] = None,
     match: Optional[extensions.MatchOptions] = 'all',
-    scope: Optional[extensions.ScopeOptions] = 'outer',
     returns: Optional[extensions.ReturnsOptions] = 'sections',
     excise: Optional[bool] = True,
     accumulate: Optional[bool] = True,
@@ -51,15 +66,13 @@ def parse(
     the data in 'parser' is used instead.
 
     Args:
-        settings (core.Settings): _description_
+        settings (core.Settings): configuration data.
         parser (Optional[extensions.Parser], optional): a Parser instance with 
             data for the other parameters. Defaults to None.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
         match (Optional[extensions.MatchOptions]): how much of the str must be 
             matched. Defaults to 'all'.
-        scope (Optional[extensions.ScopeOptions]): whether to match outer, 
-            inner, or all keys. Defaults to 'outer'.
         returns (Optional[extensions.ReturnOptions]): the type of data that 
             should be returned after parsing. Defaults to 'section'.
         excise (Optional[bool]): whether to remove the matching terms from keys
@@ -79,446 +92,332 @@ def parse(
         Any: an item parsed from 'settings'.
         
     """
+    # Applies information from 'parser' if it is passed.
     if parser is not None:
         terms = parser.terms
         match = parser.match
-        scope = parser.scope
         returns = parser.returns
         excise = parser.excise
         accumulate = parser.accumulate
         divider = parser.divider
     elif terms is None:
         raise ValueError('Either parser or terms argument must not be None')
-    key_getter = globals()[f'get_{scope}_keys']
-    keys = key_getter(
-        settings = settings,
+    # Determines name of the appropriate function in the this module to use.
+    matcher = globals()[f'get_{returns}']
+    # Gets matches based on passed arguments.
+    matches = matcher(
+        settings = settings, 
         terms = terms, 
         match = match, 
-        accumuldate = accumulate,
+        excise = excise, 
         divider = divider)
-    if returns == 'keys':
-        return keys
+    # Returns all matches if 'accumulate' is True. Otherwise, only the first
+    # result is returned.
+    if accumulate:
+        return matches
+    elif isinstance(matches, MutableMapping):
+        return matches[list(matches.keys())[0]]
     else:
-        final_getter = globals()[f'get_{returns}']
-        return final_getter(
-            settings = settings,
-            terms = terms,
-            keys = keys,
-            excise = excise,
-            divider = divider)
-
-def get_outer_sections(
-    settings: core.Settings, 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> dict[str, dict[str, Any]]:
-    """_summary_
-
+        return matches[0]
+  
+def get_contents(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
+    """Returns parsed information from a Settings instance.
+    
     Args:
-        settings (core.Settings): a Settings instance with raw data to use.
-        terms (Sequence[str]): str to match against entries in 'settings'.
-        match (Optional[str]): the scope of the match to look for. Options
-            are 'all', 'prefix', and 'suffix'. Defaults to 'all'.
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
 
     Returns:
-        dict[str, dict[str, Any]]: sections that match 'terms'.
-        
-    """
-    keys = get_outer_keys(
-        settings = settings, 
-        terms = terms, 
-        match = match)
-    return {k: settings[k] for k in keys}
-
-def get_outer_section_contents(
-    settings: core.Settings, 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> dict[str, Any]:
-    """_summary_
-
-    Args:
-        settings (core.Settings): a Settings instance with raw data to use.
-        terms (Sequence[str]): str to match against entries in 'settings'.
-        match (Optional[str]): the scope of the match to look for. Options
-            are 'all', 'prefix', and 'suffix'. Defaults to 'all'.
-
-    Returns:
-        dict[str, Any]: key/value pairs from sections that match 'terms'.
-        
-    """
-    keys = get_outer_keys(
-        settings = settings, 
-        terms = terms, 
-        match = match)
-    relevant = {}
-    for key in keys:
-        relevant.update(settings[key])
-    return relevant
-
-def get_all_keys(
-    settings: core.Settings, 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> Optional[str]:
-    """_summary_
-
-    Args:
-        item (Any): _description_
-        terms (Sequence[str]): _description_
-        match (Optional[str], optional): _description_. Defaults to 'all'.
-
-    Returns:
-        Optional[str]: _description_
-        
-    """
-    matches = get_outer_keys(
-        settings = settings, 
-        terms = terms, 
-        match = match)
-    matches.extend(get_inner_keys(
-        settings = settings, 
-        terms = terms, 
-        match = match))
-    return matches
-
-def get_inner_keys(
-    settings: core.Settings, 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> Optional[str]:
-    """_summary_
-
-    Args:
-        item (Any): _description_
-        terms (Sequence[str]): _description_
-        match (Optional[str], optional): _description_. Defaults to 'all'.
-
-    Returns:
-        Optional[str]: _description_
-    """
-    matches = []
-    for _, section in settings.items():
-        matches.extend(
-            get_outer_keys(
-                settings = section, 
-                terms = terms, 
-                match = match))
-    return matches
-
-def get_outer_keys(
-    settings: dict[str, Any], 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> Optional[str]:
-    """_summary_
-
-    Args:
-        item (Any): _description_
-        terms (Sequence[str]): _description_
-        match (Optional[str], optional): _description_. Defaults to 'all'.
-
-    Returns:
-        Optional[str]: _description_
+        dict[str, dict[str, Any]]: keys are section names of 'settings' and
+            values are sections of 'settings'.
+            
     """
     matcher = globals()[f'match_{match}']
-    return [k for k in settings.keys() if matcher(k, terms)]
-
-def get_section_keys(
-    settings: core.Settings, 
-    terms: Sequence[str], 
-    match: Optional[str] = 'all') -> dict[str, list[str]]:
-    """_summary_
-
-    Args:
-        item (Any): _description_
-        terms (Sequence[str]): _description_
-        match (Optional[str], optional): _description_. Defaults to 'all'.
-
-    Returns:
-        Optional[str]: _description_
-        
-    """
+    kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     matches = {}
-    for key, section in settings.items():
-        matches[key] = (
-            get_outer_keys(
-                settings = section, 
-                terms = terms, 
-                match = match))
+    for name, section in settings.items():
+        if any(matcher(item = k, **kwargs) for k in section.keys()):
+            matches[name] = {
+                matcher(item = k, **kwargs)[0]: v for k, v in section.items() 
+                if matcher(item = k, **kwargs)}
     return matches
 
-def get_both_kinds(
-    settings: MutableMapping[str, dict[str, Any]], 
-    terms: Sequence[str],
-    match: extensions.MatchOptions,
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> MutableMapping[str, Any]:
-    """Returns a dict of kinds for inner and outer keys.
-
+def get_keys(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> list[str]:
+    """Returns parsed information from a Settings instance.
+    
     Args:
-        settings (MutableMapping[str, Any]): _description_
-        terms (Sequence[str]): _description_
-        match (extensions.MatchOptions): _description_
-        excise (Optional[extensions.ExciseOptions], optional): _description_. 
-            Defaults to True.
-        divider (Optional[str], optional): _description_. Defaults to ''.
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
 
     Returns:
-        MutableMapping[str, Any]: _description_
+        list[str]: matching keys
         
     """
-    kinds = get_outer_kinds(
-            settings = settings,
-            terms = terms,
-            match = match,
-            excise = excise,
-            divider = divider)
-    inner_kinds = get_inner_kinds(
-            settings = settings,
-            terms = terms,
-            match = match,
-            excise = excise,
-            divider = divider)
-    kinds.update(inner_kinds)
-    return kinds
+    matcher = globals()[f'match_{match}']
+    kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
+    return [
+        matcher(item = k, **kwargs)[0] for k in settings.keys() 
+        if matcher(item = k, **kwargs)]
 
-def get_inner_kinds(
-    settings: MutableMapping[str, dict[str, Any]], 
-    terms: Sequence[str],
-    match: extensions.MatchOptions,
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> MutableMapping[str, Any]:
-    """Returns a dict of kinds for inner keys.
-
+def get_kinds(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> dict[str, str]:
+    """Returns parsed information from a Settings instance.
+    
     Args:
-        settings (MutableMapping[str, Any]): _description_
-        terms (Sequence[str]): _description_
-        match (extensions.MatchOptions): _description_
-        excise (Optional[extensions.ExciseOptions], optional): _description_. 
-            Defaults to True.
-        divider (Optional[str], optional): _description_. Defaults to ''.
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
 
     Returns:
-        MutableMapping[str, Any]: _description_
+        dict[str, str]: keys are parsed settings keys (possibly modified based
+            on 'excise') and values are the associated terms.
         
     """
-    kinds = {}
-    for section in settings.values():
-        new_kinds = get_outer_kinds(
-            settings = section,
-            terms = terms,
-            match = match,
-            excise = excise,
-            divider = divider)
-        kinds.update(new_kinds)
-    return kinds
+    matcher = globals()[f'match_{match}']
+    kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
+    return {
+        matcher(item = k, **kwargs)[0]: matcher(item = k, **kwargs)[1]
+        for k in settings.keys() if matcher(item = k, **kwargs)}
 
-def get_outer_kinds(
-    settings: MutableMapping[str, Any], 
-    terms: Sequence[str],
-    match: extensions.MatchOptions,
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> MutableMapping[str, Any]:
-    """Returns a dict of kinds for outer keys.
-
+def get_sections(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
+    """Returns parsed information from a Settings instance.
+    
     Args:
-        settings (MutableMapping[str, Any]): _description_
-        terms (Sequence[str]): _description_
-        match (extensions.MatchOptions): _description_
-        excise (Optional[extensions.ExciseOptions], optional): _description_. 
-            Defaults to True.
-        divider (Optional[str], optional): _description_. Defaults to ''.
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
 
     Returns:
-        MutableMapping[str, Any]: _description_
+        dict[str, dict[str, Any]]: keys are names of sections, and values are 
+            matching sections.
         
     """
-    kinds = {}
-    checker_name = f'match_{match}'
-    checker = globals()[checker_name]
-    for key in settings.keys():
-        matching = checker(item = key, terms = terms, divider = divider)
-        if matching is not None:
-            if excise:
-                kind = camina.drop_prefix(
-                    item = key, 
-                    prefix = matching, 
-                    divider = divider)
-            else:
-                kind = key
-            kinds.update(kind, matching) 
-    return kinds
+    matcher = globals()[f'match_{match}']
+    kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
+    return {
+        matcher(item = k, **kwargs)[0]: v for k, v in settings.items() 
+        if matcher(item = k, **kwargs)}
 
-def has_all(item: Any, terms: Sequence[str]) -> bool:
-    """Applies the parser to 'item'.
-
+def get_section_keys(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> dict[str, list[str]]:
+    """Returns parsed information from a Settings instance.
+    
     Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
 
     Returns:
-        bool: the matching term or None (if there is no matching term).
+        dict[str, list[str]]: keys are names of sections in 'settings' with any 
+            matching keys within them and values are a list of matching keys
+            from the corresponding sections. 
         
     """
-    return any(item == t for t in terms)
+    kwargs = {
+        'terms': terms, 
+        'match': match, 
+        'excise': excise, 
+        'divider': divider}
+    matches = {}
+    for name, section in settings.items():
+        if get_keys(settings = section, **kwargs):
+            matches[name] = get_keys(settings = section, **kwargs)
+    return matches
+
+def get_section_kinds(
+    settings: MutableMapping[str, Any],
+    terms: Optional[tuple[str, ...]] = None,
+    match: Optional[extensions.MatchOptions] = 'all',
+    excise: Optional[bool] = True,
+    divider: Optional[str] = '') -> dict[str, dict[str, str]]:
+    """Returns parsed information from a Settings instance.
+    
+    Args:
+        settings (MutableMapping[str, Any]): configuration data.
+        terms (Optional[tuple[str, ...]]): strings to match against entries in a 
+            Settings instance. Defaults to None.
+        match (Optional[extensions.MatchOptions]): how much of the str must be 
+            matched. Defaults to 'all'.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
+        divider (Optional[str]): when matching a prefix, suffix, or substring,
+            'divider' is the str connection that substring with the remainder of
+            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            ''.
+
+    Returns:
+        dict[str, dict[str, str]]: keys section names and values have parsed 
+            settings keys (possibly modified based on 'excise') and values are 
+            the associated terms.
+        
+    """
+    kwargs = {
+        'terms': terms, 
+        'match': match, 
+        'excise': excise, 
+        'divider': divider}
+    matches = {}
+    for name, section in settings.items():
+        if get_kinds(settings = section, **kwargs):
+            matches[name] = get_kinds(settings = section, **kwargs)
+    return matches
 
 def match_all(
     item: Any, 
     terms: Sequence[str], 
-    divider: Optional[str] = '') -> Optional[str]:
+    excise: Optional[extensions.ExciseOptions] = True,
+    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
     """Applies the parser to 'item'.
 
     Args:
         item (Any): item to parse.
         terms (Sequence[str]): strings to find matches for.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
         divider (Optional[str]): divider between a term and the rest of 'item'.
             Defaults to ''.
 
     Returns:
-        Optional[str]: the matching term or None (if there is no matching term).
+        Optional[tuple[str, str]]: the matching str and matching term or None 
+            (if there is no matching term).
         
     """
     for term in terms:
         if item == term:
-            return term 
+            return item, term
     return None
-
-def has_prefix(
-    item: Any, 
-    terms: Sequence[str], 
-    divider: Optional[str] = '') -> bool:
-    """Applies the parser to 'item'.
-
-    Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
-        divider (Optional[str]): divider between a term and the rest of 'item'.
-            Defaults to ''.
-
-    Returns:
-        bool
-        
-    """
-    prefixes = [t + divider for t in terms]
-    return any(item.startswith(p) for p in prefixes)
 
 def match_prefix(
     item: Any, 
     terms: Sequence[str], 
-    divider: Optional[str] = '') -> Optional[str]:
+    excise: Optional[extensions.ExciseOptions] = True,
+    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
     """Applies the parser to 'item'.
 
     Args:
         item (Any): item to parse.
         terms (Sequence[str]): strings to find matches for.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
         divider (Optional[str]): divider between a term and the rest of 'item'.
             Defaults to ''.
 
     Returns:
-        Optional[str]: the matching term or None (if there is no matching term).
+        Optional[tuple[str, str]]: the matching str and matching term or None 
+            (if there is no matching term).
         
     """
     for term in terms:
-        if item.startswith(term + divider):
-            return term 
+        substring = term + divider
+        if item.startswith(substring):
+            if excise:
+                return camina.drop_prefix(item = item, prefix = substring), term
+            else:
+                return item, term 
     return None
-
-def has_suffix(
-    item: Any, 
-    terms: Sequence[str], 
-    divider: Optional[str] = '') -> bool:
-    """Applies the parser to 'item'.
-
-    Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
-        divider (Optional[str]): divider between a term and the rest of 'item'.
-            Defaults to ''.
-
-    Returns:
-        bool:.
-        
-    """
-    suffixes = [divider + t for t in terms]
-    return any(item.endswith(p) for p in suffixes)
 
 def match_suffix(
     item: Any, 
-    terms: Sequence[str], 
-    divider: Optional[str] = '') -> Optional[str]:
+    terms: Sequence[str],  
+    excise: Optional[extensions.ExciseOptions] = True,
+    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
     """Applies the parser to 'item'.
 
     Args:
         item (Any): item to parse.
         terms (Sequence[str]): strings to find matches for.
+        excise (Optional[bool]): whether to remove the matching terms from keys
+            in the return item. Defaults to True, meaning the terms will be 
+            excised from keys along with 'divider', if applicable.
         divider (Optional[str]): divider between a term and the rest of 'item'.
             Defaults to ''.
 
     Returns:
-        Optional[str]: the matching term or None (if there is no matching term).
+        Optional[tuple[str, str]]: the matching str and matching term or None 
+            (if there is no matching term).
         
     """
     for term in terms:
-        if item.endswith(divider + term):
-            return term 
+        substring = divider + term
+        if item.endswith(substring):
+            if excise:
+                excised_term = camina.drop_suffix_from_str(
+                    item = item, 
+                    suffix = substring)
+                return excised_term, term
+            else:
+                return item, term 
     return None
-
-def excise_settings(
-    settings: MutableMapping[str, Any], 
-    terms: Sequence[str],
-    match: extensions.MatchOptions,
-    scope: extensions.ScopeOptions,
-    excise: extensions.ExciseOptions,
-    divider: str) -> MutableMapping[str, Any]:
-    """_summary_
-
-    Args:
-        settings (MutableMapping[str, Any]): _description_
-        terms (Sequence[str]): _description_
-        match (extensions.MatchOptions): _description_
-        scope (extensions.ScopeOptions): _description_
-        excise (extensions.ExciseOptions): _description_
-
-    Returns:
-        MutableMapping[str, Any]: _description_
-        
-    """
-    if excise == 'none':
-        return settings
-    else:
-        func_name = f'excise_{excise}_{match}'
-        func = globals()[func_name]
-        return func(
-            settings = settings, 
-            terms = terms, 
-            match = match, 
-            excise = excise,
-            divider = divider)
-
-def excise_terms_prefix(
-    settings: MutableMapping[str, Any], 
-    terms: Sequence[str],
-    excise: extensions.ExciseOptions,
-    divider: str) -> MutableMapping[str, Any]:
-    """_summary_
-
-    Args:
-        settings (MutableMapping[str, Any]): _description_
-        terms (Sequence[str]): _description_
-        excise (extensions.ExciseOptions): _description_
-        divider (str): _description_
-
-    Returns:
-        MutableMapping[str, Any]: _description_
-        
-    """
-    if excise == 'terms':
-        for term in terms:
-            excised = camina.drop_prefix(
-                item = settings, 
-                prefix = term, 
-                divider = divider)
-    elif excise == 'remainder':
-        excised = {}
-        for key, _ in settings.items():
-            for term in terms:
-                prefix = term + divider
-                if term.startswith(prefix):
-                    excised.update(key, term)    
-    return excised

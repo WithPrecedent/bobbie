@@ -32,7 +32,7 @@ import dataclasses
 import importlib
 import importlib.util
 import pathlib
-from typing import Any, ClassVar, Optional, Type, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING
 
 import camina
 
@@ -80,8 +80,10 @@ class Settings(camina.Dictionary):
             to other datatypes (True) or left alone (False). If 'contents' was 
             imported from an .ini file, all values will be strings. Defaults to 
             True.
-        parsers (Optional[extensions.Parsers]): an instance of Parsers which 
-            includes descriptors to add to this Settings instance. Defaults to
+        parsers (Optional[MutableMapping[Hashable, extensions.Parser]]): keys 
+            are str names of Parser instances and the values are Parser 
+            instances. The keys will be used as attribute names when the 'parse'
+            method is automatically called if 'parsers' is not None. Defaults to 
             None.
 
     """
@@ -91,7 +93,7 @@ class Settings(camina.Dictionary):
     defaults: Optional[Mapping[Hashable, Any]] = dataclasses.field(
         default_factory = dict)
     infer_types: Optional[bool] = True
-    parsers: MutableMapping[Hashable, ] = None
+    parsers: Optional[MutableMapping[Hashable, extensions.Parser]] = None
 
     """ Initialization Methods """
 

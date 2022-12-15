@@ -37,11 +37,17 @@ from . import parsers
 
 """ Limited Option Types for Static Type Checkers """
 
-MatchOptions = Literal['all', 'prefix', 'substring', 'suffix']
-ScopeOptions = Literal['both', 'inner', 'outer']
-ReturnsOptions = Literal['contents', 'keys', 'kinds', 'sections', 
-                         'section_contents', 'section_keys', 'section_kinds']
+MatchOptions = Literal['all', 'prefix', 'suffix']
+ReturnsOptions = Literal[
+    'contents',
+    'keys', 
+    'kinds', 
+    'sections', 
+    'section_keys',
+    'section_kinds']
 
+
+""" Extension Classes """
 
 @dataclasses.dataclass
 class Parser(object):
@@ -52,8 +58,6 @@ class Parser(object):
             instance.
         match (Optional[MatchOptions]): how much of the str must be matched.
             Defaults to 'all'.
-        scope (Optional[ScopeOptions]): whether to match outer, inner, or all
-            keys. Defaults to 'outer'.
         returns (Optional[ReturnOptions]): the type of data that should be 
             returned after parsing. Defaults to 'section'.
         excise (Optional[bool]): whether to remove the matching terms from keys
@@ -69,7 +73,6 @@ class Parser(object):
     """
     terms: tuple[str, ...]
     match: Optional[MatchOptions] = 'all'
-    scope: Optional[ScopeOptions] = 'outer'
     returns: Optional[ReturnsOptions] = 'sections'
     excise: Optional[bool] = True
     accumulate: Optional[bool] = True
@@ -77,7 +80,7 @@ class Parser(object):
 
     """ Dunder Methods """
     
-    def __get__(self, obj: object) -> Any:
+    def __get__(self, obj: object, objtype: Type[Any] = None) -> Any:
         """Getter for use as a descriptor.
 
         Args:
@@ -88,15 +91,7 @@ class Parser(object):
             Any: stored value(s).
             
         """
-        return parsers.parse(
-            settings = obj.settings, 
-            terms = self.terms, 
-            match = self.match,
-            scope = self.scope,
-            returns = self.returns,
-            excise = self.excise,
-            accumualte = self.accumulate,
-            divider = self.divider)
+        return parsers.parse(settings = obj, parser = self)
 
     def __set__(self, obj: object, value: Any) -> None:
         """Setter for use as a descriptor.
@@ -108,7 +103,7 @@ class Parser(object):
             
         """
         keys = parsers.get_outer_keys(
-            settings = obj.settings,
+            settings = obj,
             terms = self.terms,
             match = self.match)
         try:

@@ -45,7 +45,7 @@ any other package maintainer - I want to ensure the package is as accessible and
 useful as possible.
      
 """
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 __package__ = 'bobbie'
 

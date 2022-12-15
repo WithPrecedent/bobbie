@@ -1,16 +1,4 @@
 [[package]]
-name = "ashford"
-version = "0.1.2"
-description = "factory, registration, and validation tools for python"
-category = "main"
-optional = false
-python-versions = ">=3.9,<4.0"
-
-[package.dependencies]
-camina = ">=0.1.10,<0.2.0"
-miller = ">=0.1.6,<0.2.0"
-
-[[package]]
 name = "atomicwrites"
 version = "1.4.1"
 description = "Atomic file writes."
@@ -30,7 +18,7 @@ python-versions = ">=3.5"
 dev = ["cloudpickle", "coverage[toml] (>=5.0.2)", "furo", "hypothesis", "mypy (>=0.900,!=0.940)", "pre-commit", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "sphinx", "sphinx-notfound-page", "zope.interface"]
 docs = ["furo", "sphinx", "sphinx-notfound-page", "zope.interface"]
 tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "zope.interface"]
-tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
+tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "camina"
@@ -50,18 +38,6 @@ description = "Cross-platform colored terminal text."
 category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
-
-[[package]]
-name = "holden"
-version = "0.1.6"
-description = "lightweight, accessible, flexible composite data structures"
-category = "main"
-optional = false
-python-versions = ">=3.9,<4.0"
-
-[package.dependencies]
-camina = ">=0.1.10,<0.2.0"
-miller = ">=0.1.2,<0.2.0"
 
 [[package]]
 name = "miller"
@@ -97,14 +73,11 @@ miller = ">=0.1.4,<0.2.0"
 
 [[package]]
 name = "packaging"
-version = "21.3"
+version = "22.0"
 description = "Core utilities for Python packages"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "pluggy"
@@ -124,17 +97,6 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-
-[[package]]
-name = "pyparsing"
-version = "3.0.9"
-description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "dev"
-optional = false
-python-versions = ">=3.6.8"
-
-[package.extras]
-diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
@@ -172,13 +134,9 @@ formats = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "da21a290169ba86c091b2b40b0b32f3838a3d9989d8de04b57c6c9e1c60b5173"
+content-hash = "8cb25757e1149c313a689f6e6f2e041e48a091de5287058ca3d149488dfe1849"
 
 [metadata.files]
-ashford = [
-    {file = "ashford-0.1.2-py3-none-any.whl", hash = "sha256:a59c199871fa1c92891274aadaf45ea9895496191030a09e7098a2b1f826112e"},
-    {file = "ashford-0.1.2.tar.gz", hash = "sha256:59e664e0b1049057305aefaae3814c189063e6d7a649d9e062f295f2f7aa3d23"},
-]
 atomicwrites = [
     {file = "atomicwrites-1.4.1.tar.gz", hash = "sha256:81b2c9071a49367a7f770170e5eec8cb66567cfbbc8c73d20ce5ca4a8d71cf11"},
 ]
@@ -194,10 +152,6 @@ colorama = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
-holden = [
-    {file = "holden-0.1.6-py3-none-any.whl", hash = "sha256:7ce35138eb097d1140cb814cad43085fad5804c906fd2eb892c849cd9d43029a"},
-    {file = "holden-0.1.6.tar.gz", hash = "sha256:12b681526759948036bb093f68b5511cf47e5e7fe3a9f9a8b5b309bfd37c5a26"},
-]
 miller = [
     {file = "miller-0.1.6-py3-none-any.whl", hash = "sha256:8983a0fc27e1ebd9d7be15e1261e4ff9c2d5814e07f337c485d25cd9d2ac2deb"},
     {file = "miller-0.1.6.tar.gz", hash = "sha256:f0c61ed4f8323f8fe2611f0b0f5b14c3381e973513b84c32d5f6e1053ea8e509"},
@@ -211,8 +165,8 @@ nagata = [
     {file = "nagata-0.1.4.tar.gz", hash = "sha256:3c8303a5406b6177c81ddac4545cc0fc112095826509462f2b1a49f4ff137101"},
 ]
 packaging = [
-    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
-    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
+    {file = "packaging-22.0-py3-none-any.whl", hash = "sha256:957e2148ba0e1a3b282772e791ef1d8083648bc131c8ab0c1feba110ce1146c3"},
+    {file = "packaging-22.0.tar.gz", hash = "sha256:2198ec20bd4c017b8f9717e00f0c8714076fc2fd93816750ab48e2c41de2cfd3"},
 ]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
@@ -221,10 +175,6 @@ pluggy = [
 py = [
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
-]
-pyparsing = [
-    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
-    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pytest = [
     {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},

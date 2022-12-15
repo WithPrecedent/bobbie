@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bobbie"
-version = "0.1.2"
+version = "0.1.3"
 description = "flexible, easy python project configuration"
 authors = ["corey rayburn yung <coreyrayburnyung@gmail.com>"]
 license = "Apache-2.0"
