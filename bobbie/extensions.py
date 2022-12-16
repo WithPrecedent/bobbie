@@ -91,7 +91,11 @@ class Parser(object):
             Any: stored value(s).
             
         """
-        return parsers.parse(settings = obj, parser = self)
+        try:
+            settings = obj.settings
+        except AttributeError:
+            settings = obj
+        return parsers.parse(settings = settings, parser = self)
 
     def __set__(self, obj: object, value: Any) -> None:
         """Setter for use as a descriptor.
@@ -102,15 +106,20 @@ class Parser(object):
             value (Any): the value to assign when accessed.
             
         """
-        keys = parsers.get_outer_keys(
-            settings = obj,
+        try:
+            settings = obj.settings
+        except AttributeError:
+            settings = obj
+        keys = parsers.get_keys(
+            settings = settings,
             terms = self.terms,
-            match = self.match)
+            match = 'all',
+            excise = False)
         try:
             key = keys[0]
         except IndexError:
             key = self.terms[0]
-        obj.settings[key] = value
+        settings[key] = value
         return
 
     def __set_name__(self, owner: Type[Any], name: str) -> None:
