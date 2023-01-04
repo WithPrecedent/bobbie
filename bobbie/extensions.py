@@ -37,7 +37,7 @@ from . import parsers
 
 """ Limited Option Types for Static Type Checkers """
 
-MatchOptions = Literal['all', 'prefix', 'suffix']
+ScopeOptions = Literal['all', 'prefix', 'suffix']
 ReturnsOptions = Literal[
     'contents',
     'keys', 
@@ -56,7 +56,7 @@ class Parser(object):
     Args:
         terms (tuple[str, ...]): strings to match against entries in a Settings
             instance.
-        match (Optional[MatchOptions]): how much of the str must be matched.
+        scope (Optional[ScopeOptions]): how much of the str must be scopeed.
             Defaults to 'all'.
         returns (Optional[ReturnOptions]): the type of data that should be 
             returned after parsing. Defaults to 'section'.
@@ -67,12 +67,12 @@ class Parser(object):
             or just the first (False). Defaults to True.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
         
     """
     terms: tuple[str, ...]
-    match: Optional[MatchOptions] = 'all'
+    scope: Optional[ScopeOptions] = 'all'
     returns: Optional[ReturnsOptions] = 'sections'
     excise: Optional[bool] = True
     accumulate: Optional[bool] = True
@@ -113,7 +113,7 @@ class Parser(object):
         keys = parsers.get_keys(
             settings = settings,
             terms = self.terms,
-            match = 'all',
+            scope = 'all',
             excise = False)
         try:
             key = keys[0]

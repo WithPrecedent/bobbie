@@ -173,7 +173,7 @@ class Settings(camina.Dictionary):
             Settings: an instance derived from 'source'.
             
         """
-        path = camina.pathlibify(item = source)   
+        path = camina.pathlibify(source)   
         extension = path.suffix[1:]
         load_method = getattr(cls, f'from_{extension}')
         return load_method(source = path, **kwargs)
@@ -196,7 +196,7 @@ class Settings(camina.Dictionary):
             FileNotFoundError: if the path does not correspond to a file.
 
         """
-        path = camina.pathlibify(item = source) 
+        path = camina.pathlibify(source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -226,7 +226,7 @@ class Settings(camina.Dictionary):
 
         """
         import json
-        path = camina.pathlibify(item = source) 
+        path = camina.pathlibify(source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -257,7 +257,7 @@ class Settings(camina.Dictionary):
                 file.
 
         """
-        path = camina.pathlibify(item = source) 
+        path = camina.pathlibify(source) 
         kwargs['infer_types'] = False
         try:
             path = pathlib.Path(path)
@@ -289,7 +289,7 @@ class Settings(camina.Dictionary):
 
         """
         import toml
-        path = camina.pathlibify(item = source) 
+        path = camina.pathlibify(source) 
         if 'infer_types' not in kwargs:
             kwargs['infer_types'] = True
         try:
@@ -316,7 +316,7 @@ class Settings(camina.Dictionary):
 
         """
         import yaml
-        path = camina.pathlibify(item = source) 
+        path = camina.pathlibify(source) 
         kwargs['infer_types'] = False
         try:
             with open(path, 'r') as config:

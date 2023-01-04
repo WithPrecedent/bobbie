@@ -28,23 +28,17 @@ Contents:
         those sections that match. 
     get_section_kinds: returns a dict with keys that are section names and 
         values which are dicts returned by 'get_kinds'.
-    match_all: returns a matching str (possibly modified based on arguments) and
-        the term which matches by matching the entire str.
-    match_prefix: returns a matching str (possibly modified based on arguments) 
-        and the term which matches by matching a str prefix.
-    match_suffix: returns a matching str (possibly modified based on arguments) 
-        and the term which matches by matching a str suffix.
 
 ToDo:
        
        
 """
 from __future__ import annotations
-from collections.abc import MutableMapping, Sequence
+from collections.abc import MutableMapping
 from typing import Any, Optional, TYPE_CHECKING
 
-import camina
-
+from . import filters
+ 
 if TYPE_CHECKING:
     from . import core
     from . import extensions
@@ -54,7 +48,7 @@ def parse(
     settings: core.Settings,
     parser: Optional[extensions.Parser] = None,
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     returns: Optional[extensions.ReturnsOptions] = 'sections',
     excise: Optional[bool] = True,
     accumulate: Optional[bool] = True,
@@ -71,7 +65,7 @@ def parse(
             data for the other parameters. Defaults to None.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         returns (Optional[extensions.ReturnOptions]): the type of data that 
             should be returned after parsing. Defaults to 'section'.
@@ -82,7 +76,7 @@ def parse(
             or just the first (False). Defaults to True.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Raises:
@@ -95,7 +89,7 @@ def parse(
     # Applies information from 'parser' if it is passed.
     if parser is not None:
         terms = parser.terms
-        match = parser.match
+        scope = parser.scope
         returns = parser.returns
         excise = parser.excise
         accumulate = parser.accumulate
@@ -103,12 +97,12 @@ def parse(
     elif terms is None:
         raise ValueError('Either parser or terms argument must not be None')
     # Determines name of the appropriate function in the this module to use.
-    matcher = globals()[f'get_{returns}']
+    filters.match = globals()[f'get_{returns}']
     # Gets matches based on passed arguments.
-    matches = matcher(
+    matches = filters.match(
         settings = settings, 
         terms = terms, 
-        match = match, 
+        scope = scope, 
         excise = excise, 
         divider = divider)
     # Returns all matches if 'accumulate' is True. Otherwise, only the first
@@ -123,7 +117,7 @@ def parse(
 def get_contents(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
     """Returns parsed information from a Settings instance.
@@ -132,14 +126,14 @@ def get_contents(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
@@ -147,20 +141,19 @@ def get_contents(
             values are sections of 'settings'.
             
     """
-    matcher = globals()[f'match_{match}']
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     matches = {}
     for name, section in settings.items():
-        if any(matcher(item = k, **kwargs) for k in section.keys()):
+        if any(filters.match(item = k, **kwargs) for k in section.keys()):
             matches[name] = {
-                matcher(item = k, **kwargs)[0]: v for k, v in section.items() 
-                if matcher(item = k, **kwargs)}
+                filters.match(item = k, **kwargs)[0]: v for k, v in section.items() 
+                if filters.match(item = k, **kwargs)}
     return matches
 
 def get_keys(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> list[str]:
     """Returns parsed information from a Settings instance.
@@ -169,30 +162,29 @@ def get_keys(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
         list[str]: matching keys
         
     """
-    matcher = globals()[f'match_{match}']
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return [
-        matcher(item = k, **kwargs)[0] for k in settings.keys() 
-        if matcher(item = k, **kwargs)]
+        filters.match(item = k, **kwargs)[0] for k in settings.keys() 
+        if filters.match(item = k, **kwargs)]
 
 def get_kinds(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> dict[str, str]:
     """Returns parsed information from a Settings instance.
@@ -201,14 +193,14 @@ def get_kinds(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
@@ -216,16 +208,15 @@ def get_kinds(
             on 'excise') and values are the associated terms.
         
     """
-    matcher = globals()[f'match_{match}']
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return {
-        matcher(item = k, **kwargs)[0]: matcher(item = k, **kwargs)[1]
-        for k in settings.keys() if matcher(item = k, **kwargs)}
+        filters.match(item = k, **kwargs)[0]: filters.match(item = k, **kwargs)[1]
+        for k in settings.keys() if filters.match(item = k, **kwargs)}
 
 def get_sections(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
     """Returns parsed information from a Settings instance.
@@ -234,14 +225,14 @@ def get_sections(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
@@ -249,16 +240,15 @@ def get_sections(
             matching sections.
         
     """
-    matcher = globals()[f'match_{match}']
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return {
-        matcher(item = k, **kwargs)[0]: v for k, v in settings.items() 
-        if matcher(item = k, **kwargs)}
+        filters.match(item = k, **kwargs)[0]: v for k, v in settings.items() 
+        if filters.match(item = k, **kwargs)}
 
 def get_section_keys(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> dict[str, list[str]]:
     """Returns parsed information from a Settings instance.
@@ -267,14 +257,14 @@ def get_section_keys(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
@@ -285,7 +275,7 @@ def get_section_keys(
     """
     kwargs = {
         'terms': terms, 
-        'match': match, 
+        'scope': scope, 
         'excise': excise, 
         'divider': divider}
     matches = {}
@@ -297,7 +287,7 @@ def get_section_keys(
 def get_section_kinds(
     settings: MutableMapping[str, Any],
     terms: Optional[tuple[str, ...]] = None,
-    match: Optional[extensions.MatchOptions] = 'all',
+    scope: Optional[extensions.ScopeOptions] = 'all',
     excise: Optional[bool] = True,
     divider: Optional[str] = '') -> dict[str, dict[str, str]]:
     """Returns parsed information from a Settings instance.
@@ -306,14 +296,14 @@ def get_section_kinds(
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
-        match (Optional[extensions.MatchOptions]): how much of the str must be 
+        scope (Optional[extensions.ScopeOptions]): how much of the str must be 
             matched. Defaults to 'all'.
         excise (Optional[bool]): whether to remove the matching terms from keys
             in the return item. Defaults to True, meaning the terms will be 
             excised from keys along with 'divider', if applicable.
         divider (Optional[str]): when matching a prefix, suffix, or substring,
             'divider' is the str connection that substring with the remainder of
-            the str. If 'match' is 'all', 'divider' has no effect. Defaults to 
+            the str. If 'scope' is 'all', 'divider' has no effect. Defaults to 
             ''.
 
     Returns:
@@ -324,7 +314,7 @@ def get_section_kinds(
     """
     kwargs = {
         'terms': terms, 
-        'match': match, 
+        'scope': scope, 
         'excise': excise, 
         'divider': divider}
     matches = {}
@@ -332,92 +322,3 @@ def get_section_kinds(
         if get_kinds(settings = section, **kwargs):
             matches[name] = get_kinds(settings = section, **kwargs)
     return matches
-
-def match_all(
-    item: Any, 
-    terms: Sequence[str], 
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
-    """Applies the parser to 'item'.
-
-    Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
-        excise (Optional[bool]): whether to remove the matching terms from keys
-            in the return item. Defaults to True, meaning the terms will be 
-            excised from keys along with 'divider', if applicable.
-        divider (Optional[str]): divider between a term and the rest of 'item'.
-            Defaults to ''.
-
-    Returns:
-        Optional[tuple[str, str]]: the matching str and matching term or None 
-            (if there is no matching term).
-        
-    """
-    for term in terms:
-        if item == term:
-            return item, term
-    return None
-
-def match_prefix(
-    item: Any, 
-    terms: Sequence[str], 
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
-    """Applies the parser to 'item'.
-
-    Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
-        excise (Optional[bool]): whether to remove the matching terms from keys
-            in the return item. Defaults to True, meaning the terms will be 
-            excised from keys along with 'divider', if applicable.
-        divider (Optional[str]): divider between a term and the rest of 'item'.
-            Defaults to ''.
-
-    Returns:
-        Optional[tuple[str, str]]: the matching str and matching term or None 
-            (if there is no matching term).
-        
-    """
-    for term in terms:
-        substring = term + divider
-        if item.startswith(substring):
-            if excise:
-                return camina.drop_prefix(item = item, prefix = substring), term
-            else:
-                return item, term 
-    return None
-
-def match_suffix(
-    item: Any, 
-    terms: Sequence[str],  
-    excise: Optional[extensions.ExciseOptions] = True,
-    divider: Optional[str] = '') -> Optional[tuple[str, str]]:
-    """Applies the parser to 'item'.
-
-    Args:
-        item (Any): item to parse.
-        terms (Sequence[str]): strings to find matches for.
-        excise (Optional[bool]): whether to remove the matching terms from keys
-            in the return item. Defaults to True, meaning the terms will be 
-            excised from keys along with 'divider', if applicable.
-        divider (Optional[str]): divider between a term and the rest of 'item'.
-            Defaults to ''.
-
-    Returns:
-        Optional[tuple[str, str]]: the matching str and matching term or None 
-            (if there is no matching term).
-        
-    """
-    for term in terms:
-        substring = divider + term
-        if item.endswith(substring):
-            if excise:
-                excised_term = camina.drop_suffix_from_str(
-                    item = item, 
-                    suffix = substring)
-                return excised_term, term
-            else:
-                return item, term 
-    return None

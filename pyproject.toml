@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bobbie"
-version = "0.1.4"
+version = "0.1.5"
 description = "flexible, easy python project configuration"
 authors = ["corey rayburn yung <coreyrayburnyung@gmail.com>"]
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ repository = "https://github.com/WithPrecedent/bobbie"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-camina = "^0.1.10"
+camina = "^0.1.11"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
