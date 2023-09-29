@@ -15,8 +15,8 @@ License: Apache-2.0
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    
-    
+
+
 """
 from __future__ import annotations
 import pathlib
@@ -48,7 +48,7 @@ example_settings = {
         'start': 'when_ready',
         'end': 'when_done'}}
 
-example_parsers = {
+example_Parsers = {
     'files': bobbie.Parser(
         terms = ('filer', 'files', 'clerk'),
         match = 'all',
@@ -128,10 +128,10 @@ def test_core():
     assert dict_settings['files']['float_format'] == '%.4f'
     return
 
-def test_parsers():
+def test_Parsers():
     settings = bobbie.Settings.create(
-        source = example_settings, 
-        parsers = example_parsers)
+        source = example_settings,
+        Parsers = example_Parsers)
     assert settings.parameters == {
         'tasks': {
             'start': 'when_ready',
@@ -156,21 +156,21 @@ def test_parsers():
         'gpu': False}
     assert settings.formats == {
         'files': {
-            'source': 'csv', 
-            'interim': 'csv', 
-            'final': 'csv', 
-            'analysis': 'csv', 
+            'source': 'csv',
+            'interim': 'csv',
+            'final': 'csv',
+            'analysis': 'csv',
             'float': '%.4f'}}
     assert settings.kinds == {
         'general': {'conserve': 'memory'},
         'files': {
-            'source': 'format', 
-            'interim': 'format', 
-            'final': 'format', 
-            'analysis': 'format', 
-            'float': 'format', 
-            'test': 'chunk', 
-            'random_test': 'chunk', 
+            'source': 'format',
+            'interim': 'format',
+            'final': 'format',
+            'analysis': 'format',
+            'float': 'format',
+            'test': 'chunk',
+            'random_test': 'chunk',
             'boolean': 'out'}}
     assert settings.format_keys == {
         'files': ['source', 'interim', 'final', 'analysis', 'float']}
@@ -181,5 +181,5 @@ def test_parsers():
 
 if __name__ == '__main__':
     test_core()
-    test_parsers()
-    
+    test_Parsers()
+

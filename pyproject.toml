@@ -1,23 +1,178 @@
-[tool.poetry]
+# Project packaging rules and instructions
+
+[project]
 name = "bobbie"
-version = "0.1.5"
-description = "flexible, easy python project configuration"
-authors = ["corey rayburn yung <coreyrayburnyung@gmail.com>"]
-license = "Apache-2.0"
+description = "Flexible, easy Python project configuration"
+authors = [{name = "Corey Rayburn Yung", email = "coreyrayburnyung@gmail.com"}]
+license = {text = "Apache Software License 2.0"}
 readme = "README.md"
-homepage = "https://github.com/WithPrecedent/bobbie"
-repository = "https://github.com/WithPrecedent/bobbie"
+requires-python = ">=3.9"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development"]
+keywords = []
+dependencies = []
 
-[tool.poetry.dependencies]
-python = "^3.9"
-camina = "^0.1.11"
-
-[tool.poetry.dev-dependencies]
-pytest = "^5.2"
-
-[tool.poetry.extras]
-formats = ["toml", "pyyaml"]
+[project.urls]
+Documentation = "https://WithPrecedent.github.io/bobbie"
+Repository = "https://github.com/WithPrecedent/bobbie"
+Issues = "https://github.com/WithPrecedent/bobbie/issues"
+Changelog = "https://WithPrecedent.github.io/bobbie/changelog"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+plugins = [
+    "sync-pre-commit-lock[pdm]",
+    "pdm-multirun"]
+
+[tool.pdm.build]
+package-dir = "src"
+# editable-backend = "editables"
+
+[tool.pdm.dev-dependencies]
+docs = [
+    "markdown-callouts >= 0.3",
+    "markdown-exec >= 1.6.0",
+    "mkdocs >= 1.5.2",
+    "mkdocs-coverage >= 1.0.0",
+    "mkdocs-gen-files >= 0.5.0",
+    "mkdocs-git-committers-plugin-2 >= 1.1.2",
+    "mkdocs-literate-nav >= 0.6.0",
+    "mkdocs-material >= 9.1.2",
+    "mkdocs-minify-plugin >= 0.7.1",
+    "mkdocstrings[python] >= 0.22.0",
+    "toml >= 0.10.2"]
+quality = [
+    "pre-commit >= 3.3.3",
+    "ruff >= 0.0.286"]
+tests = [
+    "coverage >= 7.2.7",
+    "pytest >= 7.4.0",
+    "pytest-cov >= 4.1.0",
+    "pytest-randomly >= 3.13.0",
+    "pytest-xdist >= 3.3.1"]
+
+[tool.pdm.version]
+source = "file"
+path = "src/bobbie/__init__.py"
+
+[tool.pytest.ini_options]
+addopts = "--showlocals"
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
+pythonpath = ["src"]
+
+[tool.ruff]
+extend-exclude = ["docs", "scripts", "site", "tests", ".*.*"]
+fix = true
+fixable = ["ALL"]
+ignore = [
+    "A001",  # Variable is shadowing a Python builtin
+    "ANN101",  # Missing type annotation for self
+    "ANN102",  # Missing type annotation for cls
+    "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
+    "ARG003",  # Unused class method argument: `parameters`
+    "ARG005",  # Unused lambda argument
+    "C901",  # Too complex
+    "D105",  # Missing docstring in magic method
+    "D400",  # First line must end in a period
+    "D401",  # First line of docstring should be in imperative mood
+    "D406",  # Section name should end with a newline - bugged for 'Attributes:'
+    "D407",  # Missing dashed underline after section ("Args")
+    "D415",  # First line must end in a period, question mark, or exclamation point
+    "DTZ005",  # The use of `datetime.now()` without `tz` argument is not allowed
+    "E501",  # Line too long
+    "E731",  # Do not assign a `lambda` expression, use a `def`
+    "ERA001",  # Commented out code
+    "EXE002",  # No shebang is present in an executable file
+    "FBT001",  # Boolean positional arg in function definition
+    "G004",  # Logging statement uses f-string
+    "PTH123",  # `open()` should be replaced by `Path.open()`
+    "PLR0911",  # Too many return statements
+    "PLR0912",  # Too many branches
+    "PLR0913",  # Too many arguments to function call
+    "PLR0915",  # Too many statements
+    "PLR1711", # Useless 'return' at the end of function
+    "Q000",  # Single quotes found but double quotes preferred
+    # "S0001",  # Use of assert detected
+    "RET505",  # Unnecessary `else` after `return` statement
+    "SLF001", # Private member accessed
+    "TID252",  # Relative imports are banned
+    "TRY003",  # Avoid specifying long messages outside the exception class
+    "UP004"]  # Class inherits from `object`
+    # "W0105",  # String statement has no effect
+    # "W0221",  # Arguments differ
+    # "W0222",]  # Access to a protected member
+line-length = 80
+select = [
+    "A",  # flake8-buttons
+    "ANN",  # flake8-annotations
+    "ARG",  # flake8-unused-arguments
+    "B",  # flake8-bugbear
+    "BLE",  # flake8-blind-except
+    "C",  #
+    "C4",  # flake8-comprehensions
+    "COM",  # flake8-commas
+    "D",  # pydocstyle
+    "DTZ",  # flake8-datetimez
+    "E",  # pydocstyle errors
+    "ERA",  # eradicate
+    "EXE",  # flake8-executable
+    "F",  # Pyflakes
+    "FBT",  # flake8-boolean-trap
+    "G",  # flake8-logging-format
+    "I",  # isort
+    "ICN",  # flake8-import-conventions
+    "INP",  # flake8-no-pep420
+    "ISC",  # flake8-implicit-str-concat
+    "N",  # pep8-naming
+    "NPY",  # NumPy-specific rules
+    "PD",  # pandas-vet
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PL",  # Pylint
+    "PLC",  # Pylint
+    "PLE",  # Pylint
+    "PLR",  # Pylint
+    "PLW",  # Pylint
+    "PT",  # flake8-pytest-style
+    "PTH",  # flake8-use-pathlib
+    "PYI",  # flake8-pyi
+    "Q",  # flake8-quotes
+    "RUF",  # Ruff-specific rules
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "S",  # bandit
+    "SIM",  # flake8-slots
+    "SLF",  # flake8-self
+    "T",  #
+    "T10",  # flake8-debugger
+    "T20",  # flake8-print
+    "TCH",  # flake8-type-checking
+    "TID",  # flake8-tidy-imports
+    "TRY",  # tryceratops
+    "UP",  # pyupgrade
+    "W",  # pydocstyle warnings
+    "YTT",]  # flake8-2020
+
+[tool.ruff.flake8-annotations]
+suppress-none-returning = true
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.isort]
+case-sensitive = true
+known-first-party = ["camina"]
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false

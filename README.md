@@ -1,7 +1,144 @@
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Documentation Status](https://readthedocs.org/projects/bobbie/badge/?version=latest)](http://bobbie.readthedocs.io/?badge=latest)
+# bobbie
 
-bobbie provides a lightweight, easy-to-use, flexible class for loading and storing configuration settings for a python project. Unlike some other packages, bobbie neither tinkers with environment variables nor limits users to a single source type. boobbie has built-in type inference for data sources (e.g. ini files) which do not allow for typing. bobbie stores the configuration settings in a class which can be used both as a drop-in dict and with extra features for accessing specific settings. 
+| | |
+| --- | --- |
+| Version | [![PyPI Latest Release](https://img.shields.io/pypi/v/bobbie.svg?style=for-the-badge&color=steelblue&label=PyPI&logo=PyPI&logoColor=yellow)](https://pypi.org/project/bobbie/) [![GitHub Latest Release](https://img.shields.io/github/v/tag/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=GitHub&logo=github)](https://github.com/WithPrecedent/bobbie/releases)
+| Status | [![Build Status](https://img.shields.io/github/actions/workflow/status/WithPrecedent/bobbie/ci.yml?branch=main&style=for-the-badge&color=cadetblue&label=Tests&logo=pytest)](https://github.com/WithPrecedent/bobbie/actions/workflows/ci.yml?query=branch%3Amain) [![Development Status](https://img.shields.io/badge/Development-Active-seagreen?style=for-the-badge&logo=git)](https://www.repostatus.org/#active) [![Project Stability](https://img.shields.io/pypi/status/bobbie?style=for-the-badge&logo=pypi&label=Stability&logoColor=yellow)](https://pypi.org/project/bobbie/)
+| Documentation | [![Hosted By](https://img.shields.io/badge/Hosted_by-Github_Pages-blue?style=for-the-badge&color=navy&logo=github)](https://WithPrecedent.github.io/bobbie)
+| Tools | [![Documentation](https://img.shields.io/badge/MkDocs-magenta?style=for-the-badge&color=deepskyblue&logo=markdown&labelColor=gray)](https://squidfunk.github.io/mkdocs-material/) [![Linter](https://img.shields.io/endpoint?style=for-the-badge&url=https://raw.githubusercontent.com/charliermarsh/Ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/Ruff) [![Dependency Manager](https://img.shields.io/badge/PDM-mediumpurple?style=for-the-badge&logo=affinity&labelColor=gray)](https://PDM.fming.dev) [![Pre-commit](https://img.shields.io/badge/pre--commit-darkolivegreen?style=for-the-badge&logo=pre-commit&logoColor=white&labelColor=gray)](https://github.com/TezRomacH/python-package-template/blob/master/.pre-commit-config.yaml) [![CI](https://img.shields.io/badge/GitHub_Actions-navy?style=for-the-badge&logo=githubactions&labelColor=gray&logoColor=white)](https://github.com/features/actions) [![Editor Settings](https://img.shields.io/badge/Editor_Config-paleturquoise?style=for-the-badge&logo=editorconfig&labelColor=gray)](https://editorconfig.org/) [![Repository Template](https://img.shields.io/badge/snickerdoodle-bisque?style=for-the-badge&logo=cookiecutter&labelColor=gray)](https://www.github.com/WithPrecedent/bobbie) [![Dependency Maintainer](https://img.shields.io/badge/dependabot-navy?style=for-the-badge&logo=dependabot&logoColor=white&labelColor=gray)](https://github.com/dependabot)
+| Compatibility | [![Compatible Python Versions](https://img.shields.io/pypi/pyversions/bobbie?style=for-the-badge&color=steelblue&label=Python&logo=python&logoColor=yellow)](https://pypi.python.org/pypi/bobbie/) [![Linux](https://img.shields.io/badge/Linux-lightseagreen?style=for-the-badge&logo=linux&labelColor=gray&logoColor=white)](https://www.linux.org/) [![MacOS](https://img.shields.io/badge/MacOS-snow?style=for-the-badge&logo=apple&labelColor=gray)](https://www.apple.com/macos/) [![Windows](https://img.shields.io/badge/windows-blue?style=for-the-badge&logo=Windows&labelColor=gray&color=orangered)](https://www.microsoft.com/en-us/windows?r=1)
+| Stats | [![PyPI Download Rate (per month)](https://img.shields.io/pypi/dm/bobbie?style=for-the-badge&color=steelblue&label=Downloads%20💾&logo=pypi&logoColor=yellow)](https://pypi.org/project/bobbie) [![GitHub Stars](https://img.shields.io/github/stars/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Stars%20⭐&logo=github)](https://github.com/WithPrecedent/bobbie/stargazers) [![GitHub Contributors](https://img.shields.io/github/contributors/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Contributors%20🙋&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Issues](https://img.shields.io/github/issues/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Issues%20📘&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Forks](https://img.shields.io/github/forks/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Forks%20🍴&logo=github)](https://github.com/WithPrecedent/bobbie/forks)
+| | |
 
-bobbie's framework supports a wide range of coding styles. You can create complex multiple inheritance structures with mixins galore or simpler, compositional objects. Even though the data structures are necessarily object-oriented, all of the tools to modify them are also available as functions, for those who prefer a more funcitonal approaching to programming. 
+-----
 
-The project is also highly internally documented so that users and developers can easily make bobbie work with their projects. It is designed for Python coders at all levels. Beginners should be able to follow the readable code and internal documentation to understand how it works. More advanced users should find complex and tricky problems addressed through efficient code.
+## What is bobbie?
+
+<p align="center">
+<img src="https://media.giphy.com/media/53wQ8r97DCk2gAalDq/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
+</p>
+
+`bobbie` provides a lightweight, easy-to-use, flexible class for loading and
+storing configuration settings for a Python project. Unlike some other packages,
+`bobbie` neither tinkers with environment variables nor limits users to a
+single source type. `boobbie` stores the configuration
+settings in a class which can be used as a drop-in `dict` or with extra
+features for accessing specific settings.
+
+## Why use bobbie?
+
+`bobbie` is:
+
+* **Flexible**: a `dict`, `.py` module, or `.env`, `.ini`, `.json`, `.toml`, or
+  `.yaml` may serve as the source for configuration settings
+* **Lightweight**: no dependencies and a small codebase ensures a very small
+  memory footprint
+* **Intuitive**: a `create` class method constructs `Settings` (from any data
+  source), all data validation occurs behind the scenes, and the created
+  instance may be used as a drop-in replacement for a Python `dict`.
+* **Extensible**: you can easily add new parsing rules by subclassing `Parser`
+
+<p align="center">
+<img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
+</p>
+
+The [comparison table](#feature-comparison-of-python-configuration-libraries)
+below shows how `bobbie` compares to the other major options that store
+configuration options for Python projects.
+
+## Getting started
+
+### Requirements
+
+[TODO: List any OS or other restrictions and pre-installation dependencies]
+
+### Installation
+
+To install `bobbie`, use `pip`:
+
+```sh
+pip install bobbie
+```
+
+### Create a Settings Instance
+
+`bobbie` supports several ways to create a `Settings` instance. However, you can
+opt to always use the `create` class method for any data source.
+
+#### From Dict
+
+```python
+import bobbie
+
+configuration = {
+  'general': {
+    'verbose': False,
+    'seed': 43,
+    'parallelize': False},
+  'files': {
+    'source_format': 'csv',
+    'file_encoding': 'windows-1252',
+    'float_format': '%.4f',
+    'export_results': True}}
+# You may use the general `create` method.
+settings = bobbie.Settings.create(configuration)
+# Or, just send a `dict` to `Settings` itself.
+settings = bobbie.Settings(configuration)
+```
+
+#### From File
+
+```python
+import bobbie
+
+# You may use the general `create` method.
+settings = bobbie.Settings.create('settings_file.yaml')
+# Or, the `from_path` method.
+settings = bobbie.Settings.from_path('settings_file.yaml')
+# Or, the `from_yaml` method. They all do the same thing.
+settings = bobbie.Settings.from_yaml('settings_file.yaml')
+```
+
+If the file is a Python module, it must contain a variable named `settings`.
+
+## Contributing
+
+Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/bobbie/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/bobbie/contributing.md) and [Code of Conduct](https://www.github.com/WithPrecedent/bobbie/code_of_conduct.md).
+
+## Similar Projects
+
+There are a lot of great packages for storing project settings. The table below
+shows the features of the leading libraries.
+
+### Feature Comparison of Python Configuration Libraries
+
+<p align="center">
+<img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:300px;"/>
+</p>
+
+
+| Library | Typing | Secrets | dict | env | ini | json | py | toml | yaml |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| [`configParser`](https://docs.python.org/3/library/configParser.html) | | | | | ✅ | | | | |
+| [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | | ✅ | ✅ | ✅ | | ✅ | ✅ |
+| [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | ✅ | ✅ | ✅ | | ✅ | ✅ |
+| [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | ✅ | ✅ | | | | |
+| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | |  | | |  || |
+| [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | | |
+
+As you can see, `bobiie` lacks a method for storing passwords, encryption keys,
+and other secrets. That is largely because it is focused on internal Python
+projects and the goal of keeping its resource usage as low as possible. So, if
+you need secrets stored in your project settings, there are several good options
+that you should explore.
+
+## Acknowledgments
+
+I would like to thank the University of Kansas School of Law for tolerating and
+supporting this law professor's coding efforts, an endeavor which is well
+outside the typical scholarly activities in the discipline.
+
+## License
+
+Use of this repository is authorized under the [Apache Software License 2.0](https://www.github.com/WithPrecedent/bobbie/blog/main/LICENSE).

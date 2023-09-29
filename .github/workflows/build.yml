@@ -1,0 +1,37 @@
+# Builds package and creates environment
+
+name: build
+
+# Allows this Action to be called by other Actions
+on: workflow_call
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: 3.x
+
+    - name: Check output
+      shell: bash
+      run: |
+        echo ${{ steps.setup-pdm.outputs.pdm-bin }}
+        echo ${{ steps.setup-pdm.outputs.pdm-version }}
+        echo ${{ steps.setup-pdm.outputs.python-path }}
+        echo ${{ steps.setup-pdm.outputs.python-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: pdm install -v && pdm info

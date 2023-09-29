@@ -1,0 +1,32 @@
+# Issues a linting and formatting report for the repository.
+
+name: lint
+
+# Allows this Action to be called by other Actions or through GitHub
+on: [workflow_call, workflow_dispatch]
+
+jobs:
+
+  lint_and_format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      shell: bash
+      run: pdm install -v && pdm info
+
+    - name: Run Ruff
+      run: pdm run ruff check --format=github .

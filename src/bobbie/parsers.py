@@ -1,23 +1,7 @@
-"""
-parsers: functions for parsing configuration settings
-Corey Rayburn Yung <coreyrayburnyung@gmail.com>
-Copyright 2020-2022, Corey Rayburn Yung
-License: Apache-2.0
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+"""Tools for parsing configuration settings
 
 Contents:
-    parse: general parsing function.
+    parse: offers different parse of `Settings` data based on arguments passed.
     get_contents: returns dict of settings sections with matching keys in those
         sections.
     get_keys: returns list of settings keys that match. 
@@ -29,40 +13,40 @@ Contents:
     get_section_kinds: returns a dict with keys that are section names and 
         values which are dicts returned by 'get_kinds'.
 
-ToDo:
-       
-       
+To Do:
+
+
 """
 from __future__ import annotations
+
 from collections.abc import MutableMapping
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from . import filters
- 
+
 if TYPE_CHECKING:
-    from . import core
-    from . import extensions
-    
+    from . import core, extensions
+
 
 def parse(
     settings: core.Settings,
-    parser: Optional[extensions.Parser] = None,
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    returns: Optional[extensions.ReturnsOptions] = 'sections',
-    excise: Optional[bool] = True,
-    accumulate: Optional[bool] = True,
-    divider: Optional[str] = '') -> Any:
-    """Returns parsed information from a Settings instance.
-    
-    Either 'parser' or 'terms' must not be None. If 'parser' is passed, the 
-    rest of the arguments (other than 'settings' and 'parser') are ignored and
-    the data in 'parser' is used instead.
+    parse: extensions.parse | None = None,
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    returns: extensions.ReturnsOptions | None = 'sections',
+    excise: bool | None = True,
+    accumulate: bool | None = True,
+    divider: str | None = '') -> Any:
+    """Returns parse of select information from a `Settings` instance.
+
+    Either 'parse' or 'terms' must not be None. If 'parse' is passed, the 
+    rest of the arguments (other than 'settings' and 'parse') are ignored and
+    the data in 'parse' is used instead.
 
     Args:
-        settings (core.Settings): configuration data.
-        parser (Optional[extensions.Parser], optional): a Parser instance with 
-            data for the other parameters. Defaults to None.
+        settings: a `Settings` or subclass instance with configuration data.
+        parse: a `Parser` or subclass instance with data for the other parameters. 
+            Defaults to None.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
             Settings instance. Defaults to None.
         scope (Optional[extensions.ScopeOptions]): how much of the str must be 
@@ -80,22 +64,22 @@ def parse(
             ''.
 
     Raises:
-        ValueError: if both 'parser' and 'terms' are None.
+        ValueError: if both 'parse' and 'terms' are None.
 
     Returns:
         Any: an item parsed from 'settings'.
-        
+
     """
-    # Applies information from 'parser' if it is passed.
-    if parser is not None:
-        terms = parser.terms
-        scope = parser.scope
-        returns = parser.returns
-        excise = parser.excise
-        accumulate = parser.accumulate
-        divider = parser.divider
+    # Applies information from 'parse' if it is passed.
+    if parse is not None:
+        terms = parse.terms
+        scope = parse.scope
+        returns = parse.returns
+        excise = parse.excise
+        accumulate = parse.accumulate
+        divider = parse.divider
     elif terms is None:
-        raise ValueError('Either parser or terms argument must not be None')
+        raise ValueError('Either parse or terms argument must not be None')
     # Determines name of the appropriate function in the this module to use.
     filters.match = globals()[f'get_{returns}']
     # Gets matches based on passed arguments.
@@ -110,18 +94,18 @@ def parse(
     if accumulate:
         return matches
     elif isinstance(matches, MutableMapping):
-        return matches[list(matches.keys())[0]]
+        return matches[next(iter(matches.keys()))]
     else:
         return matches[0]
   
 def get_contents(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> dict[str, dict[str, Any]]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -139,7 +123,7 @@ def get_contents(
     Returns:
         dict[str, dict[str, Any]]: keys are section names of 'settings' and
             values are sections of 'settings'.
-            
+
     """
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     matches = {}
@@ -152,12 +136,12 @@ def get_contents(
 
 def get_keys(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> list[str]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> list[str]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -174,7 +158,7 @@ def get_keys(
 
     Returns:
         list[str]: matching keys
-        
+
     """
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return [
@@ -183,12 +167,12 @@ def get_keys(
 
 def get_kinds(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> dict[str, str]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> dict[str, str]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -206,21 +190,21 @@ def get_kinds(
     Returns:
         dict[str, str]: keys are parsed settings keys (possibly modified based
             on 'excise') and values are the associated terms.
-        
+
     """
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return {
         filters.match(item = k, **kwargs)[0]: filters.match(item = k, **kwargs)[1]
-        for k in settings.keys() if filters.match(item = k, **kwargs)}
+        for k in settings if filters.match(item = k, **kwargs)}
 
 def get_sections(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> dict[str, dict[str, Any]]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> dict[str, dict[str, Any]]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -238,7 +222,7 @@ def get_sections(
     Returns:
         dict[str, dict[str, Any]]: keys are names of sections, and values are 
             matching sections.
-        
+
     """
     kwargs = {'terms': terms, 'excise': excise, 'divider': divider}
     return {
@@ -247,12 +231,12 @@ def get_sections(
 
 def get_section_keys(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> dict[str, list[str]]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> dict[str, list[str]]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -271,7 +255,7 @@ def get_section_keys(
         dict[str, list[str]]: keys are names of sections in 'settings' with any 
             matching keys within them and values are a list of matching keys
             from the corresponding sections. 
-        
+
     """
     kwargs = {
         'terms': terms, 
@@ -286,12 +270,12 @@ def get_section_keys(
 
 def get_section_kinds(
     settings: MutableMapping[str, Any],
-    terms: Optional[tuple[str, ...]] = None,
-    scope: Optional[extensions.ScopeOptions] = 'all',
-    excise: Optional[bool] = True,
-    divider: Optional[str] = '') -> dict[str, dict[str, str]]:
+    terms: tuple[str, ...] | None = None,
+    scope: extensions.ScopeOptions | None = 'all',
+    excise: bool | None = True,
+    divider: str | None = '') -> dict[str, dict[str, str]]:
     """Returns parsed information from a Settings instance.
-    
+
     Args:
         settings (MutableMapping[str, Any]): configuration data.
         terms (Optional[tuple[str, ...]]): strings to match against entries in a 
@@ -310,7 +294,7 @@ def get_section_kinds(
         dict[str, dict[str, str]]: keys section names and values have parsed 
             settings keys (possibly modified based on 'excise') and values are 
             the associated terms.
-        
+
     """
     kwargs = {
         'terms': terms, 

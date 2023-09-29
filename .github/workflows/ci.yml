@@ -1,0 +1,121 @@
+# Automatic jobs upon a commit or pull-request
+
+# This Action builds, tests, and lints the package. Then, it builds the
+# documentation and deploys it on GitHub Pages.
+
+name: continuous integration
+
+on: [push, pull_request]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      id: setup-pdm
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Check output
+      shell: bash
+      run: |
+        echo ${{ steps.setup-pdm.outputs.pdm-bin }}
+        echo ${{ steps.setup-pdm.outputs.pdm-version }}
+        echo ${{ steps.setup-pdm.outputs.python-path }}
+        echo ${{ steps.setup-pdm.outputs.python-version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: pdm install -v && pdm info
+
+    - name: Run Tests
+      run: pdm run -v pytest tests
+
+    - name: Run Ruff
+      run: pdm run ruff check --format=github .
+
+  lint_and_format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      shell: bash
+      run: pdm install -v && pdm info
+
+    - name: Run Ruff
+      run: pdm run ruff check --format=github .
+
+  document_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v3
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      shell: bash
+      run: pdm install -v && pdm info
+
+    - name: Build documentation with MkDocs
+      run: pdm run mkdocs build
+
+    - name: Deploy documentation to GitHub Pages
+      run: pdm run mkdocs gh-deploy --force --clean --verbose
+
+  # Only triggered if the commit message matches the semantic version format 
+  # (e.g. "v0.1.2").
+  create_github_release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create GitHub Release
+      uses: CupOfTea696/gh-action-auto-release@v1.0.2
+      with:
+        title: "Release: $version"
+        tag: "v$semver"
+        regex: "/^v#{semver}$/i"
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
