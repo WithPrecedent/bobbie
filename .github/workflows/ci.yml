@@ -22,16 +22,16 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - name: get repository
+      uses: actions/checkout@v4.1.1
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: install python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Setup PDM
-      uses: pdm-project/setup-pdm@v3
+      uses: pdm-project/setup-pdm@v4
       id: setup-pdm
       with:
         python-version: ${{ matrix.python-version }}
@@ -58,16 +58,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - name: get repository
+      uses: actions/checkout@v4.1.1
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: install python
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
 
     - name: Setup PDM
-      uses: pdm-project/setup-pdm@v3
+      uses: pdm-project/setup-pdm@v4
       with:
         python-version: 3.x
 
@@ -82,16 +82,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - name: get repository
+      uses: actions/checkout@v4.1.1
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: install python
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
 
-    - name: Setup PDM
-      uses: pdm-project/setup-pdm@v3
+    - name: install pdm
+      uses: pdm-project/setup-pdm@v4
       with:
         python-version: 3.x
 
@@ -105,7 +105,7 @@ jobs:
     - name: Deploy documentation to GitHub Pages
       run: pdm run mkdocs gh-deploy --force --clean --verbose
 
-  # Only triggered if the commit message matches the semantic version format 
+  # Only triggered if the commit message matches the semantic version format
   # (e.g. "v0.1.2").
   create_github_release:
     runs-on: ubuntu-latest
@@ -118,4 +118,4 @@ jobs:
         tag: "v$semver"
         regex: "/^v#{semver}$/i"
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

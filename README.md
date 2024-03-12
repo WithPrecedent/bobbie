@@ -18,25 +18,27 @@
 <img src="https://media.giphy.com/media/53wQ8r97DCk2gAalDq/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
 </p>
 
-`bobbie` provides a lightweight, easy-to-use, flexible class for loading and
-storing configuration settings for a Python project. Unlike some other packages,
-`bobbie` neither tinkers with environment variables nor limits users to a
-single source type. `boobbie` stores the configuration
-settings in a class which can be used as a drop-in `dict` or with extra
-features for accessing specific settings.
+There is no better option for leading a mission/project than [former Gunnery
+Sergeant and all-aroubd badass Roberta
+Draper](https://expanse.fandom.com/wiki/Bobbie_Draper_(TV)), for whom this
+package is named. `bobbie` provides
+a lightweight, easy-to-use, flexible, and extensible `Settings` class for loading and
+storing configuration settings for a Python project.
 
 ## Why use bobbie?
 
-`bobbie` is:
+There are [numerous options](#similar-projects) for storing project configuration settings in Python.
+So, what makes `bobbie` different?
 
-* **Flexible**: a `dict`, `.py` module, or `.env`, `.ini`, `.json`, `.toml`, or
-  `.yaml` may serve as the source for configuration settings
-* **Lightweight**: no dependencies and a small codebase ensures a very small
-  memory footprint
-* **Intuitive**: a `create` class method constructs `Settings` (from any data
-  source), all data validation occurs behind the scenes, and the created
-  instance may be used as a drop-in replacement for a Python `dict`.
-* **Extensible**: you can easily add new parsing rules by subclassing `Parser`
+* **Flexible**: a `Settings` instance is easily built from a `dict`, `.py`
+  module, or file (`.env`, `.ini`, `.json`, `.toml`, or `.yaml` are supported) file.
+* **Lightweight**: no required dependencies (there are optional dependencies for
+  importing data from certain file types) and an efficient codebase ensure a
+  very small memory footprint.
+* **Intuitive**: a `create` class method constructs `Settings` (from any data source). 
+* **Convenient**: unlike `configparser`, automatic data and type validation is performed when
+  `Settings` is created.
+* **Extensible**: you can easily add new parsing rules by subclassing `Parser`.
 
 <p align="center">
 <img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
@@ -48,10 +50,6 @@ configuration options for Python projects.
 
 ## Getting started
 
-### Requirements
-
-[TODO: List any OS or other restrictions and pre-installation dependencies]
-
 ### Installation
 
 To install `bobbie`, use `pip`:
@@ -60,12 +58,12 @@ To install `bobbie`, use `pip`:
 pip install bobbie
 ```
 
-### Create a Settings Instance
+### Create a Settings instance
 
 `bobbie` supports several ways to create a `Settings` instance. However, you can
 opt to always use the `create` class method for any data source.
 
-#### From Dict
+#### From `dict`
 
 ```python
 import bobbie
@@ -86,7 +84,7 @@ settings = bobbie.Settings.create(configuration)
 settings = bobbie.Settings(configuration)
 ```
 
-#### From File
+#### From file
 
 ```python
 import bobbie
@@ -105,7 +103,7 @@ If the file is a Python module, it must contain a variable named `settings`.
 
 Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/bobbie/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/bobbie/contributing.md) and [Code of Conduct](https://www.github.com/WithPrecedent/bobbie/code_of_conduct.md).
 
-## Similar Projects
+## Similar projects
 
 There are a lot of great packages for storing project settings. The table below
 shows the features of the leading libraries.

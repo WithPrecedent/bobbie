@@ -23,11 +23,11 @@ jobs:
       id-token: write
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+    - name: get repository
+      uses: actions/checkout@v4
 
-    - name: Setup PDM
-      uses: pdm-project/setup-pdm@v3
+    - name: install pdm
+      uses: pdm-project/setup-pdm@v4
 
     - name: Publish to PyPI
       run: pdm publish

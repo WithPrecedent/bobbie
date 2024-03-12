@@ -10,15 +10,25 @@ requires-python = ">=3.9"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Environment :: Console",
     "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development"]
 keywords = []
-dependencies = []
+dependencies = ["wonka"]
+
+[project.optional-dependencies]
+env = ["python-dotenv"]
+toml = ["toml"]
+xml = ["xmltodict"]
+yaml = ["pyyaml"]
 
 [project.urls]
 Documentation = "https://WithPrecedent.github.io/bobbie"
@@ -50,8 +60,7 @@ docs = [
     "mkdocs-literate-nav >= 0.6.0",
     "mkdocs-material >= 9.1.2",
     "mkdocs-minify-plugin >= 0.7.1",
-    "mkdocstrings[python] >= 0.22.0",
-    "toml >= 0.10.2"]
+    "mkdocstrings[python] >= 0.22.0"]
 quality = [
     "pre-commit >= 3.3.3",
     "ruff >= 0.0.286"]
@@ -73,6 +82,7 @@ filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["src"]
 
 [tool.ruff]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 extend-exclude = ["docs", "scripts", "site", "tests", ".*.*"]
 fix = true
 fixable = ["ALL"]
@@ -104,6 +114,8 @@ ignore = [
     "PLR0915",  # Too many statements
     "PLR1711", # Useless 'return' at the end of function
     "Q000",  # Single quotes found but double quotes preferred
+    "RET505",  # Unnecessary `else` after `return` statement
+    "RET506",  # Unnecessary `else` after `raise` statement
     # "S0001",  # Use of assert detected
     "RET505",  # Unnecessary `else` after `return` statement
     "SLF001", # Private member accessed
@@ -171,8 +183,18 @@ suppress-none-returning = true
 [tool.ruff.flake8-quotes]
 docstring-quotes = "double"
 
+[tool.ruff.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions"]
+
+[tool.ruff.flake8-unused-arguments]
+ignore-variadic-names = true
+
 [tool.ruff.isort]
 case-sensitive = true
-known-first-party = ["camina"]
+known-first-party = ["bobbie"]
 required-imports = ["from __future__ import annotations"]
 split-on-trailing-comma = false
+
+[tool.ruff.pydocstyle]
+convention = "google"
+ignore-decorators = ["typing.overload"]

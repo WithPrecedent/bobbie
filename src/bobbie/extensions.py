@@ -2,9 +2,8 @@
 
 Contents:
     Parser: a descriptor for parseing `Settings` data.
-    Parsers: a `dict`-like class to store `Parser` instances. It
-        can be passed as an argument to `Settings` to automatically add `Parser`
-        instances as attributes to `Settings`.
+    Parsers: a `dict`-like class to store `Parser` instances.
+    View: a mixin for `Settings` that can dynamically add parsers to it.
 
 To Do:
 
@@ -12,15 +11,13 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Hashable, MutableMapping
+from collections.abc import Hashable, MutableMapping, Sequence
 from typing import Any, Literal
 
-from . import parses
+from . import parsers, utilities
 
-""" Limited option types for static type checkers """
-
-ScopeOptions = Literal['all', 'prefix', 'suffix']
-ReturnsOptions = Literal[
+_ScopeOptions = Literal['all', 'prefix', 'suffix']
+_ReturnsOptions = Literal[
     'contents',
     'keys',
     'kinds',
@@ -29,71 +26,67 @@ ReturnsOptions = Literal[
     'section_kinds']
 
 
-""" Extension Classes """
-
 @dataclasses.dataclass
 class Parser(object):
-    """A descriptor which supports a different parse of `Settings` data.
+    """A descriptor which extracts information from a `Settings` instance.
 
     Args:
-        terms: strings to match against entries in a
-            `Settings` instance.
-        scope: how much of the str must be scopeed.
-            Defaults to `all`.
-        returns: the type of data that should be 
-            returned after parsing. Defaults to `section`.
-        excise: whether to remove the matching terms from keys
-            in the return item. Defaults to True, meaning the terms will be 
-            excised from keys along with `divider`, if applicable.
-        accumulate: whether to return all matching items (True)
-            or just the first (False). Defaults to True.
+        terms: strings to match against entries in a `Settings` instance.
+        scope: how much of the `str `must be matched. Defaults to `all`.'
+        returns: the kind of data that should be returned after parsing.
+            Defaults to `section`.
+        excise: whether to remove the matching terms from keys in the return
+            item. Defaults to _MISSING, which means the global setting will be
+            used.
+        accumulate: whether to return all matching items (True) or just the
+            first (False). Defaults to _MISSING, which means the global setting
+            will be used.
         divider: when matching a prefix, suffix, or substring,
             `divider` is the str connection that substring with the remainder of
-            the str. If `scope` is `all`, `divider` has no effect. Defaults to 
+            the str. If `scope` is `all`, `divider` has no effect. Defaults to
             ''.
 
     """
 
     terms: tuple[str, ...]
-    scope: ScopeOptions = 'all'
-    returns: ReturnsOptions = 'sections'
+    scope: _ScopeOptions = 'all'
+    returns: _ReturnsOptions = 'sections'
     excise: bool = True
     accumulate: bool = True
     divider: str = ''
 
     """ Dunder Methods """
 
-    def __get__(self, obj: object, objtype: type[Any] | None = None) -> Any:
+    def __get__(self, instance: object, kind: type[Any] | None = None) -> Any:
         """Getter for use as a descriptor.
 
         Args:
-            obj: the object which has a Parser instance as a descriptor.
-            objtype: object connected to this descriptor.
+            instance: the object which has a Parser instance as a descriptor.
+            kind: class of `instance`.
 
         Returns:
             Any: stored value(s).
 
         """
         try:
-            settings = obj.settings
+            settings = instance.settings
         except AttributeError:
-            settings = obj
-        return parses.parse(settings = settings, parse = self)
+            settings = instance
+        return parsers.parse(settings = settings, parse = self)
 
-    def __set__(self, obj: object, value: Any) -> None:
+    def __set__(self, instance: object, value: Any) -> None:
         """Setter for use as a descriptor.
 
         Args:
-            obj: the object which has a Parser instance as a 
-                descriptor.
+            instance: the object which has a Parser instance as a descriptor.
             value: the value to assign when accessed.
 
         """
         try:
-            settings = obj.settings
+            settings = instance.settings
         except AttributeError:
-            settings = obj
-        keys = parses.get_keys(
+            settings = instance
+        keys = parsers.get_keys(
             settings = settings,
             terms = self.terms,
             scope = 'all',
@@ -109,8 +102,7 @@ class Parser(object):
         """Stores the attribute name in `owner` of the Parser descriptor.
 
         Args:
-            owner: the class which has a Parser instance as a 
-                descriptor.
+            owner: the class which has a Parser instance as a descriptor.
             name: the str name of the descriptor.
 
         """
@@ -125,7 +117,7 @@ class Parsers(MutableMapping):
     Args:
         contents: a `dict` for storing configuration options. Defaults to en
             empty `dict`.
-        default_factory: default value to return when the `get` method is used. 
+        default_factory: default value to return when the `get` method is used.
             Defaults to an empty dict.
 
     """
@@ -149,3 +141,23 @@ class Parsers(MutableMapping):
         if not all(isinstance(v, Parser) for v in self.contents.values()):
             raise TypeError('All values in Parsers must be Parser instances')
         return
+
+
+@dataclasses.dataclass
+class View(object):
+    """A mixin for `Settings`, adding `Parser` descriptors."""
+
+    @classmethod
+    def add_parsers(cls, parsers: str | Sequence[str]) -> None:
+        """add_parsers _summary_
+
+        Args:
+            parsers: _description_
+
+        Returns:
+            _description_
+
+        """
+        for name in utilities._iterify(parsers):
+            parser = Parsers[name]
+            setattr(cls, name, parser())

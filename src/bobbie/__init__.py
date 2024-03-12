@@ -10,7 +10,7 @@ __author__: str = 'Corey Rayburn Yung'
 from .core import Settings
 from .extensions import Parser, Parsers
 from .filters import match, match_all, match_prefix, match_suffix
-from .parses import (
+from .parsers import (
     get_contents,
     get_keys,
     get_kinds,
