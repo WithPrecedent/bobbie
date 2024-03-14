@@ -10,10 +10,6 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from collections.abc import MutableMapping
 
 """ Global Variables """
 
@@ -31,7 +27,7 @@ _FILE_EXTENSIONS: dict[str, str] = {
 _GENERAL_SECTION: str | None = 'general'
 _INFER_TYPES: bool = True
 _INJECT_GLOBAL: bool = True
-_INTERNAL_STORAGE: type[MutableMapping] = dict
+_OVERWRITE_ATTRIBUTES: bool = True
 _RAISE_ERROR: bool = True
 _RECURSIVE_SETTINGS: bool = True
 
