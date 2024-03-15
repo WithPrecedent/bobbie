@@ -16,7 +16,6 @@ from typing import Any, Literal
 
 from . import parsers, utilities
 
-_ScopeOptions = Literal['all', 'prefix', 'suffix']
 _ReturnsOptions = Literal[
     'contents',
     'keys',
@@ -24,6 +23,7 @@ _ReturnsOptions = Literal[
     'sections',
     'section_keys',
     'section_kinds']
+_ScopeOptions = Literal['all', 'prefix', 'suffix']
 
 
 @dataclasses.dataclass
@@ -34,17 +34,14 @@ class Parser(object):
         terms: strings to match against entries in a `Settings` instance.
         scope: how much of the `str `must be matched. Defaults to `all`.'
         returns: the kind of data that should be returned after parsing.
-            Defaults to `section`.
+            Defaults to `sections`.
         excise: whether to remove the matching terms from keys in the return
-            item. Defaults to _MISSING, which means the global setting will be
-            used.
+            item. Defaults to True.
         accumulate: whether to return all matching items (True) or just the
-            first (False). Defaults to _MISSING, which means the global setting
-            will be used.
-        divider: when matching a prefix, suffix, or substring,
-            `divider` is the str connection that substring with the remainder of
-            the str. If `scope` is `all`, `divider` has no effect. Defaults to
-            ''.
+            first (False). Defaults to True.
+        divider: when matching a prefix, suffix, or substring, `divider` is the
+            `str` connection that substring with the remainder of the `str.` If
+            `scope` is `all`, `divider` has no effect. Defaults to''.
 
     """
 

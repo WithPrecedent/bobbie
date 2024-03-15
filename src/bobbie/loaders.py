@@ -22,14 +22,14 @@ from . import configuration, utilities
 if TYPE_CHECKING:
      from collections.abc import Hashable
 
-     from . import core
+     from . import base
 
 
 def from_dict(
     source: MutableMapping[Hashable, Any],
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a dict-like object.
 
     Args:
@@ -56,9 +56,9 @@ def from_dict(
 
 def from_path(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a file path.
 
     Args:
@@ -87,9 +87,9 @@ def from_path(
 
 def from_env(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a file path.
 
     Args:
@@ -122,9 +122,9 @@ def from_env(
 
 def from_ini(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a file path.
 
     Args:
@@ -157,9 +157,9 @@ def from_ini(
 
 def from_json(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a `json` file path.
 
     Args:
@@ -192,9 +192,9 @@ def from_json(
 
 def from_module(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a `py` module file path.
 
     Args:
@@ -229,9 +229,9 @@ def from_module(
 
 def from_toml(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a `toml` file path.
 
     Args:
@@ -260,9 +260,9 @@ def from_toml(
 
 def from_xml(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from an `xml` file path.
 
     Args:
@@ -293,9 +293,9 @@ def from_xml(
 
 def from_yaml(
     source: pathlib.Path | str,
-    base: type[core.Settings],
+    base: type[base.Settings],
     parameters: MutableMapping[Hashable, Any] | None = None,
-    **kwargs:  Any) -> core.Settings:
+    **kwargs:  Any) -> base.Settings:
     """Creates a `Settings` instance from a `yaml` file path.
 
     Args:

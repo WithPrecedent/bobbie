@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 import pathlib
-from bobbie.core import Settings, _validate_source
+from bobbie.base import Settings, _validate_source
 from collections.abc import MutableMapping
 
 # Test IDs for parametrization

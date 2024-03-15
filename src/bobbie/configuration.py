@@ -26,7 +26,6 @@ _FILE_EXTENSIONS: dict[str, str] = {
     'yml': 'yml'}
 _GENERAL_SECTION: str | None = 'general'
 _INFER_TYPES: bool = True
-_INJECT_GLOBAL: bool = True
 _OVERWRITE_ATTRIBUTES: bool = True
 _RAISE_ERROR: bool = True
 _RECURSIVE_SETTINGS: bool = True

@@ -24,7 +24,7 @@ import sys
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
 from typing import Any, ClassVar
 
-from . import configuration, extensions, utilities
+from . import configuration, utilities
 
 
 @dataclasses.dataclass
@@ -167,7 +167,6 @@ class Settings(MutableMapping):
 
         """
         parameters = parameters or {}
-        source = _validate_source(source, (str, pathlib.Path))
         path = utilities._pathlibify(source)
         if path.isfile():
             extension = path.suffix[1:]
@@ -395,11 +394,19 @@ class Settings(MutableMapping):
             contents (MutableMapping[Hashable, Any]): a dict to store in
             `section`.
 
+        Raises:
+            TypeError if `key` isn't a `str`.
+
         """
         try:
             self[section].update(contents)
         except KeyError:
-            self[section] = contents
+            try:
+                contents = self.__class__(contents, name = section)
+                self[section] = contents
+            except TypeError as error:
+                message = 'The key must be hashable'
+                raise TypeError(message) from error
         return
 
     def delete(self, item: Hashable) -> None:
@@ -582,15 +589,8 @@ class Settings(MutableMapping):
             value: the dictionary to be placed in that section.
 
         Raises:
-            TypeError if `key` isn't a str or `value` isn't a dict.
+            TypeError if `key` isn't a `str`.
 
         """
-        try:
-            self.contents[key].update(value)
-        except KeyError:
-            try:
-                self.contents[key] = value
-            except TypeError as error:
-                message = 'key must be a str and value must be a dict type'
-                raise TypeError(message) from error
+        self.add(section = key, contents = value)
         return

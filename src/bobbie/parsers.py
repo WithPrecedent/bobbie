@@ -22,14 +22,14 @@ from __future__ import annotations
 from collections.abc import MutableMapping
 from typing import TYPE_CHECKING, Any
 
-from . import configuration, filters
+from . import base, configuration, filters
 
 if TYPE_CHECKING:
-    from . import core, extensions
+    from . import extensions
 
 
 def parse(
-    settings: core.Settings,
+    settings: base.Settings,
     parser: extensions.Parser | None = None,
     terms: tuple[str, ...] | None = None,
     scope: configuration._ScopeOptions | None = 'all',

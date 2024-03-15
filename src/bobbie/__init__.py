@@ -7,7 +7,7 @@ __version__ = '0.1.5'
 __author__: str = 'Corey Rayburn Yung'
 
 
-from .core import Settings
+from .base import Settings
 from .extensions import Parser, Parsers
 from .filters import match, match_all, match_prefix, match_suffix
 from .parsers import (
