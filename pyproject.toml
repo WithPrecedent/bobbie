@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development"]
 keywords = []
-dependencies = ["wonka"]
+dependencies = []
 
 [project.optional-dependencies]
 env = ["python-dotenv"]

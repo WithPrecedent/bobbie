@@ -105,19 +105,18 @@ def _typify(item: str) -> list[Any] | int | float | bool | str:
     """
     if not isinstance(item, str):
         return item
-    else:
+    try:
+        return int(item)
+    except ValueError:
         try:
-            return int(item)
+            return float(item)
         except ValueError:
-            try:
-                return float(item)
-            except ValueError:
-                if item.lower() in ['true', 'yes']:
-                    return True
-                elif item.lower() in ['false', 'no']:
-                    return False
-                elif ', ' in item:
-                    item = item.split(', ')
-                    return [_typify(i) for i in item]
-                else:
-                    return item
+            if item.lower() in {'true', 'yes'}:
+                return True
+            elif item.lower() in {'false', 'no'}:
+                return False
+            elif ', ' in item:
+                item = item.split(', ')
+                return [_typify(i) for i in item]
+            else:
+                return item

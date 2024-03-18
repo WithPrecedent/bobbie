@@ -10,6 +10,10 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 """ Global Variables """
 
@@ -23,9 +27,11 @@ _FILE_EXTENSIONS: dict[str, str] = {
     'py': 'module',
     'xml': 'xml',
     'yaml': 'yaml',
-    'yml': 'yml'}
+    'yml': 'yaml'}
 _GENERAL_SECTION: str | None = 'general'
 _INFER_TYPES: bool = True
+_LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
+_MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
 _RAISE_ERROR: bool = True
 _RECURSIVE_SETTINGS: bool = True
