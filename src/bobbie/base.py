@@ -27,25 +27,6 @@ from . import configuration, loaders, utilities
 if TYPE_CHECKING:
     import types
 
-_FILE_EXTENSIONS: dict[str, str] = {
-    'env': 'env',
-    'ini': 'ini',
-    'json': 'json',
-    'toml': 'toml',
-    'py': 'module',
-    'xml': 'xml',
-    'yaml': 'yaml',
-    'yml': 'yaml'}
-_LOADERS: dict[str, types.FunctionType] = {
-    'env': loaders.env_to_dict,
-    'ini': loaders.ini_to_dict,
-    'json': loaders.json_to_dict,
-    'py': loaders.module_to_dict,
-    'toml': loaders.toml_to_dict,
-    'xml': loaders.xml_to_dict,
-    'yaml': loaders.yaml_to_dict,
-    'yml': loaders.yaml_to_dict}
-
 
 @dataclasses.dataclass
 class Configuration(MutableMapping):
@@ -476,11 +457,12 @@ class Settings(Configuration):
             A `Settings` or `Settings` subclass instance derived from `source`.
 
         """
-        parameters = parameters or {}
         path = utilities._pathlibify(source)
-        if path.isfile():
+        if path.is_file():
             extension = path.suffix[1:]
-            creator = getattr(cls, f'from_{extension}')
+            suffix = configuration._FILE_EXTENSIONS[extension]
+            name = configuration._CREATOR_METHOD(suffix)
+            creator = getattr(cls, name)
             try:
                 return creator(path, parameters, **kwargs)
             except AttributeError as error:

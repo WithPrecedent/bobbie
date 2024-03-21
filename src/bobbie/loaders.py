@@ -43,7 +43,7 @@ def load(
 
     """
     path = utilities._pathlibify(source)
-    if path.isfile():
+    if path.is_file():
         extension = path.suffix[1:]
         tool_name = configuration._LOAD_FUNCTION(extension)
         try:

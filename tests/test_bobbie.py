@@ -33,56 +33,56 @@ example_settings = {
 example_Parsers = {
     'files': bobbie.Parser(
         terms = ('filer', 'files', 'clerk'),
-        match = 'all',
+        scope = 'all',
         returns = 'sections',
         excise = False,
         accumulate = False,
         divider = ''),
     'general': bobbie.Parser(
         terms = ('general',),
-        match = 'all',
+        scope = 'all',
         returns = 'sections',
         excise = False,
         accumulate = False,
         divider = ''),
     'parameters': bobbie.Parser(
         terms = ('parameters',),
-        match = 'suffix',
+        scope = 'suffix',
         returns = 'sections',
         excise = True,
         accumulate = True,
         divider = '_'),
     'formats': bobbie.Parser(
         terms = ('format',),
-        match = 'suffix',
+        scope = 'suffix',
         returns = 'contents',
         excise = True,
         accumulate = True,
         divider = '_'),
     'kinds': bobbie.Parser(
         terms = ('format', 'chunk', 'out', 'memory'),
-        match = 'suffix',
+        scope = 'suffix',
         returns = 'section_kinds',
         excise = True,
         accumulate = True,
         divider = '_'),
     'format_keys': bobbie.Parser(
         terms = ('format',),
-        match = 'suffix',
+        scope = 'suffix',
         returns = 'section_keys',
         excise = True,
         accumulate = True,
         divider = '_'),
     'key_test': bobbie.Parser(
         terms = ('general', 'files'),
-        match = 'all',
+        scope = 'all',
         returns = 'keys',
         excise = False,
         accumulate = True,
         divider = ''),
     'prefix_test': bobbie.Parser(
         terms = ('test', 'final'),
-        match = 'prefix',
+        scope = 'prefix',
         returns = 'section_keys',
         excise = False,
         accumulate = True,
@@ -90,20 +90,20 @@ example_Parsers = {
 
 def test_core():
     ini_settings = bobbie.Settings.create(
-        source = pathlib.Path('tests') / 'project_settings.ini')
+        pathlib.Path('tests') / 'project_settings.ini')
     assert ini_settings['general']['verbose'] is True
     assert isinstance(ini_settings['tasks']['things_to_do'], list)
     assert ini_settings['files']['test_chunk'] == 500
     assert ini_settings['files']['float_format'] == '%.4f'
     py_settings = bobbie.Settings.create(
-        source = pathlib.Path('tests') / 'project_settings.py')
+        pathlib.Path('tests') / 'project_settings.py')
     assert py_settings['general']['verbose'] is True
     assert isinstance(py_settings['tasks']['things_to_do'], list)
     assert py_settings['files']['test_chunk'] == 500
     assert py_settings['files']['float_format'] == '%.4f'
     py_settings = bobbie.Settings.create(
-        source = pathlib.Path('tests') / 'project_settings.py')
-    dict_settings = bobbie.Settings.create(source = example_settings)
+        pathlib.Path('tests') / 'project_settings.py')
+    dict_settings = bobbie.Settings.create(example_settings)
     assert dict_settings['general']['verbose'] is True
     assert isinstance(dict_settings['tasks']['things_to_do'], list)
     assert dict_settings['files']['test_chunk'] == 500
@@ -112,7 +112,7 @@ def test_core():
 
 def test_parsers():
     settings = bobbie.Settings.create(
-        source = example_settings,
+        example_settings,
         Parsers = example_Parsers)
     assert settings.parameters == {
         'tasks': {

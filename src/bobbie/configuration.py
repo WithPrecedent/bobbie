@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 """ Global Variables """
 
 _ACCUMULATE_MATCHES: bool = True
+_CREATOR_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
 _EXCISE_MATCHES: bool = True
 _FILE_EXTENSIONS: dict[str, str] = {
     'env': 'env',
@@ -28,8 +29,14 @@ _FILE_EXTENSIONS: dict[str, str] = {
     'xml': 'xml',
     'yaml': 'yaml',
     'yml': 'yaml'}
-_GENERAL_SECTION: str | None = 'general'
-_INFER_TYPES: bool = True
+_INFER_TYPES: dict[str, bool] = {
+    'env': True,
+    'ini': True,
+    'json': 'json',
+    'toml': 'toml',
+    'module': False,
+    'xml': 'xml',
+    'yaml': 'yaml'}
 _LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
@@ -59,36 +66,3 @@ class _MISSING_VALUE(object):  # noqa: N801
 # _MISSING, instance of MISSING_VALUE, should be used for missing values as an
 # alternative to None. This provides a fuller repr and traceback.
 _MISSING = _MISSING_VALUE()
-
-""" Functions for Changing Global Variables """
-
-def set_global_section(name: str) -> None:
-    """Sets the `Settings` section for global settings to `name`.
-
-    Args:
-        name: name of section where global settings are stored.
-
-    Raises:
-        TypeError: if 'name' is not a `str`.
-
-    """
-    if isinstance(name, str):
-        globals()['_GLOBAL_SECTION'] = name
-    else:
-        raise TypeError('name argument must be a str')
-
-def set_nested_settings(nest: bool) -> None:
-    """Sets the `Settings` section for global settings to `name`.
-
-    Args:
-        nest: whether Settings should automatically create nested instances of
-            itself (True) or use ordinary `dict` types (False).
-
-    Raises:
-        TypeError: if 'nest' is not a `bool`.
-
-    """
-    if isinstance(nest, bool):
-        globals()['_NESTED_SETTINGS'] = bool
-    else:
-        raise TypeError('nest argument must be a boolean')
