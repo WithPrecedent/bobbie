@@ -18,7 +18,7 @@ import pathlib
 import sys
 from typing import TYPE_CHECKING, Any
 
-from . import configuration, utilities
+from . import setup, utilities
 
 if TYPE_CHECKING:
      from collections.abc import Hashable, MutableMapping
@@ -45,7 +45,7 @@ def load(
     path = utilities._pathlibify(source)
     if path.is_file():
         extension = path.suffix[1:]
-        tool_name = configuration._LOAD_FUNCTION(extension)
+        tool_name = setup._LOAD_FUNCTION(extension)
         try:
             tool = globals()[tool_name]
         except KeyError as error:
@@ -161,7 +161,7 @@ def module_to_dict(
         import_path = specer(path.name, path, **kwargs)
         import_module = importlib.util.module_spec(import_path)
         import_path.loader.exec_module(import_module)
-        return getattr(import_module, configuration._MODULE_SETTINGS_ATTRIBUTE)
+        return getattr(import_module, setup._MODULE_SETTINGS_ATTRIBUTE)
     except FileNotFoundError as error:
         message = f'settings file {path} not found'
         raise FileNotFoundError(message) from error

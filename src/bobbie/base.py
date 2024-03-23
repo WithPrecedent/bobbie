@@ -10,18 +10,15 @@ To Do:
 """
 from __future__ import annotations
 
-import configparser
 import contextlib
 import copy
 import dataclasses
 import functools
-import importlib.util
 import pathlib
-import sys
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
 from typing import Any, ClassVar
 
-from . import configuration, loaders, utilities
+from . import loaders, setup, utilities
 
 
 @dataclasses.dataclass
@@ -71,10 +68,9 @@ class Settings(MutableMapping):
 
     """
 
-    contents: MutableMapping[Hashable, Any] = dataclasses.field(
-        default_factory = dict)
+    contents: setup.GenericDict = dataclasses.field(default_factory = dict)
     name: str | None = None
-    defaults: ClassVar[Mapping[Hashable, Any]] = {}
+    defaults: ClassVar[setup.GenericDict] = {}
 
     """ Initialization Methods """
 
@@ -87,7 +83,7 @@ class Settings(MutableMapping):
         self._integrate_defaults()
         # Converts all stored `dict`-like objects as `Settings` or
         # `Settings` subclass instances.
-        if configuration._RECURSIVE_SETTINGS:
+        if setup._RECURSIVE_SETTINGS:
             self.contents = self._recursify(self.contents)
 
     """ Class Methods """
@@ -97,7 +93,7 @@ class Settings(MutableMapping):
     def create(
         cls,
         source: Any, /,
-        parameters: Mapping[Hashable, Any] | None = None,
+        parameters: setup.GenericDict | None = None,
         **kwargs:  Any) -> Settings:
         """Calls appropriate class method to create an instance.
 
@@ -114,7 +110,7 @@ class Settings(MutableMapping):
                 like object.
 
         Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
+            A `Settings` instance derived from `source`.
 
         """
         message = (
@@ -125,8 +121,8 @@ class Settings(MutableMapping):
     @classmethod
     def from_dict(
         cls,
-        source: MutableMapping[Hashable, Any], /,
-        parameters: Mapping[Hashable, Any] | None = None,
+        source: setup.GenericDict, /,
+        parameters: setup.GenericDict | None = None,
         **kwargs:  Any) -> Settings:
         """Creates a `Settings` instance from a `dict`-like object.
 
@@ -140,7 +136,7 @@ class Settings(MutableMapping):
                 compatiability with dispatching from the `create` method.
 
         Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
+            A `Settings` instance derived from `source`.
 
         """
         parameters = parameters or {}
@@ -151,7 +147,7 @@ class Settings(MutableMapping):
     def from_file(
         cls,
         source: str | pathlib.Path, /,
-        parameters: Mapping[Hashable, Any] | None = None,
+        parameters: setup.GenericDict | None = None,
         **kwargs:  Any) -> Settings:
         """Creates a `Settings` instance from a file path.
 
@@ -169,14 +165,14 @@ class Settings(MutableMapping):
                 type.
 
         Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
+            A `Settings` instance derived from `source`.
 
         """
         path = utilities._pathlibify(source)
         if path.is_file():
             extension = path.suffix[1:]
-            suffix = configuration._FILE_EXTENSIONS[extension]
-            name = configuration._CREATOR_METHOD(suffix)
+            suffix = setup._FILE_EXTENSIONS[extension]
+            name = setup._CREATOR_METHOD(suffix)
             creator = getattr(cls, name)
             try:
                 return creator(path, parameters, **kwargs)
@@ -192,7 +188,7 @@ class Settings(MutableMapping):
         cls,
         keys: Sequence[Hashable],
         value: Any, /) -> Settings:
-        """Emulates the `fromkeys` class method from a python `dict`.
+        """Emulates the `fromkeys` class method for a python `dict`.
 
         Args:
             keys: items to be keys in a new Settings.
@@ -209,24 +205,25 @@ class Settings(MutableMapping):
     def add(
         self,
         key: Hashable,
-        value: MutableMapping[Hashable, Any]) -> None:
+        value: setup.GenericDict) -> None:
         """Adds `key` and `value` to `contents`.
 
         If `key` is already a key in `contents`, the contents associated with
         that key are updated. If `key` doesn't exist, a new key/value pair is
-        added to `contents`. All stored `dict`-like objects in `value` are
-        automatically converted to `Settings` or `Settings` subclass
-        objects.
+        added to `contents`. Stored `dict`-like objects in `value` are
+        automatically converted to `Settings` objects based on the global
+        recursive configuration option.
 
         Args:
             key: name of key to store `value`.
             value: values to be stored.
 
         Raises:
-            TypeError if `key` isn't a `str`.
+            TypeError: if `key` isn't a `str`.
 
         """
-        if isinstance(value, MutableMapping):
+        if (isinstance(value, MutableMapping)
+                and setup._RECURSIVE_SETTINGS):
             value = self._recursify(value)
         try:
             self[key].update(value)
@@ -274,7 +271,7 @@ class Settings(MutableMapping):
             instance (object): instance with modifications made.
 
         """
-        overwrite = configuration._OVERWRITE_ATTRIBUTES if None else overwrite
+        overwrite = setup._OVERWRITE_ATTRIBUTES if None else overwrite
         sections = self.keys() if None else sections
         for section in utilities._iterify(sections):
             with contextlib.suppress(KeyError):
@@ -286,19 +283,19 @@ class Settings(MutableMapping):
         return instance
 
     def items(self) -> tuple[tuple[Hashable, Any], ...]:
-        """Emulates python dict `items` method.
+        """Emulates python `dict` `items` method.
 
         Returns:
-            tuple[tuple[Hashable], Any]: a tuple equivalent to dict.items().
+            A `tuple` equivalent to `dict.items()`.
 
         """
-        return tuple(zip(self.keys(), self.values()))
+        return tuple(zip(self.keys(), self.values(), strict = True))
 
     def keys(self) -> tuple[Hashable, ...]:
-        """Returns `contents` keys as a tuple.
+        """Emulates python `dict` `keys` method.
 
         Returns:
-            tuple[Hashable, ...]: a tuple equivalent to dict.keys().
+            A `tuple` equivalent to `dict.keys().`
 
         """
         return tuple(self.contents.keys())
@@ -343,10 +340,10 @@ class Settings(MutableMapping):
         return new_dictionary
 
     def values(self) -> tuple[Any, ...]:
-        """Returns `contents` values as a tuple.
+        """Emulates python `dict` `values` method.
 
         Returns:
-            tuple[Any, ...]: a tuple equivalent to dict.values().
+            A `tuple` equivalent to `dict.values().`
 
         """
         return tuple(self.contents.values())
@@ -356,16 +353,16 @@ class Settings(MutableMapping):
     @classmethod
     def _infer_types(
         cls,
-        contents: MutableMapping[Hashable, Any]) -> (
-            MutableMapping[Hashable, Any]):
+        contents: setup.GenericDict) -> (
+            setup.GenericDict):
         """Converts stored values to appropriate datatypes.
 
         Args:
-            contents (MutableMapping[Hashable, Any]): a nested contents dict to
+            contents (setup.GenericDict): a nested contents dict to
                 reparse.
 
         Returns:
-            MutableMapping[Hashable, Any]: with the nested values converted to
+            setup.GenericDict: with the nested values converted to
                 the appropriate datatypes.
 
         """
@@ -390,7 +387,7 @@ class Settings(MutableMapping):
     def _load_from_file(
         cls,
         source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
+        parameters: setup.GenericDict | None = None,
         **kwargs:  Any) -> Settings:
         """Creates a `Settings` instance from a file path.
 
@@ -412,8 +409,8 @@ class Settings(MutableMapping):
         path = utilities._pathlibify(source)
         if path.is_file():
             extension = path.suffix[1:]
-            file_type = configuration._FILE_EXTENSIONS[extension]
-            loader_name = configuration._LOAD_FUNCTION(extension)
+            file_type = setup._FILE_EXTENSIONS[extension]
+            loader_name = setup._LOAD_FUNCTION(extension)
             try:
                 loader = getattr(loaders, loader_name)
             except KeyError as error:
@@ -421,7 +418,7 @@ class Settings(MutableMapping):
                     f'Loading settings from {extension} files is not supported')
                 raise TypeError(message) from error
             contents = loader(source, **kwargs)
-            if configuration._INFER_TYPES[file_type]:
+            if setup._INFER_TYPES[file_type]:
                 contents = cls._infer_types(contents)
         else:
             message = f'settings file {path} not found'
@@ -431,8 +428,8 @@ class Settings(MutableMapping):
 
     def _recursify(
         self,
-        contents: MutableMapping[Hashable, Any]) -> (
-            MutableMapping[Hashable, Any]):
+        contents: setup.GenericDict) -> (
+            setup.GenericDict):
         """Converts any stored `dict` in `contents` to a `Settings`.
 
         Args:

@@ -10,10 +10,15 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING
+from collections.abc import Hashable, MutableMapping
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+""" Types """
+
+GenericDict: TypeAlias = MutableMapping[Hashable, Any]
 
 """ Global Variables """
 
