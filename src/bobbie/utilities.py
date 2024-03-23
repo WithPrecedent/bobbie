@@ -1,4 +1,4 @@
-"""Shared tools
+"""Shared tools.
 
 Contents:
 

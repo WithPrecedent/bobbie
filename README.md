@@ -91,8 +91,8 @@ import bobbie
 
 # You may use the general `create` method.
 settings = bobbie.Settings.create('settings_file.yaml')
-# Or, the `from_path` method.
-settings = bobbie.Settings.from_path('settings_file.yaml')
+# Or, the `from_file` method.
+settings = bobbie.Settings.from_file('settings_file.yaml')
 # Or, the `from_yaml` method. They all do the same thing.
 settings = bobbie.Settings.from_yaml('settings_file.yaml')
 ```

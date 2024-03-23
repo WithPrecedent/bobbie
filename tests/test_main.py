@@ -77,7 +77,7 @@ def test_validate_source(test_id, source, kind, exception):
 
 # Note: Additional tests should be created for each method in the Settings class
 # to achieve 100% line and branch coverage. This includes testing methods like
-# from_dict, from_path, add, delete, inject, items, keys, subset, values, and
+# from_dict, from_file, add, delete, inject, items, keys, subset, values, and
 # all dunder methods. Each method should be tested with a variety of inputs to
 # cover all branches and lines of code.
 

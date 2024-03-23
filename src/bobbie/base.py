@@ -15,33 +15,53 @@ import contextlib
 import copy
 import dataclasses
 import functools
-import importlib
 import importlib.util
 import pathlib
 import sys
 from collections.abc import Hashable, Mapping, MutableMapping, Sequence
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import Any, ClassVar
 
 from . import configuration, loaders, utilities
 
-if TYPE_CHECKING:
-    import types
-
 
 @dataclasses.dataclass
-class Configuration(MutableMapping):
-    """Base for storing configuration settings.
+class Settings(MutableMapping):
+    """Stores configuration settings and supports loading them from files.
 
-    This is the most basic version of `bobbie`'s settings storage options. It
-    does not support loading configuration options from a file. You should only
-    use this class if you plan to pass complete settings as a `dict` like object
-    in instancing this class.
+    The best way to create a `Settings` instance is to call `Settings.create`
+    and pass as the first argument a:
+        1) `pathlib` or `str` path to a compatible file (including a Python
+            module);
+                                or
+        2) a `dict` or `dict`-like object.
+    Any other arguments that you want passed to `Settings` (such as `name`) or a
+    `Settings` subclass, you should pass to the `parameters` argument. Any
+    additional kwargs that you pass will be relayed to the constructor used by
+    `bobbie`. For example, if you are using Python 3.11, `bobbie` uses the
+    builtin `tomllib` library to parse `toml` files. If you want to change the
+    float parser to `decimal.Decimal` and name your `Settings` instance "Project
+    Settings", you would do this:
+
+    ```py
+    Settings.create(
+        'configuration.toml',
+        parameters = {'name': 'Project Settings"},
+        parse_float: decimal.Decimal})
+    ```
+
+    You may also instance `Settings` directly, like a normal class. However,
+    doing so precludes the abilitiy to relay additional keyword arguments to the
+    constructor used by `bobbie` (`parse_float` in the above example).
+
+    Currently, supported file extensions are:
+
+    * `env`, `ini`, `json`, `py`, `toml`, `xml`, `yaml`, and `yml`.
 
     Args:
         contents: configuration options. Defaults to an empty `dict`.
-        name: the `str` name of `Configuration`. The top-level of a
-            `Configuration` need not have any name, but may include one for use
-            by custom parsers. Defaults to `None`.
+        name: the `str` name of `Settings`. The top-level of a `Settings` need
+            not have any name, but may include one for use by custom parsers.
+            Defaults to `None`.
 
     Attributes:
         defaults: default options that should be used when a user does not
@@ -65,54 +85,121 @@ class Configuration(MutableMapping):
             super().__post_init__()
         # Adds non-duplicative default settings to `contents`.
         self._integrate_defaults()
-        # Converts all stored `dict`-like objects as `Configuration` or
-        # `Configuration` subclass instances.
-        self.contents = self._recursify(self.contents)
+        # Converts all stored `dict`-like objects as `Settings` or
+        # `Settings` subclass instances.
+        if configuration._RECURSIVE_SETTINGS:
+            self.contents = self._recursify(self.contents)
 
     """ Class Methods """
 
+    @functools.singledispatchmethod
     @classmethod
     def create(
         cls,
-        source: MutableMapping[Hashable, Any], /,
+        source: Any, /,
         parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Configuration:
-        """Creates an instance from `source`.
+        **kwargs:  Any) -> Settings:
+        """Calls appropriate class method to create an instance.
 
         Args:
-            source: `dict` with data to store in a `Configuration` instance.
+            source: path to a file or `dict` with data to store in a `Settings`
+                instance.
             parameters: additional parameters and arguments to pass to the
-                created `Configuration` instance. Defaults to None.
-            kwargs: in the base class, any additional arguments are ignored.
-                They are only included here for a consistent interface with
-                subclasses.
+                created `Settings` instance. Defaults to None.
+            kwargs: additional parameters and arguments to pass to the
+                constructor used by `bobbie` (such as encoding arguments).
 
         Raises:
-            TypeError: if `source` is not a `dict`-like object.
+            TypeError: if `source` is not a `str`, `pathlib.Path`, or `dict`-
+                like object.
 
         Returns:
-            A `Configuration` or `Configuration` subclass instance derived from
-                `source`.
+            A `Settings` or `Settings` subclass instance derived from `source`.
 
         """
-        if not isinstance(source, MutableMapping):
-            raise TypeError('The first argument must be a dict-like object')
+        message = (
+            'The first positional argument must be a str, Path, or mapping')
+        raise TypeError(message)
+
+    @create.register(Mapping)
+    @classmethod
+    def from_dict(
+        cls,
+        source: MutableMapping[Hashable, Any], /,
+        parameters: Mapping[Hashable, Any] | None = None,
+        **kwargs:  Any) -> Settings:
+        """Creates a `Settings` instance from a `dict`-like object.
+
+        Args:
+            source: `dict`-like object with settings to store in a `Settings`
+                instance.
+            parameters: additional parameters and arguments to pass to the
+                created `Settings` instance. Defaults to None.
+            kwargs: any additional keyword arguments are ignored by this
+                constructer method. They are only accepted to ensure
+                compatiability with dispatching from the `create` method.
+
+        Returns:
+            A `Settings` or `Settings` subclass instance derived from `source`.
+
+        """
         parameters = parameters or {}
         return cls(source, **parameters)
+
+    @create.register(str | pathlib.Path)
+    @classmethod
+    def from_file(
+        cls,
+        source: str | pathlib.Path, /,
+        parameters: Mapping[Hashable, Any] | None = None,
+        **kwargs:  Any) -> Settings:
+        """Creates a `Settings` instance from a file path.
+
+        Args:
+            source: path to file with data to store in a `Settings` instance.
+            parameters: additional parameters and arguments to pass to the
+                created `Settings` instance. Defaults to None.
+            kwargs: additional parameters and arguments to pass to the
+                constructor used by `bobbie` (such as encoding arguments).
+
+        Raises:
+            FileNotFoundError: if the `source` path does not correspond to a
+                file.
+            TypeError: if no constructor method is found for the passed file
+                type.
+
+        Returns:
+            A `Settings` or `Settings` subclass instance derived from `source`.
+
+        """
+        path = utilities._pathlibify(source)
+        if path.is_file():
+            extension = path.suffix[1:]
+            suffix = configuration._FILE_EXTENSIONS[extension]
+            name = configuration._CREATOR_METHOD(suffix)
+            creator = getattr(cls, name)
+            try:
+                return creator(path, parameters, **kwargs)
+            except AttributeError as error:
+                message = f'there is no constructor for a {extension} file'
+                raise TypeError(message) from error
+        else:
+            message = f'settings file {path} not found'
+            raise FileNotFoundError(message)
 
     @classmethod
     def fromkeys(
         cls,
         keys: Sequence[Hashable],
-        value: Any, /) -> Configuration:
+        value: Any, /) -> Settings:
         """Emulates the `fromkeys` class method from a python `dict`.
 
         Args:
-            keys: items to be keys in a new Configuration.
-            value: the value to use for all values in a new Configuration.
+            keys: items to be keys in a new Settings.
+            value: the value to use for all values in a new Settings.
 
         Returns:
-            Configuration: formed from `keys` and `value`.
+            Settings: formed from `keys` and `value`.
 
         """
         return cls(contents = dict.fromkeys(keys, value))
@@ -128,7 +215,7 @@ class Configuration(MutableMapping):
         If `key` is already a key in `contents`, the contents associated with
         that key are updated. If `key` doesn't exist, a new key/value pair is
         added to `contents`. All stored `dict`-like objects in `value` are
-        automatically converted to `Configuration` or `Configuration` subclass
+        automatically converted to `Settings` or `Settings` subclass
         objects.
 
         Args:
@@ -219,7 +306,7 @@ class Configuration(MutableMapping):
     def subset(
         self,
         include: Hashable | Sequence[Hashable] | None = None,
-        exclude: Hashable | Sequence[Hashable] | None = None) -> Configuration:
+        exclude: Hashable | Sequence[Hashable] | None = None) -> Settings:
         """Returns a new instance with a subset of `contents`.
 
         This method applies `include` before `exclude` if both are passed. If
@@ -228,15 +315,15 @@ class Configuration(MutableMapping):
 
         Args:
             include (Optional[Hashable | Sequence[Hashable]]): key(s) to
-                include in the new Configuration instance.
+                include in the new Settings instance.
             exclude (Optional[Hashable | Sequence[Hashable]]): key(s) to
-                exclude from the new Configuration instance.
+                exclude from the new Settings instance.
 
         Raises:
             ValueError: if `include` and `exclude` are both None.
 
         Returns:
-            Configuration: with only keys from `include` and no keys in `exclude`.
+            Settings: with only keys from `include` and no keys in `exclude`.
 
         """
         if include is None and exclude is None:
@@ -266,24 +353,94 @@ class Configuration(MutableMapping):
 
     """ Private Methods """
 
+    @classmethod
+    def _infer_types(
+        cls,
+        contents: MutableMapping[Hashable, Any]) -> (
+            MutableMapping[Hashable, Any]):
+        """Converts stored values to appropriate datatypes.
+
+        Args:
+            contents (MutableMapping[Hashable, Any]): a nested contents dict to
+                reparse.
+
+        Returns:
+            MutableMapping[Hashable, Any]: with the nested values converted to
+                the appropriate datatypes.
+
+        """
+        new_contents = {}
+        for key, value in contents.items():
+            if isinstance(value, dict):
+                inner_bundle = {
+                    inner_key: utilities._typify(inner_value)
+                    for inner_key, inner_value in value.items()}
+                new_contents[key] = inner_bundle
+            else:
+                new_contents[key] = utilities._typify(value)
+        return new_contents
+
     def _integrate_defaults(self) -> None:
         """Adds `default` options when no similar stored settings exists."""
         new_contents = self.defaults
         new_contents.update(self.contents)
         self.contents = new_contents
 
+    @classmethod
+    def _load_from_file(
+        cls,
+        source: pathlib.Path | str, /,
+        parameters: Mapping[Hashable, Any] | None = None,
+        **kwargs:  Any) -> Settings:
+        """Creates a `Settings` instance from a file path.
+
+        Args:
+            source: path to file with data to store in a `Settings` instance.
+            parameters: additional parameters and arguments to pass to the
+                created `Settings` instance. Defaults to None.
+            kwargs: additional parameters and arguments to pass to the
+                constructor used by `bobbie` (such as encoding arguments).
+
+        Raises:
+            FileNotFoundError: if the `source` path does not correspond to a
+                file.
+
+        Returns:
+            A `Settings` or `Settings` subclass instance derived from `source`.
+
+        """
+        path = utilities._pathlibify(source)
+        if path.is_file():
+            extension = path.suffix[1:]
+            file_type = configuration._FILE_EXTENSIONS[extension]
+            loader_name = configuration._LOAD_FUNCTION(extension)
+            try:
+                loader = getattr(loaders, loader_name)
+            except KeyError as error:
+                message = (
+                    f'Loading settings from {extension} files is not supported')
+                raise TypeError(message) from error
+            contents = loader(source, **kwargs)
+            if configuration._INFER_TYPES[file_type]:
+                contents = cls._infer_types(contents)
+        else:
+            message = f'settings file {path} not found'
+            raise FileNotFoundError(message)
+        parameters = parameters or {}
+        return cls(contents, **parameters)
+
     def _recursify(
         self,
         contents: MutableMapping[Hashable, Any]) -> (
             MutableMapping[Hashable, Any]):
-        """Converts any stored `dict` in `contents` to a `Configuration`.
+        """Converts any stored `dict` in `contents` to a `Settings`.
 
         Args:
             contents: `dict` of settings.
 
         Returns:
             A mapping with all internal `dict` like objects converted to
-                `Configuration` or `Configuration` subclass objects.
+                `Settings` or `Settings` subclass objects.
 
         """
         new_contents = {}
@@ -320,430 +477,5 @@ class Configuration(MutableMapping):
             TypeError if `key` isn't a `str`.
 
         """
-        self.add(section = key, contents = value)
+        self.add(key, value)
         return
-
-
-@dataclasses.dataclass
-class Settings(Configuration):
-    """Stores configuration settings and supports loading them from files.
-
-    The best way to create a `Settings` instance is to call `Settings.create`
-    and pass as the first argument a:
-        1) `pathlib` or `str` path to a compatible file (including a Python
-            module);
-                                or
-        2) a `dict` or `dict`-like object.
-    Any other arguments that you want passed to `Settings` (such as `name`) or a
-    `Settings` subclass, you should pass to the `parameters` argument. Any
-    additional kwargs that you pass will be relayed to the constructor used by
-    `bobbie`. For example, if you are using Python 3.11, `bobbie` uses the
-    builtin `tomllib` library to parse `toml` files. If you want to change the
-    float parser to `decimal.Decimal` and name your `Settings` instance "Project
-    Settings", you would do this:
-
-    ```py
-    Settings.create(
-        'configuration.toml',
-        parameters = {'name': 'Project Settings"},
-        parse_float: decimal.Decimal})
-    ```
-
-    You may also instance `Settings` directly, like a normal class. However,
-    doing so precludes the abilitiy to relay additional keyword arguments to the
-    constructor used by `bobbie` (`parse_float` in the above example).
-
-    Currently, supported file extensions are:
-
-    * `env`, `ini`, `json`, `py`, `toml`, `xml`, `yaml`, and `yml`.
-
-    Args:
-        contents: configuration options. Defaults to an empty `dict`.
-        name: the `str` name of `Settings`. The top-level of a `Settings` need
-            not have any name, but may include one for use by custom parsers.
-            Defaults to `None`.
-
-    Attributes:
-        defaults: default options that should be used when a user does not
-            provide the corresponding options in their configuration settings,
-            but are otherwise necessary for the project. Defaults to an empty
-            `dict`.
-
-    """
-
-    contents: MutableMapping[Hashable, Any] = dataclasses.field(
-        default_factory = dict)
-    name: str | None = None
-    defaults: ClassVar[Mapping[Hashable, Any]] = {}
-
-    """ Class Methods """
-
-    @functools.singledispatchmethod
-    @classmethod
-    def create(
-        cls,
-        source: Any, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Calls appropriate class method to create an instance.
-
-        Args:
-            source: path to a file or `dict` with data to store in a `Settings`
-                instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            TypeError: if `source` is not a `str`, `pathlib.Path`, or `dict`-
-                like object.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        message = (
-            'The first positional argument must be a str, Path, or mapping')
-        raise TypeError(message)
-
-    @create.register(Mapping)
-    @classmethod
-    def from_dict(
-        cls,
-        source: MutableMapping[Hashable, Any], /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a `dict`-like object.
-
-        Args:
-            source: `dict`-like object with settings to store in a `Settings`
-                instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: any additional keyword arguments are ignored by this
-                constructer method. They are only accepted to ensure
-                compatiability with dispatching from the `create` method.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        return cls(source, **parameters)
-
-    @create.register(str | pathlib.Path)
-    @classmethod
-    def from_path(
-        cls,
-        source: str | pathlib.Path, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-            TypeError: if no constructor method is found for the passed file
-                type.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        path = utilities._pathlibify(source)
-        if path.is_file():
-            extension = path.suffix[1:]
-            suffix = configuration._FILE_EXTENSIONS[extension]
-            name = configuration._CREATOR_METHOD(suffix)
-            creator = getattr(cls, name)
-            try:
-                return creator(path, parameters, **kwargs)
-            except AttributeError as error:
-                message = f'there is no constructor for a {extension} file'
-                raise TypeError(message) from error
-        else:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message)
-
-    @classmethod
-    def from_env(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to an `ini` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        import dotenv
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        if ('infer_types' not in parameters
-                and 'ini' in configuration._TYPED_FORMATS
-                and configuration._INFER_TYPES):
-            parameters['infer_types'] = True
-        try:
-            contents = dotenv.dotenv_values(source)
-            return cls(contents = contents, **parameters)
-        except (KeyError, FileNotFoundError) as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-
-    @classmethod
-    def from_ini(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to an `ini` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        if ('infer_types' not in parameters
-                and 'ini' in configuration._TYPED_FORMATS
-                and configuration._INFER_TYPES):
-            parameters['infer_types'] = True
-        try:
-            contents = configparser.ConfigParser(dict_type = dict, **kwargs)
-            contents.optionxform = lambda option: option
-            contents.read(path)
-            return cls(contents = dict(contents._sections), **parameters)
-        except (KeyError, FileNotFoundError) as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-
-    @classmethod
-    def from_json(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to a `json` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        import json
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        if ('infer_types' not in parameters and configuration._INFER_TYPES):
-            parameters['infer_types'] = True
-        try:
-            with open(pathlib.Path(path)) as settings_file:
-                contents = json.load(settings_file, **kwargs)
-            return cls(contents = contents, **parameters)
-        except FileNotFoundError as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-
-    @classmethod
-    def from_module(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to a Python module.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        if 'infer_types' not in parameters:
-            parameters['infer_types'] = False
-        try:
-            path = pathlib.Path(path)
-            specer = importlib.util.spec_from_file_location
-            import_path = specer(path.name, path, **kwargs)
-            import_module = importlib.util.module_from_spec(import_path)
-            import_path.loader.exec_module(import_module)
-            return cls(contents = import_module.settings, **parameters)
-        except FileNotFoundError as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-
-    @classmethod
-    def from_toml(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to a `toml` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        if sys.version_info[:3] >= (3,11):
-            import tomllib
-            loader = tomllib.load
-        else:
-            import toml
-            loader = toml.load
-        contents = loader(path, **kwargs)
-        return cls(contents, **parameters)
-
-    @classmethod
-    def from_xml(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to a `toml` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        import xmltodict
-        with open(path) as settings_file:
-            contents = xmltodict.parse(settings_file.read(), **kwargs)
-        return cls(contents, **parameters)
-
-    @classmethod
-    def from_yaml(
-        cls,
-        source: pathlib.Path | str, /,
-        parameters: Mapping[Hashable, Any] | None = None,
-        **kwargs:  Any) -> Settings:
-        """Creates a `Settings` instance from a file path to a `yaml` file.
-
-        Args:
-            source: path to file with data to store in a `Settings` instance.
-            parameters: additional parameters and arguments to pass to the
-                created `Settings` instance. Defaults to None.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
-
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
-
-        Returns:
-            A `Settings` or `Settings` subclass instance derived from `source`.
-
-        """
-        import yaml
-        parameters = parameters or {}
-        path = utilities._pathlibify(source)
-        kwargs['infer_types'] = False
-        try:
-            with open(path) as config:
-                contents = yaml.safe_load(config, **kwargs)
-                return cls(contents, **parameters)
-        except FileNotFoundError as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-
-    """ Private Methods """
-
-    def _infer_types(
-        self,
-        contents: MutableMapping[Hashable, Any]) -> (
-            MutableMapping[Hashable, Any]):
-        """Converts stored values to appropriate datatypes.
-
-        Args:
-            contents (MutableMapping[Hashable, Any]): a nested contents dict to
-                reparse.
-
-        Returns:
-            MutableMapping[Hashable, Any]: with the nested values converted to
-                the appropriate datatypes.
-
-        """
-        new_contents = {}
-        for key, value in contents.items():
-            if isinstance(value, dict):
-                inner_bundle = {
-                    inner_key: utilities._typify(inner_value)
-                    for inner_key, inner_value in value.items()}
-                new_contents[key] = inner_bundle
-            else:
-                new_contents[key] = utilities._typify(value)
-        return new_contents

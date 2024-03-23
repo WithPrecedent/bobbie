@@ -105,10 +105,10 @@ def ini_to_dict(
         contents = configparser.ConfigParser(dict_type = dict, **kwargs)
         contents.optionxform = lambda option: option
         contents.read(path)
-        return contents
     except (KeyError, FileNotFoundError) as error:
         message = f'settings file {path} not found'
         raise FileNotFoundError(message) from error
+    return contents
 
 def json_to_dict(
     source: pathlib.Path | str, /,

@@ -10,16 +10,14 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 """ Global Variables """
 
-_ACCUMULATE_MATCHES: bool = True
 _CREATOR_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
-_EXCISE_MATCHES: bool = True
 _FILE_EXTENSIONS: dict[str, str] = {
     'env': 'env',
     'ini': 'ini',
@@ -32,15 +30,14 @@ _FILE_EXTENSIONS: dict[str, str] = {
 _INFER_TYPES: dict[str, bool] = {
     'env': True,
     'ini': True,
-    'json': 'json',
-    'toml': 'toml',
+    'json': True,
+    'toml': False,
     'module': False,
-    'xml': 'xml',
-    'yaml': 'yaml'}
+    'xml': True,
+    'yaml': False}
 _LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
-_RAISE_ERROR: bool = True
 _RECURSIVE_SETTINGS: bool = True
 
 

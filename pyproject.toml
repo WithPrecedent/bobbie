@@ -6,7 +6,7 @@ description = "Flexible, easy Python project configuration"
 authors = [{name = "Corey Rayburn Yung", email = "coreyrayburnyung@gmail.com"}]
 license = {text = "Apache Software License 2.0"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",
