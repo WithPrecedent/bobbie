@@ -16,50 +16,20 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 
-def _drop_prefix_from_str(item: str, /, prefix: str, divider: str = '') -> str:
-    """Drops `prefix` from `item` with `divider` in between.
-
-    Args:
-        item (str): item to be modified.
-        prefix (str): prefix to be added to `item`.
-        divider (str): str to add between `item` and `prefix`. Defaults to '',
-            which means no divider will be added.
-
-    Returns:
-        str: modified str.
-
-    """
-    prefix = ''.join([prefix, divider])
-    return item[len(prefix):] if item.startswith(prefix) else item
-
-def _drop_suffix_from_str(item: str, /, suffix: str, divider: str = '') -> str:
-    """Drops `suffix` from `item` with `divider` in between.
-
-    Args:
-        item (str): item to be modified.
-        suffix (str): suffix to be added to 'item'.
-
-    Returns:
-        str: modified str.
-
-    """
-    suffix = ''.join([suffix, divider])
-    return item.removesuffix(suffix) if item.endswith(suffix) else item
-
 def _iterify(item: Any) -> Iterable:
     """Returns `item` as an iterable, but does not iterate str types.
 
     Args:
-        item (Any): item to turn into an iterable
+        item: item to turn into an iterable
 
     Returns:
-        Iterable: of `item`. A str type will be stored as a single item in an
+        Iterable of `item`. A `str` type will be stored as a single item in an
             Iterable wrapper.
 
     """
     if item is None:
         return iter(())
-    elif isinstance(item, (str, bytes)):
+    elif isinstance(item, str | bytes):
         return iter([item])
     else:
         try:
@@ -97,10 +67,10 @@ def _typify(item: str) -> list[Any] | int | float | bool | str:
     form.
 
     Args:
-        item (str): string to be converted to appropriate datatype.
+        item: string to be converted to appropriate datatype.
 
     Returns:
-        list[Any] | int | float | bool | str: converted item.
+        Converted item.
 
     """
     if not isinstance(item, str):

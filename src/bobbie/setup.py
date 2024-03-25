@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING, Any, TypeAlias
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+from . import utilities
+
 """ Types """
 
 GenericDict: TypeAlias = MutableMapping[Hashable, Any]
@@ -44,7 +46,7 @@ _LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
 _RECURSIVE_SETTINGS: bool = True
-
+_TYPER: Callable[[Any], Any] = utilities._typify
 
 """ Missing Argument Sentinel Class and Instance """
 

@@ -1,4 +1,4 @@
-"""Base classes for loading and storing configuration options.
+"""Base class for loading and storing configuration options.
 
 Contents:
     Settings: loads and stores configuration settings with easy-to-use parser
@@ -240,7 +240,7 @@ class Settings(MutableMapping):
         """Deletes `item` in `contents`.
 
         Args:
-            item (Hashable): key in `contents` to delete the key/value pair.
+            item: key in `contents` to delete the key/value pair.
 
         """
         del self.contents[item]
@@ -311,16 +311,15 @@ class Settings(MutableMapping):
         class instance before `exclude` is applied.
 
         Args:
-            include (Optional[Hashable | Sequence[Hashable]]): key(s) to
-                include in the new Settings instance.
-            exclude (Optional[Hashable | Sequence[Hashable]]): key(s) to
-                exclude from the new Settings instance.
+            include: key(s) to include in the new Settings instance.
+            exclude: key(s) to exclude from the new Settings instance.
 
         Raises:
             ValueError: if `include` and `exclude` are both None.
 
         Returns:
-            Settings: with only keys from `include` and no keys in `exclude`.
+            A `Settings` instance with only keys from `include` and no keys from
+                `exclude`.
 
         """
         if include is None and exclude is None:
@@ -351,15 +350,11 @@ class Settings(MutableMapping):
     """ Private Methods """
 
     @classmethod
-    def _infer_types(
-        cls,
-        contents: setup.GenericDict) -> (
-            setup.GenericDict):
+    def _infer_types(cls, contents: setup.GenericDict) -> setup.GenericDict:
         """Converts stored values to appropriate datatypes.
 
         Args:
-            contents (setup.GenericDict): a nested contents dict to
-                reparse.
+            contents: a `dict` to reparse.
 
         Returns:
             setup.GenericDict: with the nested values converted to
@@ -455,10 +450,10 @@ class Settings(MutableMapping):
         """Returns value for `key` in `contents`.
 
         Args:
-            key (Hashable): key in `contents` for which a value is sought.
+            key: key in `contents` for which a value is sought.
 
         Returns:
-            Any: value stored in `contents`.
+            Value stored in `contents`.
 
         """
         return self.contents[key]
