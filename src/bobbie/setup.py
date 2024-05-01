@@ -18,13 +18,9 @@ if TYPE_CHECKING:
 
 from . import utilities
 
-""" Types """
-
-GenericDict: TypeAlias = MutableMapping[Hashable, Any]
 
 """ Global Variables """
 
-_CREATOR_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
 _FILE_EXTENSIONS: dict[str, str] = {
     'env': 'env',
     'ini': 'ini',
@@ -45,7 +41,7 @@ _INFER_TYPES: dict[str, bool] = {
 _LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
-_RECURSIVE_SETTINGS: bool = True
+_RECURSIVE_SETTINGS: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify
 
 """ Missing Argument Sentinel Class and Instance """

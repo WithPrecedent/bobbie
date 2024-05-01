@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
 * Added more tests
 * Completed Parsers
 * Added .env support
+* Changed required Python version to 3.11 or later (to support `singledispatch`
+  and better type annotation options like `Self`)
 
 ## 0.1.5
 

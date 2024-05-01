@@ -45,9 +45,10 @@ def load(
     path = utilities._pathlibify(source)
     if path.is_file():
         extension = path.suffix[1:]
-        tool_name = setup._LOAD_FUNCTION(extension)
+        suffix = setup._FILE_EXTENSIONS[extension]
+        loader = setup._CREATOR_METHOD(suffix)
         try:
-            tool = globals()[tool_name]
+            tool = globals()[loader]
         except KeyError as error:
             message = (
                 f'Loading settings from {extension} files is not supported')

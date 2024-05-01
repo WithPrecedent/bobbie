@@ -33,6 +33,7 @@ example_settings = {
 def test_core():
     ini_settings = bobbie.Settings.create(
         pathlib.Path('tests') / 'project_settings.ini')
+    print(ini_settings.contents['general'])
     assert ini_settings['general']['verbose'] is True
     assert isinstance(ini_settings['tasks']['things_to_do'], list)
     assert ini_settings['files']['test_chunk'] == 500
