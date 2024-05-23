@@ -186,12 +186,8 @@ def toml_to_dict(
 
     """
     path = utilities._pathlibify(source)
-    if sys.version_info[:3] >= (3,11):
-        import tomllib
-        loader = tomllib.load
-    else:
-        import toml
-        loader = toml.load
+    import tomllib
+    loader = tomllib.load
     try:
         return loader(path, **kwargs)
     except FileNotFoundError as error:

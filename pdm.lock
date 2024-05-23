@@ -5,7 +5,7 @@
 groups = ["default", "docs", "quality", "tests"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:381bbfd1ea2a78496182a3ef0a752cef1d3287e5f4086f99bb21a829b4c2fc4f"
+content_hash = "sha256:2852aec0dd152687048b902d8482957f447f02b87ccfb09a21ddff5218c48ddc"
 
 [[package]]
 name = "babel"
@@ -1039,4 +1039,15 @@ files = [
     {file = "watchdog-4.0.0-py3-none-win_amd64.whl", hash = "sha256:f970663fa4f7e80401a7b0cbeec00fa801bf0287d93d48368fc3e6fa32716245"},
     {file = "watchdog-4.0.0-py3-none-win_ia64.whl", hash = "sha256:9a03e16e55465177d416699331b0f3564138f1807ecc5f2de9d55d8f188d08c7"},
     {file = "watchdog-4.0.0.tar.gz", hash = "sha256:e3e7065cbdabe6183ab82199d7a4f6b3ba0a438c5a512a68559846ccb76a78ec"},
+]
+
+[[package]]
+name = "wonka"
+version = "0.1.4"
+requires_python = ">=3.9"
+summary = "Flexible, accessible, extensible Python factories"
+groups = ["default"]
+files = [
+    {file = "wonka-0.1.4-py3-none-any.whl", hash = "sha256:72ea19ccfc8654d582fe657a79cdced9983c9de3b91514fabc70e9ce468e078a"},
+    {file = "wonka-0.1.4.tar.gz", hash = "sha256:33d9efb671125139c971d630847114ec6fb18813f43728fd0906e20ba90091b0"},
 ]
