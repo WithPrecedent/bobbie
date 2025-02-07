@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
@@ -52,7 +52,7 @@ jobs:
       run: pdm run -v pytest tests
 
     - name: Run Ruff
-      run: pdm run ruff check --format=github .
+      run: pdm run ruff check --fix
 
   lint_and_format:
     runs-on: ubuntu-latest
@@ -76,7 +76,7 @@ jobs:
       run: pdm install -v && pdm info
 
     - name: Run Ruff
-      run: pdm run ruff check --format=github .
+      run: pdm run ruff check --fix
 
   document_and_deploy:
     runs-on: ubuntu-latest
