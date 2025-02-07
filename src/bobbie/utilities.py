@@ -73,7 +73,6 @@ def _typify(item: str) -> list[Any] | int | float | bool | str:
         Converted item.
 
     """
-    print('test type item', item)
     if not isinstance(item, str):
         return item
     try:
