@@ -119,7 +119,7 @@ shows the features of the leading libraries.
 | [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | |  | | |  || |
 | [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | | |
 
-As you can see, `bobiie` lacks a method for storing passwords, encryption keys,
+As you can see, `bobbie` lacks a method for storing passwords, encryption keys,
 and other secrets. That is largely because it is focused on internal Python
 projects and the goal of keeping its resource usage as low as possible. So, if
 you need secrets stored in your project settings, there are several good options

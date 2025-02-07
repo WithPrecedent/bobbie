@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.1.7
+
+* Fixed GitHub actions bug with `pdm` and `ruff`
+* Fixed typo in readme
+
 ## 0.1.6
 
 * Added documentation and readme
