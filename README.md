@@ -18,10 +18,7 @@
 <img src="https://media.giphy.com/media/53wQ8r97DCk2gAalDq/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
 </p>
 
-There is no better option for leading a mission/project than [former Gunnery
-Sergeant and all-aroubd badass Roberta
-Draper](https://expanse.fandom.com/wiki/Bobbie_Draper_(TV)), for whom this
-package is named. `bobbie` provides
+`bobbie` provides
 a lightweight, easy-to-use, flexible, and extensible `Settings` class for loading and
 storing configuration settings for a Python project.
 
@@ -30,15 +27,11 @@ storing configuration settings for a Python project.
 There are [numerous options](#similar-projects) for storing project configuration settings in Python.
 So, what makes `bobbie` different?
 
-* **Flexible**: a `Settings` instance is easily built from a `dict`, `.py`
-  module, or file (`.env`, `.ini`, `.json`, `.toml`, or `.yaml` are supported) file.
-* **Lightweight**: no required dependencies (there are optional dependencies for
-  importing data from certain file types) and an efficient codebase ensure a
-  very small memory footprint.
-* **Intuitive**: a `create` class method constructs `Settings` (from any data source). 
+* **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file.
+* **Lightweight**: an efficient codebase ensures a very small memory footprint.
+* **Intuitive**: a `create` class method constructs `Settings` (from any data source).
 * **Convenient**: unlike `configparser`, automatic data and type validation is performed when
   `Settings` is created.
-* **Extensible**: you can easily add new parsing rules by subclassing `Parser`.
 
 <p align="center">
 <img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
@@ -97,7 +90,8 @@ settings = bobbie.Settings.from_file('settings_file.yaml')
 settings = bobbie.Settings.from_yaml('settings_file.yaml')
 ```
 
-If the file is a Python module, it must contain a variable named `settings`.
+If the file is a Python module, it must contain a variable named `settings`
+(unless you change the global setting for the variable name).
 
 ## Contributing
 
@@ -129,7 +123,7 @@ As you can see, `bobiie` lacks a method for storing passwords, encryption keys,
 and other secrets. That is largely because it is focused on internal Python
 projects and the goal of keeping its resource usage as low as possible. So, if
 you need secrets stored in your project settings, there are several good options
-that you should explore.
+listed above that you should explore.
 
 ## Acknowledgments
 

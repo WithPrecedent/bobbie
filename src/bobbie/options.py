@@ -10,14 +10,12 @@ To Do:
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Hashable, MutableMapping
-from typing import TYPE_CHECKING, Any, TypeAlias
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 from . import utilities
-
 
 """ Global Variables """
 
@@ -38,16 +36,16 @@ _INFER_TYPES: dict[str, bool] = {
     'module': False,
     'xml': True,
     'yaml': False}
-_LOAD_FUNCTION: Callable[[str], str] = lambda x: f'{x}_to_dict'
+_LOAD_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
-_RECURSIVE_SETTINGS: bool = False
+_ALWAYS_RETURN_ERROR: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify
 
 """ Missing Argument Sentinel Class and Instance """
 
 @dataclasses.dataclass
-class _MISSING_VALUE(object):  # noqa: N801
+class _MISSING_VALUE:  # noqa: N801
     """Sentinel object for a missing data or parameter.
 
     This follows the same pattern as the `_MISSING_TYPE` class in the builtin

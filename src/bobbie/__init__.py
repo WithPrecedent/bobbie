@@ -11,5 +11,3 @@ from .base import Settings
 
 __all__: list[str] = [
     "Settings"]
-
-

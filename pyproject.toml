@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development"]
 keywords = []
 dependencies = [
@@ -36,6 +37,7 @@ Repository = "https://github.com/WithPrecedent/bobbie"
 Issues = "https://github.com/WithPrecedent/bobbie/issues"
 Changelog = "https://WithPrecedent.github.io/bobbie/changelog"
 
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -47,28 +49,30 @@ plugins = [
 
 [tool.pdm.build]
 package-dir = "src"
+editable-backend = "editables"
 
 [tool.pdm.dev-dependencies]
 docs = [
-    "markdown-callouts >= 0.3",
-    "markdown-exec >= 1.6.0",
-    "mkdocs >= 1.5.2",
-    "mkdocs-coverage >= 1.0.0",
-    "mkdocs-gen-files >= 0.5.0",
-    "mkdocs-git-committers-plugin-2 >= 1.1.2",
-    "mkdocs-literate-nav >= 0.6.0",
-    "mkdocs-material >= 9.1.2",
-    "mkdocs-minify-plugin >= 0.7.1",
-    "mkdocstrings[python] >= 0.22.0"]
+    "markdown-callouts",
+    "markdown-exec",
+    "mkdocs",
+    "mkdocs-coverage",
+    "mkdocs-gen-files",
+    "mkdocs-git-committers-plugin-2",
+    "mkdocs-literate-nav",
+    "mkdocs-material",
+    "mkdocs-minify-plugin",
+    "mkdocstrings[python]",
+    "toml"]
 quality = [
-    "pre-commit >= 3.3.3",
-    "ruff >= 0.0.286"]
+    "pre-commit",
+    "ruff"]
 tests = [
-    "coverage >= 7.2.7",
-    "pytest >= 7.4.0",
-    "pytest-cov >= 4.1.0",
-    "pytest-randomly >= 3.13.0",
-    "pytest-xdist >= 3.3.1"]
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "pytest-randomly",
+    "pytest-xdist"]
 
 [tool.pdm.version]
 source = "file"
@@ -81,14 +85,13 @@ filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["src"]
 
 [tool.ruff]
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 extend-exclude = ["docs", "scripts", "site", "tests", ".*.*"]
 fix = true
+line-length = 80
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 fixable = ["ALL"]
 ignore = [
     "A001",  # Variable is shadowing a Python builtin
-    "ANN101",  # Missing type annotation for self
-    "ANN102",  # Missing type annotation for cls
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
     "ARG003",  # Unused class method argument: `parameters`
     "ARG005",  # Unused lambda argument
@@ -99,7 +102,6 @@ ignore = [
     "D406",  # Section name should end with a newline - bugged for 'Attributes:'
     "D407",  # Missing dashed underline after section ("Args")
     "D415",  # First line must end in a period, question mark, or exclamation point
-    "DTZ005",  # The use of `datetime.now()` without `tz` argument is not allowed
     "E501",  # Line too long
     "E731",  # Do not assign a `lambda` expression, use a `def`
     "ERA001",  # Commented out code
@@ -114,17 +116,13 @@ ignore = [
     "PLR1711", # Useless 'return' at the end of function
     "Q000",  # Single quotes found but double quotes preferred
     "RET505",  # Unnecessary `else` after `return` statement
-    "RET506",  # Unnecessary `else` after `raise` statement
     # "S0001",  # Use of assert detected
-    "RET505",  # Unnecessary `else` after `return` statement
     "SLF001", # Private member accessed
     "TID252",  # Relative imports are banned
-    "TRY003",  # Avoid specifying long messages outside the exception class
-    "UP004"]  # Class inherits from `object`
+    "TRY003",]  # Avoid specifying long messages outside the exception class
     # "W0105",  # String statement has no effect
     # "W0221",  # Arguments differ
     # "W0222",]  # Access to a protected member
-line-length = 80
 select = [
     "A",  # flake8-buttons
     "ANN",  # flake8-annotations
@@ -169,33 +167,32 @@ select = [
     "T",  #
     "T10",  # flake8-debugger
     "T20",  # flake8-print
-    "TCH",  # flake8-type-checking
     "TID",  # flake8-tidy-imports
     "TRY",  # tryceratops
     "UP",  # pyupgrade
     "W",  # pydocstyle warnings
     "YTT",]  # flake8-2020
+task-tags = ["To Do:"]
 
-[tool.ruff.flake8-annotations]
+[tool.ruff.lint.flake8-annotations]
 suppress-none-returning = true
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
+inline-quotes = "double"
+multiline-quotes = "double"
 
-[tool.ruff.flake8-type-checking]
-exempt-modules = [
-    "typing",
-    "typing_extensions"]
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions"]
 
-[tool.ruff.flake8-unused-arguments]
+[tool.ruff.lint.flake8-unused-arguments]
 ignore-variadic-names = true
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 case-sensitive = true
-known-first-party = ["bobbie"]
 required-imports = ["from __future__ import annotations"]
 split-on-trailing-comma = false
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 ignore-decorators = ["typing.overload"]
