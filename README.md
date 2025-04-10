@@ -15,33 +15,37 @@
 ## What is bobbie?
 
 <p align="center">
-<img src="https://media.giphy.com/media/53wQ8r97DCk2gAalDq/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG00NThjdWpoamJ1N2kyajU1YjBkc2VjNzVsYjY3dmcwaHo1cTFjayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26gstFhO0hBFQcfOE/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
 </p>
 
-`bobbie` provides
-a lightweight, easy-to-use, flexible, and extensible `Settings` class for loading and
-storing configuration settings for a Python project.
+Named after [Roberta Draper ("Bobbie")](https://expanse.fandom.com/wiki/Bobbie_Draper_(TV)) from ["The Expanse,"](https://www.amazon.com/The-Expanse-Season-1/dp/B08B48L4CQ) `bobbie` provides
+a lightweight and easy-to-use way to store and access configuration settings for a Python project.
 
 ## Why use bobbie?
 
-There are [numerous options](#similar-projects) for storing project configuration settings in Python.
+
+<p align="center">
+<img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGU5Z2pzZGg3c3p0c3g4c3J1MXdtb3lobnQ4OXR4aGxhajl2a2NqbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/coCeBe4qutRaMQ51cH/giphy.gif" alt="It's better to know what you want and who you are" style="width:300px;"/>
+</p>
+
+There are [numerous options](#similar-projects) for storing configuration settings in Python.
 So, what makes `bobbie` different?
 
-* **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file.
+* **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file (env, ini, json, toml, xml, and yaml formats are supported).
 * **Lightweight**: an efficient codebase ensures a very small memory footprint.
 * **Intuitive**: a `create` class method constructs `Settings` (from any data source).
 * **Convenient**: unlike `configparser`, automatic data and type validation is performed when
   `Settings` is created.
-
-<p align="center">
-<img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
-</p>
 
 The [comparison table](#feature-comparison-of-python-configuration-libraries)
 below shows how `bobbie` compares to the other major options that store
 configuration options for Python projects.
 
 ## Getting started
+
+<p align="center">
+<img src="https://media.giphy.com/media/53wQ8r97DCk2gAalDq/giphy.gif" alt="It's better to know what you want and who you are" style="width:400px;"/>
+</p>
 
 ### Installation
 
@@ -53,10 +57,13 @@ pip install bobbie
 
 ### Create a Settings instance
 
-`bobbie` supports several ways to create a `Settings` instance. However, you can
-opt to always use the `create` class method for any data source.
+`bobbie` supports several ways to create a `Settings` instance. You can either:
+* If the settings are in a file, call a class method specific to the file type (`from_yaml` in the second example below);
+* Call a class method for the general type of source data (`from_dict` or `from_file`);
+* Call the `create` class method and it will automatically figure out the appropriate constructor; or 
+* If the settings data is in a `dict`-like object, pass it as the first argument to `Settings`.
 
-#### From `dict`
+#### From a `dict`
 
 ```python
 import bobbie
@@ -71,13 +78,15 @@ configuration = {
     'file_encoding': 'windows-1252',
     'float_format': '%.4f',
     'export_results': True}}
-# You may use the general `create` method.
+# You can pick a specific constructor method.
+settings = bobbie.Settings.from_dict(configuration) 
+# Or, may use the general `create` method.
 settings = bobbie.Settings.create(configuration)
 # Or, just send a `dict` to `Settings` itself.
 settings = bobbie.Settings(configuration)
 ```
 
-#### From file
+#### From a file
 
 ```python
 import bobbie
@@ -88,12 +97,17 @@ settings = bobbie.Settings.create('settings_file.yaml')
 settings = bobbie.Settings.from_file('settings_file.yaml')
 # Or, the `from_yaml` method. They all do the same thing.
 settings = bobbie.Settings.from_yaml('settings_file.yaml')
+# Or, 
 ```
 
-If the file is a Python module, it must contain a variable named `settings`
+If the file is a Python module, it must contain a variable named `settings` in the module namespace
 (unless you change the global setting for the variable name).
 
 ## Contributing
+
+<p align="center">
+<img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
+</p>
 
 Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/bobbie/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/bobbie/contributing.md) and [Code of Conduct](https://www.github.com/WithPrecedent/bobbie/code_of_conduct.md).
 
@@ -103,10 +117,6 @@ There are a lot of great packages for storing project settings. The table below
 shows the features of the leading libraries.
 
 ### Feature Comparison of Python Configuration Libraries
-
-<p align="center">
-<img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:300px;"/>
-</p>
 
 
 | Library | Typing | Secrets | dict | env | ini | json | py | toml | yaml |
@@ -119,11 +129,15 @@ shows the features of the leading libraries.
 | [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | |  | | |  || |
 | [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | | |
 
+<p align="center">
+<img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:350px;"/>
+</p>
+
 As you can see, `bobbie` lacks a method for storing passwords, encryption keys,
-and other secrets. That is largely because it is focused on internal Python
+and other secrets. That is because it is focused on internal Python
 projects and the goal of keeping its resource usage as low as possible. So, if
 you need secrets stored in your project settings, there are several good options
-listed above that you should explore.
+linked above that you should explore.
 
 ## Acknowledgments
 

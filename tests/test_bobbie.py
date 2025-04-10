@@ -25,33 +25,67 @@ example_settings = {
         'boolean_out': True,
         'export_results': True},
     'tasks': {
-        'things_to_do': ['stop', 'drop', 'roll']},
-    'tasks_parameters': {
-        'start': 'when_ready',
-        'end': 'when_done'}}
+        'things_to_do': ['stop', 'drop', 'roll']}}
 
-def test_core():
-    ini_settings = bobbie.Settings.create(
-        pathlib.Path('tests') / 'project_settings.ini')
-    assert ini_settings['general']['verbose'] == True
-    assert isinstance(ini_settings['tasks']['things_to_do'], list)
-    assert ini_settings['files']['test_chunk'] == 500
-    # assert ini_settings['files']['float_format'] == '%.4f'
-    py_settings = bobbie.Settings.create(
-        pathlib.Path('tests') / 'project_settings.py')
-    assert py_settings['general']['verbose'] is True
-    assert isinstance(py_settings['tasks']['things_to_do'], list)
-    assert py_settings['files']['test_chunk'] == 500
-    # assert py_settings['files']['float_format'] == '%.4f'
-    py_settings = bobbie.Settings.create(
-        pathlib.Path('tests') / 'project_settings.py')
-    dict_settings = bobbie.Settings.create(example_settings)
-    assert dict_settings['general']['verbose'] is True
-    assert isinstance(dict_settings['tasks']['things_to_do'], list)
-    assert dict_settings['files']['test_chunk'] == 500
-    # assert dict_settings['files']['float_format'] == '%.4f'
+def test_settings(settings: bobbie.Settings) -> None:
+    assert settings['general']['verbose'] == True
+    assert isinstance(settings['tasks']['things_to_do'], list)
+    assert settings['files']['test_chunk'] == 500
+    assert settings.contents == example_settings
+    return
+
+def test_dict() -> None:
+    settings = bobbie.Settings.create(example_settings)
+    test_settings(settings)
+    settings = bobbie.Settings.from_dict(example_settings)
+    test_settings(settings)
+    settings = bobbie.Settings(example_settings)
+    test_settings(settings)
+    return
+
+def test_ini() -> None:
+    file_path = pathlib.Path('tests') / 'project_settings.ini'
+    settings = bobbie.Settings.create(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_ini(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_file(file_path)
+    test_settings(settings)
+    return
+
+def test_py() -> None:
+    file_path = pathlib.Path('tests') / 'project_settings.py'
+    settings = bobbie.Settings.create(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_py(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_file(file_path)
+    test_settings(settings)
+    return
+
+def test_toml() -> None:
+    file_path = pathlib.Path('tests') / 'project_settings.toml'
+    settings = bobbie.Settings.create(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_toml(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_file(file_path)
+    test_settings(settings)
+    return
+
+def test_yaml() -> None:
+    file_path = pathlib.Path('tests') / 'project_settings.yaml'
+    settings = bobbie.Settings.create(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_yaml(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_file(file_path)
+    test_settings(settings)
     return
 
 if __name__ == '__main__':
-    test_core()
+    test_ini()
+    test_dict()
+    test_py()
+    test_yaml()
 

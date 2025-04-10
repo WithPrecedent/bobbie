@@ -37,7 +37,6 @@ Repository = "https://github.com/WithPrecedent/bobbie"
 Issues = "https://github.com/WithPrecedent/bobbie/issues"
 Changelog = "https://WithPrecedent.github.io/bobbie/changelog"
 
-
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"

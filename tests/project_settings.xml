@@ -1,0 +1,22 @@
+<general>
+    <verbose>True</verbose>
+    <seed>43</seed>
+    <conserve_memory>True</conserve_memory>
+    <parallelize>False</parallelize>
+    <gpu>False</gpu>
+</general>
+<files>
+    <source_format>csv</source_format>
+    <interim_format>csv</interim_format>
+    <final_format>csv</final_format>
+    <analysis_format>csv</analysis_format>
+    <file_encoding>windows-1252</file_encoding>
+    <test_data>True</test_data>
+    <test_chunk>500</test_chunk>
+    <random_test_chunk>True</random_test_chunk>
+    <boolean_out>True</boolean_out>
+    <export_results>True</export_results>
+</files>
+<tasks>
+    <things_to_do>stop, drop, roll</things_to_do>
+</tasks>
