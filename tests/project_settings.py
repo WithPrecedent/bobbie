@@ -2,7 +2,7 @@ settings = {
     'general': {
         'verbose': True,
         'seed': 43,
-        'conserve_memory': False,
+        'conserve_memory': True,
         'parallelize': False,
         'gpu': False},
     'files': {
@@ -11,7 +11,6 @@ settings = {
         'final_format': 'csv',
         'analysis_format': 'csv',
         'file_encoding': 'windows-1252',
-        'float_format': '%.4f',
         'test_data': True,
         'test_chunk': 500,
         'random_test_chunk': True,

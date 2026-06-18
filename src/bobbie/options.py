@@ -20,21 +20,21 @@ from . import utilities
 """ Global Variables """
 
 _FILE_EXTENSIONS: dict[str, str] = {
-    'env': 'env',
+    # 'env': 'env',
     'ini': 'ini',
     'json': 'json',
     'toml': 'toml',
     'py': 'module',
-    'xml': 'xml',
+    # 'xml': 'xml',
     'yaml': 'yaml',
     'yml': 'yaml'}
 _INFER_TYPES: dict[str, bool] = {
-    'env': True,
+    # 'env': True,
     'ini': True,
     'json': True,
     'toml': False,
     'module': False,
-    'xml': True,
+    # 'xml': True,
     'yaml': False}
 _LOAD_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'

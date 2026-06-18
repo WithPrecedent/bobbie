@@ -15,6 +15,7 @@ import copy
 import dataclasses
 import functools
 import importlib
+import importlib.util
 import pathlib
 import sys
 from collections.abc import (
@@ -57,7 +58,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
     Currently, supported file extensions are:
 
-    * `env`, `ini`, `json`, `py`, `toml`, `xml`, `yaml`, and `yml`.
+    * `ini`, `json`, `py`, `toml`, `yaml`, and `yml`.
 
     The best way to create a `Settings` instance is to call `Settings.create`
     and pass as the first argument a:
@@ -168,7 +169,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
         """
         parameters = parameters or {}
-        return cls(source, **parameters)
+        return cls(source, **parameters) # type: ignore
 
     @create.register(str | pathlib.Path)
     @classmethod
@@ -198,37 +199,37 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         path = utilities._pathlibify(source)
         file_type, loader = cls._get_loader(path)
         try:
-            return cls(loader(path, **kwargs))
+            return loader(path, **kwargs)
         except AttributeError as error:
             message = f'Loading from {file_type} file is not supported'
             raise TypeError(message) from error
 
-    @classmethod
-    def from_env(cls,source: pathlib.Path | str, **kwargs:  Any) -> Settings:
-        """Creates a settings `dict` from a file path to an `ini` file.
+    # @classmethod
+    # def from_env(cls,source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    #     """Creates a settings `dict` from a file path to an `ini` file.
 
-        Args:
-            source: path to file with data to store in a settings `dict`.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
+    #     Args:
+    #         source: path to file with data to store in a settings `dict`.
+    #         kwargs: additional parameters and arguments to pass to the
+    #             constructor used by `bobbie` (such as encoding arguments).
 
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a file.
+    #     Raises:
+    #         FileNotFoundError: if the `source` path does not correspond to a file.
 
-        Returns:
-            A `dict` of settings from `source`.
+    #     Returns:
+    #         A `dict` of settings from `source`.
 
-        """
-        path = utilities._pathlibify(source)
-        import dotenv
-        try:
-            contents = dotenv.dotenv_values(source, **kwargs)
-        except (KeyError, FileNotFoundError) as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['env']:
-            contents = cls._infer_types(contents)
-        return cls(contents)
+    #     """
+    #     path = utilities._pathlibify(source)
+    #     import dotenv
+    #     try:
+    #         contents = dotenv.dotenv_values(source, **kwargs)
+    #     except (KeyError, FileNotFoundError) as error:
+    #         message = f'settings file {path} not found'
+    #         raise FileNotFoundError(message) from error
+    #     if options._INFER_TYPES['env']:
+    #         contents = cls._infer_types(contents)
+    #     return cls(contents)
 
     @classmethod
     def from_ini(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
@@ -251,13 +252,14 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         import configparser
         try:
             contents = configparser.ConfigParser(**kwargs)
-            contents.optionxform = lambda option: option
+            contents.optionxform = lambda option: option # type: ignore
             contents.read(path)
         except (KeyError, FileNotFoundError) as error:
             message = f'settings file {path} not found'
             raise FileNotFoundError(message) from error
         if options._INFER_TYPES['ini']:
-            contents = cls._infer_types(contents)
+            contents = cls._infer_types(contents) # type: ignore
+        del contents['DEFAULT']
         return cls(contents)
 
     @classmethod
@@ -309,8 +311,8 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         try:
             specer = importlib.util.spec_from_file_location
             import_path = specer(path.name, path, **kwargs)
-            import_module = importlib.util.module_from_spec(import_path)
-            import_path.loader.exec_module(import_module)
+            import_module = importlib.util.module_from_spec(import_path) # type: ignore
+            import_path.loader.exec_module(import_module) # type: ignore
             contents = getattr(import_module, options._MODULE_SETTINGS_ATTRIBUTE)
         except FileNotFoundError as error:
             message = f'settings file {path} not found'
@@ -338,44 +340,44 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         path = utilities._pathlibify(source)
         import tomllib
-        loader = tomllib.load
         try:
-            contents = loader(path, **kwargs)
+            with open(path, 'rb') as settings_file:
+                contents = tomllib.load(settings_file)
         except FileNotFoundError as error:
             message = f'settings file {path} not found'
             raise FileNotFoundError(message) from error
         if options._INFER_TYPES['toml']:
-            contents = cls._infer_types(contents)
+            contents = cls._infer_types(contents) # type: ignore
         return cls(contents)
 
-    @classmethod
-    def from_xml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
-        """Creates a settings `dict` from a file path to a `toml` file.
+    # @classmethod
+    # def from_xml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    #     """Creates a settings `dict` from a file path to a `toml` file.
 
-        Args:
-            source: path to file with data to store in a settings `dict`.
-            kwargs: additional parameters and arguments to pass to the
-                constructor used by `bobbie` (such as encoding arguments).
+    #     Args:
+    #         source: path to file with data to store in a settings `dict`.
+    #         kwargs: additional parameters and arguments to pass to the
+    #             constructor used by `bobbie` (such as encoding arguments).
 
-        Raises:
-            FileNotFoundError: if the `source` path does not correspond to a
-                file.
+    #     Raises:
+    #         FileNotFoundError: if the `source` path does not correspond to a
+    #             file.
 
-        Returns:
-            A `dict` of settings from `source`.
+    #     Returns:
+    #         A `dict` of settings from `source`.
 
-        """
-        path = utilities._pathlibify(source)
-        import xmltodict
-        try:
-            with open(path) as settings_file:
-                contents = xmltodict.parse(settings_file.read(), **kwargs)
-        except FileNotFoundError as error:
-            message = f'settings file {path} not found'
-            raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['xml']:
-            contents = cls._infer_types(contents)
-        return cls(contents)
+    #     """
+    #     path = utilities._pathlibify(source)
+    #     import xmltodict
+    #     try:
+    #         with open(path) as settings_file:
+    #             contents = xmltodict.parse(settings_file.read(), **kwargs)
+    #     except FileNotFoundError as error:
+    #         message = f'settings file {path} not found'
+    #         raise FileNotFoundError(message) from error
+    #     if options._INFER_TYPES['xml']:
+    #         contents = cls._infer_types(contents) # type: ignore
+    #     return cls(contents)
 
     @classmethod
     def from_yaml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
@@ -397,7 +399,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         path = utilities._pathlibify(source)
         import yaml
         try:
-            with open(path) as config:
+            with open(path, 'r') as config:
                 contents = yaml.safe_load(config, **kwargs)
         except FileNotFoundError as error:
             message = f'settings file {path} not found'

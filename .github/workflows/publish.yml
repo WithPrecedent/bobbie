@@ -1,13 +1,8 @@
 # Securely publishes the repository on PyPI
 
-# This code is adapted  from the model Action in the PDM documentation:
-# https://pdm.fming.dev/latest/usage/publish/
 
 # To make this action work, you need to configure PyPI properly, using this
 # guide: https://docs.pypi.org/trusted-publishers/adding-a-publisher/
-
-# This Action does not build the project - it simply publishes the contents of
-# the contents of the ".pdm-build" folder.
 
 name: publish
 
@@ -15,19 +10,25 @@ name: publish
 on: [workflow_call, workflow_dispatch]
 
 jobs:
-  pypi-publish:
-    name: Publish to PyPI
+
+  pypi_publish:
+    name: publish to pypi
     runs-on: ubuntu-latest
     permissions:
-    # IMPORTANT: this permission is mandatory for trusted publishing
+      # This permission is needed for private repositories.
+      contents: read
+      # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
 
     steps:
     - name: get repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
-    - name: install pdm
-      uses: pdm-project/setup-pdm@v4
+    - name: install uv
+      uses: astral-sh/setup-uv@v8.1.0
 
-    - name: Publish to PyPI
-      run: pdm publish
+    - name: build package
+      run: uv build
+
+    - name: push to pypi
+      run: uv publish

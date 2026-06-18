@@ -5,7 +5,7 @@
 | Version | [![PyPI Latest Release](https://img.shields.io/pypi/v/bobbie.svg?style=for-the-badge&color=steelblue&label=PyPI&logo=PyPI&logoColor=yellow)](https://pypi.org/project/bobbie/) [![GitHub Latest Release](https://img.shields.io/github/v/tag/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=GitHub&logo=github)](https://github.com/WithPrecedent/bobbie/releases)
 | Status | [![Build Status](https://img.shields.io/github/actions/workflow/status/WithPrecedent/bobbie/ci.yml?branch=main&style=for-the-badge&color=cadetblue&label=Tests&logo=pytest)](https://github.com/WithPrecedent/bobbie/actions/workflows/ci.yml?query=branch%3Amain) [![Development Status](https://img.shields.io/badge/Development-Active-seagreen?style=for-the-badge&logo=git)](https://www.repostatus.org/#active) [![Project Stability](https://img.shields.io/pypi/status/bobbie?style=for-the-badge&logo=pypi&label=Stability&logoColor=yellow)](https://pypi.org/project/bobbie/)
 | Documentation | [![Hosted By](https://img.shields.io/badge/Hosted_by-Github_Pages-blue?style=for-the-badge&color=navy&logo=github)](https://WithPrecedent.github.io/bobbie)
-| Tools | [![Documentation](https://img.shields.io/badge/MkDocs-magenta?style=for-the-badge&color=deepskyblue&logo=markdown&labelColor=gray)](https://squidfunk.github.io/mkdocs-material/) [![Linter](https://img.shields.io/endpoint?style=for-the-badge&url=https://raw.githubusercontent.com/charliermarsh/Ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/Ruff) [![Dependency Manager](https://img.shields.io/badge/PDM-mediumpurple?style=for-the-badge&logo=affinity&labelColor=gray)](https://PDM.fming.dev) [![Pre-commit](https://img.shields.io/badge/pre--commit-darkolivegreen?style=for-the-badge&logo=pre-commit&logoColor=white&labelColor=gray)](https://github.com/TezRomacH/python-package-template/blob/master/.pre-commit-config.yaml) [![CI](https://img.shields.io/badge/GitHub_Actions-navy?style=for-the-badge&logo=githubactions&labelColor=gray&logoColor=white)](https://github.com/features/actions) [![Editor Settings](https://img.shields.io/badge/Editor_Config-paleturquoise?style=for-the-badge&logo=editorconfig&labelColor=gray)](https://editorconfig.org/) [![Repository Template](https://img.shields.io/badge/snickerdoodle-bisque?style=for-the-badge&logo=cookiecutter&labelColor=gray)](https://www.github.com/WithPrecedent/bobbie) [![Dependency Maintainer](https://img.shields.io/badge/dependabot-navy?style=for-the-badge&logo=dependabot&logoColor=white&labelColor=gray)](https://github.com/dependabot)
+| Tools | [![Documentation](https://img.shields.io/badge/MkDocs-magenta?style=for-the-badge&color=deepskyblue&logo=markdown&labelColor=gray)](https://squidfunk.github.io/mkdocs-material/) [![Linter](https://img.shields.io/endpoint?style=for-the-badge&url=https://raw.githubusercontent.com/charliermarsh/Ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/Ruff) [![Dependency Manager](https://img.shields.io/badge/uv-mediumpurple?style=for-the-badge&logo=uv&labelColor=gray)](https://docs.astral.sh/uv/)  [![Pre-commit](https://img.shields.io/badge/pre--commit-darkolivegreen?style=for-the-badge&logo=pre-commit&logoColor=white&labelColor=gray)](https://github.com/TezRomacH/python-package-template/blob/master/.pre-commit-config.yaml) [![CI](https://img.shields.io/badge/GitHub_Actions-navy?style=for-the-badge&logo=githubactions&labelColor=gray&logoColor=white)](https://github.com/features/actions) [![Editor Settings](https://img.shields.io/badge/Editor_Config-paleturquoise?style=for-the-badge&logo=editorconfig&labelColor=gray)](https://editorconfig.org/) [![Repository Template](https://img.shields.io/badge/snickerdoodle-bisque?style=for-the-badge&logo=cookiecutter&labelColor=gray)](https://www.github.com/WithPrecedent/bobbie) [![Dependency Maintainer](https://img.shields.io/badge/dependabot-navy?style=for-the-badge&logo=dependabot&logoColor=white&labelColor=gray)](https://github.com/dependabot)
 | Compatibility | [![Compatible Python Versions](https://img.shields.io/pypi/pyversions/bobbie?style=for-the-badge&color=steelblue&label=Python&logo=python&logoColor=yellow)](https://pypi.python.org/pypi/bobbie/) [![Linux](https://img.shields.io/badge/Linux-lightseagreen?style=for-the-badge&logo=linux&labelColor=gray&logoColor=white)](https://www.linux.org/) [![MacOS](https://img.shields.io/badge/MacOS-snow?style=for-the-badge&logo=apple&labelColor=gray)](https://www.apple.com/macos/) [![Windows](https://img.shields.io/badge/windows-blue?style=for-the-badge&logo=Windows&labelColor=gray&color=orangered)](https://www.microsoft.com/en-us/windows?r=1)
 | Stats | [![PyPI Download Rate (per month)](https://img.shields.io/pypi/dm/bobbie?style=for-the-badge&color=steelblue&label=Downloads%20💾&logo=pypi&logoColor=yellow)](https://pypi.org/project/bobbie) [![GitHub Stars](https://img.shields.io/github/stars/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Stars%20⭐&logo=github)](https://github.com/WithPrecedent/bobbie/stargazers) [![GitHub Contributors](https://img.shields.io/github/contributors/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Contributors%20🙋&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Issues](https://img.shields.io/github/issues/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Issues%20📘&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Forks](https://img.shields.io/github/forks/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Forks%20🍴&logo=github)](https://github.com/WithPrecedent/bobbie/forks)
 | | |
@@ -31,7 +31,7 @@ a lightweight and easy-to-use way to store and access configuration settings for
 There are [numerous options](#similar-projects) for storing configuration settings in Python.
 So, what makes `bobbie` different?
 
-* **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file (env, ini, json, toml, xml, and yaml formats are supported).
+* **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file (ini, json, toml, and yaml formats are supported).
 * **Lightweight**: an efficient codebase ensures a very small memory footprint.
 * **Intuitive**: a `create` class method constructs `Settings` (from any data source).
 * **Convenient**: unlike `configparser`, automatic data and type validation is performed when
@@ -60,7 +60,7 @@ pip install bobbie
 `bobbie` supports several ways to create a `Settings` instance. You can either:
 * If the settings are in a file, call a class method specific to the file type (`from_yaml` in the second example below);
 * Call a class method for the general type of source data (`from_dict` or `from_file`);
-* Call the `create` class method and it will automatically figure out the appropriate constructor; or 
+* Call the `create` class method and it will automatically figure out the appropriate constructor; or
 * If the settings data is in a `dict`-like object, pass it as the first argument to `Settings`.
 
 #### From a `dict`
@@ -79,7 +79,7 @@ configuration = {
     'float_format': '%.4f',
     'export_results': True}}
 # You can pick a specific constructor method.
-settings = bobbie.Settings.from_dict(configuration) 
+settings = bobbie.Settings.from_dict(configuration)
 # Or, may use the general `create` method.
 settings = bobbie.Settings.create(configuration)
 # Or, just send a `dict` to `Settings` itself.
@@ -97,7 +97,7 @@ settings = bobbie.Settings.create('settings_file.yaml')
 settings = bobbie.Settings.from_file('settings_file.yaml')
 # Or, the `from_yaml` method. They all do the same thing.
 settings = bobbie.Settings.from_yaml('settings_file.yaml')
-# Or, 
+# Or,
 ```
 
 If the file is a Python module, it must contain a variable named `settings` in the module namespace
@@ -119,15 +119,15 @@ shows the features of the leading libraries.
 ### Feature Comparison of Python Configuration Libraries
 
 
-| Library | Typing | Secrets | dict | env | ini | json | py | toml | yaml |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| [`configParser`](https://docs.python.org/3/library/configParser.html) | | | | | ✅ | | | | |
-| [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | | ✅ | ✅ | ✅ | | ✅ | ✅ |
-| [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | ✅ | ✅ | ✅ | | ✅ | ✅ |
-| [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | ✅ | ✅ | | | | |
-| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | |  | | |  || |
-| [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | | |
+| Library | Typing | Secrets | dict | ini | json | py | toml | yaml |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| [`configParser`](https://docs.python.org/3/library/configParser.html) | | | | ✅ | | | | |
+| [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | | ✅ | ✅ | | ✅ | ✅ |
+| [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | ✅ | ✅ | | ✅ | ✅ |
+| [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | ✅ | | | | |
+| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | |  | | |  || |
+| [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | |
 
 <p align="center">
 <img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:350px;"/>

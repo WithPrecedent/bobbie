@@ -86,7 +86,7 @@ def _typify(item: str) -> list[Any] | int | float | bool | str:
             elif item.lower() in {'false', 'no'}:
                 return False
             elif ', ' in item:
-                item = item.split(', ')
+                item = item.split(', ') # type: ignore
                 return [_typify(i) for i in item]
             else:
                 return item

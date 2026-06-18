@@ -1,9 +1,9 @@
 [general]
-verbose = "True"
+verbose = true
 seed = 43
-conserve_memory = "True"
-parallelize = "False"
-gpu = "False"
+conserve_memory = true
+parallelize = false
+gpu = false
 
 
 [files]
@@ -12,11 +12,11 @@ interim_format = "csv"
 final_format = "csv"
 analysis_format = "csv"
 file_encoding = "windows-1252"
-test_data = "True"
+test_data = true
 test_chunk = 500
-random_test_chunk = "True"
-boolean_out = "True"
-export_results = "True"
+random_test_chunk = true
+boolean_out = true
+export_results = true
 
 [tasks]
-things_to_do = "stop, drop, roll"
+things_to_do = ["stop", "drop", "roll"]

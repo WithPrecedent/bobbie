@@ -9,7 +9,7 @@ example_settings = {
     'general': {
         'verbose': True,
         'seed': 43,
-        'conserve_memory': False,
+        'conserve_memory': True,
         'parallelize': False,
         'gpu': False},
     'files': {
@@ -18,7 +18,6 @@ example_settings = {
         'final_format': 'csv',
         'analysis_format': 'csv',
         'file_encoding': 'windows-1252',
-        'float_format': '%.4f',
         'test_data': True,
         'test_chunk': 500,
         'random_test_chunk': True,
@@ -31,7 +30,7 @@ def test_settings(settings: bobbie.Settings) -> None:
     assert settings['general']['verbose'] == True
     assert isinstance(settings['tasks']['things_to_do'], list)
     assert settings['files']['test_chunk'] == 500
-    assert settings.contents == example_settings
+    assert dict(settings.contents) == dict(example_settings)
     return
 
 def test_dict() -> None:
@@ -53,11 +52,21 @@ def test_ini() -> None:
     test_settings(settings)
     return
 
+def test_json() -> None:
+    file_path = pathlib.Path('tests') / 'project_settings.json'
+    settings = bobbie.Settings.create(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_json(file_path)
+    test_settings(settings)
+    settings = bobbie.Settings.from_file(file_path)
+    test_settings(settings)
+    return
+
 def test_py() -> None:
     file_path = pathlib.Path('tests') / 'project_settings.py'
     settings = bobbie.Settings.create(file_path)
     test_settings(settings)
-    settings = bobbie.Settings.from_py(file_path)
+    settings = bobbie.Settings.from_module(file_path)
     test_settings(settings)
     settings = bobbie.Settings.from_file(file_path)
     test_settings(settings)
@@ -86,6 +95,8 @@ def test_yaml() -> None:
 if __name__ == '__main__':
     test_ini()
     test_dict()
+    test_json()
     test_py()
+    test_toml()
     test_yaml()
 

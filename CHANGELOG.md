@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.1.8
+
+* Switched to `uv` as dependency manager
+* Updated GitHub Actions and dependencies
+* Added full support for yaml and toml
+* Removed support for env (not nested) and xml (rarely used)
+
 ## 0.1.7
 
 * Fixed GitHub actions bug with `pdm` and `ruff`

@@ -1,10 +1,14 @@
-# Automatic jobs upon a commit or pull-request
+# Automatically performs jobs upon a commit push or pull-request
 
 # This Action builds, tests, and lints the package. Then, it builds the
 # documentation and deploys it on GitHub Pages.
 
+# If the commit message matches a semantic version (e.g. "v0.1.2"), a GitHub
+# release will be created by the `create_github_release` job.
+
 name: continuous integration
 
+# Allows this Action to be called by a push or pull request
 on: [push, pull_request]
 
 permissions:
@@ -18,100 +22,93 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
-    - name: get repository
-      uses: actions/checkout@v4.1.1
+    - name: checkout repository
+      uses: actions/checkout@v6
 
     - name: install python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Setup PDM
-      uses: pdm-project/setup-pdm@v4
-      id: setup-pdm
+    - name: install uv
+      uses: astral-sh/setup-uv@v8.1.0
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Check output
-      shell: bash
-      run: |
-        echo ${{ steps.setup-pdm.outputs.pdm-bin }}
-        echo ${{ steps.setup-pdm.outputs.pdm-version }}
-        echo ${{ steps.setup-pdm.outputs.python-path }}
-        echo ${{ steps.setup-pdm.outputs.python-version }}
+    - name: create uv environment
+      run: uv venv
 
-    - name: Install dependencies
-      shell: bash
-      run: pdm install -v && pdm info
+    - name: install dependencies
+      run: uv pip install -r pyproject.toml --group dev
 
-    - name: Run Tests
-      run: pdm run -v pytest tests
+    - name: run pre-commit
+      run: uv run pre-commit run -a --show-diff-on-failure
 
-    - name: Run Ruff
-      run: pdm run ruff check --fix
+    - name: run tests
+      run: uv run -v pytest tests
+
+    - name: run ruff
+      run: uv run ruff check --output-format=github
 
   lint_and_format:
     runs-on: ubuntu-latest
 
     steps:
-    - name: get repository
-      uses: actions/checkout@v4.1.1
+    - name: checkout repository
+      uses: actions/checkout@v6
 
     - name: install python
       uses: actions/setup-python@v5
-      with:
-        python-version: 3.x
 
-    - name: Setup PDM
-      uses: pdm-project/setup-pdm@v4
-      with:
-        python-version: 3.x
+    - name: install uv
+      uses: astral-sh/setup-uv@v8.1.0
 
-    - name: Install dependencies
-      shell: bash
-      run: pdm install -v && pdm info
+    - name: create uv environment
+      run: uv venv
 
-    - name: Run Ruff
-      run: pdm run ruff check --fix
+    - name: install dependencies
+      run: uv pip install -r pyproject.toml --group dev
+
+    - name: run ruff
+      run: uv run ruff check  --output-format=github
 
   document_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: get repository
-      uses: actions/checkout@v4.1.1
+    - name: checkout repository
+      uses: actions/checkout@v6
 
     - name: install python
       uses: actions/setup-python@v5
-      with:
-        python-version: 3.x
 
-    - name: install pdm
-      uses: pdm-project/setup-pdm@v4
-      with:
-        python-version: 3.x
+    - name: install uv
+      uses: astral-sh/setup-uv@v8.1.0
 
-    - name: Install dependencies
-      shell: bash
-      run: pdm install -v && pdm info
+    - name: create uv environment
+      run: uv venv
 
-    - name: Build documentation with MkDocs
-      run: pdm run mkdocs build
+    - name: install dependencies
+      run: uv pip install -r pyproject.toml --group dev
 
-    - name: Deploy documentation to GitHub Pages
-      run: pdm run mkdocs gh-deploy --force --clean --verbose
+    - name: build documentation with mkdocs
+      run: uv run mkdocs build
+
+    - name: deploy documentation to github pages
+      run: uv run mkdocs gh-deploy --force --clean --verbose
 
   # Only triggered if the commit message matches the semantic version format
   # (e.g. "v0.1.2").
   create_github_release:
+    name: create github release
     runs-on: ubuntu-latest
 
     steps:
-    - name: Create GitHub Release
+    - name: initiate github release
       uses: CupOfTea696/gh-action-auto-release@v1.0.2
       with:
         title: "Release: $version"

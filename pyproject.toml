@@ -7,7 +7,7 @@ authors = [{name = "Corey Rayburn Yung", email = "coreyrayburnyung@gmail.com"}]
 license = {text = "Apache Software License 2.0"}
 readme = "README.md"
 requires-python = ">=3.11"
-dynamic = ["version"]
+version = "0.1.8"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development"]
 keywords = []
 dependencies = [
@@ -37,21 +38,9 @@ Repository = "https://github.com/WithPrecedent/bobbie"
 Issues = "https://github.com/WithPrecedent/bobbie/issues"
 Changelog = "https://WithPrecedent.github.io/bobbie/changelog"
 
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm]
-plugins = [
-    "sync-pre-commit-lock[pdm]",
-    "pdm-multirun"]
-
-[tool.pdm.build]
-package-dir = "src"
-editable-backend = "editables"
-
-[tool.pdm.dev-dependencies]
-docs = [
+[dependency-groups]
+dev = [
+    "uv",
     "markdown-callouts",
     "markdown-exec",
     "mkdocs",
@@ -62,22 +51,38 @@ docs = [
     "mkdocs-material",
     "mkdocs-minify-plugin",
     "mkdocstrings[python]",
-    "toml"]
-quality = [
+    "toml",
+    "mypy",
     "pre-commit",
-    "ruff"]
+    "ruff",
+    {include-group = "tests"}]
 tests = [
     "coverage",
     "pytest",
+    "pytest-cookies",
     "pytest-cov",
     "pytest-randomly",
     "pytest-xdist"]
 
-[tool.pdm.version]
-source = "file"
-path = "src/bobbie/__init__.py"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bobbie"]
+
+[tool.mypy]
+files = ['src']
+disallow_untyped_defs = true
+disallow_any_unimported = true
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 addopts = "--showlocals"
 asyncio_mode = "auto"
 filterwarnings = ["ignore::DeprecationWarning"]
@@ -87,13 +92,14 @@ pythonpath = ["src"]
 extend-exclude = ["docs", "scripts", "site", "tests", ".*.*"]
 fix = true
 line-length = 80
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-fixable = ["ALL"]
-ignore = [
+lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+lint.fixable = ["ALL"]
+lint.ignore = [
     "A001",  # Variable is shadowing a Python builtin
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
     "ARG003",  # Unused class method argument: `parameters`
     "ARG005",  # Unused lambda argument
+    "COM812",  # Recommended disable by Ruff
     "C901",  # Too complex
     "D105",  # Missing docstring in magic method
     "D400",  # First line must end in a period
@@ -119,10 +125,7 @@ ignore = [
     "SLF001", # Private member accessed
     "TID252",  # Relative imports are banned
     "TRY003",]  # Avoid specifying long messages outside the exception class
-    # "W0105",  # String statement has no effect
-    # "W0221",  # Arguments differ
-    # "W0222",]  # Access to a protected member
-select = [
+lint.select = [
     "A",  # flake8-buttons
     "ANN",  # flake8-annotations
     "ARG",  # flake8-unused-arguments
@@ -171,7 +174,7 @@ select = [
     "UP",  # pyupgrade
     "W",  # pydocstyle warnings
     "YTT",]  # flake8-2020
-task-tags = ["To Do:"]
+lint.task-tags = ["To Do:"]
 
 [tool.ruff.lint.flake8-annotations]
 suppress-none-returning = true
@@ -195,3 +198,6 @@ split-on-trailing-comma = false
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 ignore-decorators = ["typing.overload"]
+
+[tool.uv]
+package = true
