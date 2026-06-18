@@ -95,8 +95,6 @@ lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 lint.fixable = ["ALL"]
 lint.ignore = [
     "A001",  # Variable is shadowing a Python builtin
-    "ANN101",  # Missing type annotation for `self` in method
-    "ANN102",  # Missing type annotation for `cls` in classmethod
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
     "ARG003",  # Unused class method argument: `parameters`
     "ARG005",  # Unused lambda argument

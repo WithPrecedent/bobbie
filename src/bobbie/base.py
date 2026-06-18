@@ -18,7 +18,6 @@ import functools
 import importlib
 import importlib.util
 import pathlib
-import sys
 from collections.abc import (
     Collection,
     Hashable,
