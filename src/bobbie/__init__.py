@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-__version__ = '0.1.8'
+__version__ = "0.1.8"
 
-__author__: str = 'Corey Rayburn Yung'
+__author__: str = "Corey Rayburn Yung"
 
 
 from .base import Settings
 
-__all__: list[str] = [
-    "Settings"]
+__all__: list[str] = ["Settings"]

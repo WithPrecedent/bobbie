@@ -7,6 +7,7 @@ To Do:
 
 
 """
+
 from __future__ import annotations
 
 import dataclasses
@@ -21,28 +22,31 @@ from . import utilities
 
 _FILE_EXTENSIONS: dict[str, str] = {
     # 'env': 'env',
-    'ini': 'ini',
-    'json': 'json',
-    'toml': 'toml',
-    'py': 'module',
+    "ini": "ini",
+    "json": "json",
+    "toml": "toml",
+    "py": "module",
     # 'xml': 'xml',
-    'yaml': 'yaml',
-    'yml': 'yaml'}
+    "yaml": "yaml",
+    "yml": "yaml",
+}
 _INFER_TYPES: dict[str, bool] = {
     # 'env': True,
-    'ini': True,
-    'json': True,
-    'toml': False,
-    'module': False,
+    "ini": True,
+    "json": True,
+    "toml": False,
+    "module": False,
     # 'xml': True,
-    'yaml': False}
-_LOAD_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
-_MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
+    "yaml": False,
+}
+_LOAD_METHOD: Callable[[str], str] = lambda x: f"from_{x}"
+_MODULE_SETTINGS_ATTRIBUTE: str = "settings"
 _OVERWRITE_ATTRIBUTES: bool = True
 _ALWAYS_RETURN_ERROR: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify
 
 """ Missing Argument Sentinel Class and Instance """
+
 
 @dataclasses.dataclass
 class _MISSING_VALUE:  # noqa: N801

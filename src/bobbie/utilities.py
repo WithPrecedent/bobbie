@@ -7,6 +7,7 @@ To Do:
 
 
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -37,6 +38,7 @@ def _iterify(item: Any) -> Iterable:
         except TypeError:
             return iter((item,))
 
+
 def _pathlibify(item: str | pathlib.Path) -> pathlib.Path:
     """Converts string `path` to pathlib.Path object.
 
@@ -55,7 +57,7 @@ def _pathlibify(item: str | pathlib.Path) -> pathlib.Path:
     elif isinstance(item, pathlib.Path):
         return item
     else:
-        raise TypeError('item must be str or pathlib.Path type')
+        raise TypeError("item must be str or pathlib.Path type")
 
 
 def _typify(item: str) -> list[Any] | int | float | bool | str:
@@ -81,12 +83,12 @@ def _typify(item: str) -> list[Any] | int | float | bool | str:
         try:
             return float(item)
         except ValueError:
-            if item.lower() in {'true', 'yes'}:
+            if item.lower() in {"true", "yes"}:
                 return True
-            elif item.lower() in {'false', 'no'}:
+            elif item.lower() in {"false", "no"}:
                 return False
-            elif ', ' in item:
-                item = item.split(', ') # type: ignore
+            elif ", " in item:
+                item = item.split(", ")  # type: ignore
                 return [_typify(i) for i in item]
             else:
                 return item

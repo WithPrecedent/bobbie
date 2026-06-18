@@ -8,6 +8,7 @@ To Do:
     Add Tests for all types and `dict` methods
 
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -108,22 +109,25 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
     """
 
-    contents: GenericDict = dataclasses.field(default_factory = dict)
+    contents: GenericDict = dataclasses.field(default_factory=dict)
     name: str | None = None
     sources: ClassVar[MutableMapping[type[Any], str]] = {
-        pathlib.Path: 'file',
-        str: 'file',
-        MutableMapping: 'dict'}
+        pathlib.Path: "file",
+        str: "file",
+        MutableMapping: "dict",
+    }
 
     """ Class Methods """
 
     @functools.singledispatchmethod
     @classmethod
-    def create(
+    def create(  # type: ignore
         cls,
-        source: Any, /,
+        source: Any,
+        /,
         parameters: GenericDict | None = None,
-        **kwargs:  Any) -> Settings:
+        **kwargs: Any,
+    ) -> Settings:
         """Calls appropriate class method to create an instance.
 
         Args:
@@ -143,16 +147,19 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
         """
         message = (
-            'The first positional argument must be a str, Path, or mapping')
+            "The first positional argument must be a str, Path, or mapping"
+        )
         raise TypeError(message)
 
     @create.register(MutableMapping)
     @classmethod
     def from_dict(
         cls,
-        source: GenericDict, /,
+        source: GenericDict,
+        /,
         parameters: GenericDict | None = None,
-        **kwargs:  Any) -> Settings:
+        **kwargs: Any,
+    ) -> Settings:
         """Creates a `Settings` instance from a `dict`-like object.
 
         Args:
@@ -169,14 +176,13 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
         """
         parameters = parameters or {}
-        return cls(source, **parameters) # type: ignore
+        return cls(source, **parameters)  # type: ignore
 
     @create.register(str | pathlib.Path)
     @classmethod
     def from_file(
-        cls,
-        source: str | pathlib.Path, /,
-        **kwargs:  Any) -> Settings:
+        cls, source: str | pathlib.Path, /, **kwargs: Any
+    ) -> Settings:
         """Creates a `Settings` instance from a file path.
 
         Args:
@@ -201,7 +207,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         try:
             return loader(path, **kwargs)
         except AttributeError as error:
-            message = f'Loading from {file_type} file is not supported'
+            message = f"Loading from {file_type} file is not supported"
             raise TypeError(message) from error
 
     # @classmethod
@@ -232,7 +238,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
     #     return cls(contents)
 
     @classmethod
-    def from_ini(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    def from_ini(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a settings `dict` from a file path to an `ini` file.
 
         Args:
@@ -250,20 +256,21 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         path = utilities._pathlibify(source)
         import configparser
+
         try:
             contents = configparser.ConfigParser(**kwargs)
-            contents.optionxform = lambda option: option # type: ignore
+            contents.optionxform = lambda option: option  # type: ignore
             contents.read(path)
         except (KeyError, FileNotFoundError) as error:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['ini']:
-            contents = cls._infer_types(contents) # type: ignore
-        del contents['DEFAULT']
-        return cls(contents)
+        if options._INFER_TYPES["ini"]:
+            contents = cls._infer_types(contents)  # type: ignore
+        del contents["DEFAULT"]
+        return cls(contents)  # type: ignore
 
     @classmethod
-    def from_json(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    def from_json(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a settings `dict` from a file path to a `json` file.
 
         Args:
@@ -280,18 +287,19 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         path = utilities._pathlibify(source)
         import json
+
         try:
             with open(pathlib.Path(path)) as settings_file:
                 contents = json.load(settings_file, **kwargs)
         except FileNotFoundError as error:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['json']:
+        if options._INFER_TYPES["json"]:
             contents = cls._infer_types(contents)
         return cls(contents)
 
     @classmethod
-    def from_module(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    def from_module(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a settings `dict` from a file path to a Python module.
 
         Args:
@@ -311,18 +319,20 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         try:
             specer = importlib.util.spec_from_file_location
             import_path = specer(path.name, path, **kwargs)
-            import_module = importlib.util.module_from_spec(import_path) # type: ignore
-            import_path.loader.exec_module(import_module) # type: ignore
-            contents = getattr(import_module, options._MODULE_SETTINGS_ATTRIBUTE)
+            import_module = importlib.util.module_from_spec(import_path)  # type: ignore
+            import_path.loader.exec_module(import_module)  # type: ignore
+            contents = getattr(
+                import_module, options._MODULE_SETTINGS_ATTRIBUTE
+            )
         except FileNotFoundError as error:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['module']:
+        if options._INFER_TYPES["module"]:
             contents = cls._infer_types(contents)
         return cls(contents)
 
     @classmethod
-    def from_toml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    def from_toml(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a settings `dict` from a file path to a `toml` file.
 
         Args:
@@ -340,15 +350,16 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         path = utilities._pathlibify(source)
         import tomllib
+
         try:
-            with open(path, 'rb') as settings_file:
+            with open(path, "rb") as settings_file:
                 contents = tomllib.load(settings_file)
         except FileNotFoundError as error:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['toml']:
-            contents = cls._infer_types(contents) # type: ignore
-        return cls(contents)
+        if options._INFER_TYPES["toml"]:
+            contents = cls._infer_types(contents)  # type: ignore
+        return cls(contents)  # type: ignore
 
     # @classmethod
     # def from_xml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
@@ -380,7 +391,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
     #     return cls(contents)
 
     @classmethod
-    def from_yaml(cls, source: pathlib.Path | str, **kwargs:  Any) -> Settings:
+    def from_yaml(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a settings `dict` from a file path to a `yaml` file.
 
         Args:
@@ -398,22 +409,21 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         path = utilities._pathlibify(source)
         import yaml
+
         try:
             with open(path) as config:
                 contents = yaml.safe_load(config, **kwargs)
         except FileNotFoundError as error:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message) from error
-        if options._INFER_TYPES['yaml']:
+        if options._INFER_TYPES["yaml"]:
             contents = cls._infer_types(contents)
         return cls(contents)
 
     @classmethod
-    def fromkeys(
-        cls,
-        keys: GenericList,
-        value: Any,
-        **kwargs: Any) -> GenericDict:
+    def fromkeys(  # type: ignore
+        cls, keys: GenericList, value: Any, **kwargs: Any
+    ) -> GenericDict:
         """Emulates the `fromkeys` class method from a python `dict`.
 
         Args:
@@ -429,7 +439,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
     """ Instance Methods """
 
-    def add(self, key: Hashable, value: GenericDict) -> None:
+    def add(self, key: Hashable, value: GenericDict) -> None:  # type: ignore
         """Adds `key` and `value` to `contents`.
 
         If `key` is already a key in `contents`, the contents associated with
@@ -452,14 +462,13 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             try:
                 self[key] = value
             except TypeError as error:
-                message = 'The key must be hashable'
+                message = "The key must be hashable"
                 raise TypeError(message) from error
         return
 
-    def delete(
-        self,
-        key: Hashable,
-        return_error: bool = options._ALWAYS_RETURN_ERROR) -> None:
+    def delete(  # type: ignore
+        self, key: Hashable, return_error: bool = options._ALWAYS_RETURN_ERROR
+    ) -> None:
         """Deletes `item` in `contents`.
 
         Args:
@@ -472,10 +481,10 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             del self.contents[key]
         except KeyError as error:
             if return_error:
-                message = f'{key} is not found in the settings'
+                message = f"{key} is not found in the settings"
                 raise KeyError(message) from error
         except TypeError as error:
-            message = 'The key must be hashable'
+            message = "The key must be hashable"
             raise TypeError(message) from error
         return
 
@@ -501,7 +510,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             if default is not None:
                 return default
             if self.default_factory is None:
-                raise KeyError(f'{key} is not in the Settings') from error
+                raise KeyError(f"{key} is not in the Settings") from error
             try:
                 return self.default_factory()
             except TypeError:
@@ -511,7 +520,8 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         self,
         instance: object,
         sections: Sequence[str] | str | None = None,
-        overwrite: bool | None = None) -> object:
+        overwrite: bool | None = None,
+    ) -> object:
         """Injects appropriate items into `instance` from `contents`.
 
         By default, if `instance` has a `name` attribute, this method will add
@@ -537,13 +547,15 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         for section in utilities._iterify(sections):
             with contextlib.suppress(KeyError):
                 for key, value in self.contents[section].items():
-                    if (not hasattr(instance, key)
-                            or not getattr(instance, key)
-                            or overwrite):
+                    if (
+                        not hasattr(instance, key)
+                        or not getattr(instance, key)
+                        or overwrite
+                    ):
                         setattr(instance, key, value)
         return instance
 
-    def items(self) -> ItemsView:
+    def items(self) -> ItemsView:  # type: ignore
         """Emulates python dict `items` method.
 
         Returns:
@@ -552,7 +564,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         return self.contents.items()
 
-    def keys(self) -> KeysView:
+    def keys(self) -> KeysView:  # type: ignore
         """Returns `contents` keys as a `tuple`.
 
         Returns:
@@ -572,10 +584,11 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         self.default_factory = value
         return
 
-    def subset(
+    def subset(  # type: ignore
         self,
         include: Collection[Any] | Any | None = None,
-        exclude: Collection[Any] | Any | None = None) -> GenericDict:
+        exclude: Collection[Any] | Any | None = None,
+    ) -> GenericDict:
         """Returns a new instance with a subset of `contents`.
 
         This method applies `include` before `exclude` if both are passed. If
@@ -597,7 +610,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
         """
         if include is None and exclude is None:
-            raise ValueError('include or exclude must not be None')
+            raise ValueError("include or exclude must not be None")
         if include is None:
             contents = copy.deepcopy(self.contents)
         else:
@@ -608,7 +621,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             contents = {k: v for k, v in contents.items() if k not in exclude}
         return self.__class__(contents)
 
-    def update(self, item: GenericDict) -> Self:
+    def update(self, item: GenericDict) -> Self:  # type: ignore
         """Updates 'contents' using the 'add' method for key/value pairs.
 
         Args:
@@ -619,7 +632,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             self.add(key, value)
         return self
 
-    def values(self) -> ValuesView:
+    def values(self) -> ValuesView:  # type: ignore
         """Returns `contents` values as a `tuple`.
 
         Returns:
@@ -646,7 +659,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             loader = getattr(cls, options._LOAD_METHOD(file_type))
             return file_type, loader
         else:
-            message = f'settings file {path} not found'
+            message = f"settings file {path} not found"
             raise FileNotFoundError(message)
 
     @classmethod
@@ -666,7 +679,8 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             if isinstance(value, MutableMapping):
                 inner_bundle = {
                     inner_key: options._TYPER(inner_value)
-                    for inner_key, inner_value in value.items()}
+                    for inner_key, inner_value in value.items()
+                }
                 new_contents[key] = inner_bundle
             else:
                 new_contents[key] = options._TYPER(value)
