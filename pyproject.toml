@@ -7,10 +7,9 @@ authors = [{name = "Corey Rayburn Yung", email = "coreyrayburnyung@gmail.com"}]
 license = {text = "Apache Software License 2.0"}
 readme = "README.md"
 requires-python = ">=3.11"
-version = "0.1.8"
+version = "0.2.0"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Environment :: Console",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "License :: OSI Approved :: Apache Software License",
@@ -28,8 +27,6 @@ dependencies = [
     "wonka >= 0.1.4"]
 
 [project.optional-dependencies]
-env = ["python-dotenv"]
-xml = ["xmltodict"]
 yaml = ["pyyaml"]
 
 [project.urls]

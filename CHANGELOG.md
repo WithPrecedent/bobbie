@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.2.0
+
+* Stable release version with all tests and lint checks passed
+
 ## 0.1.8
 
 * Switched to `uv` as dependency manager
