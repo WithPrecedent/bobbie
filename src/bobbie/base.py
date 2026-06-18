@@ -41,8 +41,8 @@ if sys.version_info < (3, 12):
     GenericDict: TypeAlias = MutableMapping[Hashable, Any]
     GenericList: TypeAlias = MutableSequence[Any]
 else:
-    type GenericDict = MutableMapping[Hashable, Any]
-    type GenericList = MutableSequence[Any]
+    GenericDict: TypeAlias = MutableMapping[Hashable, Any]
+    GenericList: TypeAlias = MutableSequence[Any]
 
 
 @dataclasses.dataclass
@@ -399,7 +399,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         path = utilities._pathlibify(source)
         import yaml
         try:
-            with open(path, 'r') as config:
+            with open(path) as config:
                 contents = yaml.safe_load(config, **kwargs)
         except FileNotFoundError as error:
             message = f'settings file {path} not found'

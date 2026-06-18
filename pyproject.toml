@@ -84,7 +84,6 @@ show_error_codes = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--showlocals"
-asyncio_mode = "auto"
 filterwarnings = ["ignore::DeprecationWarning"]
 pythonpath = ["src"]
 
@@ -96,6 +95,8 @@ lint.dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 lint.fixable = ["ALL"]
 lint.ignore = [
     "A001",  # Variable is shadowing a Python builtin
+    "ANN101",  # Missing type annotation for `self` in method
+    "ANN102",  # Missing type annotation for `cls` in classmethod
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed
     "ARG003",  # Unused class method argument: `parameters`
     "ARG005",  # Unused lambda argument
@@ -113,6 +114,7 @@ lint.ignore = [
     "EXE002",  # No shebang is present in an executable file
     "FBT001",  # Boolean positional arg in function definition
     "G004",  # Logging statement uses f-string
+    "PGH003",  # Use specific rule codes when ignoring type issues
     "PTH123",  # `open()` should be replaced by `Path.open()`
     "PLR0911",  # Too many return statements
     "PLR0912",  # Too many branches
