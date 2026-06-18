@@ -1,11 +1,5 @@
 repos:
 
-- repo: https://github.com/pdm-project/pdm
-  rev: "2.8.2"
-  hooks:
-  - id: pdm-lock-check
-    files: ^pdm.lock$
-
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: "v4.4.0"
   hooks:

@@ -99,4 +99,3 @@ if __name__ == '__main__':
     test_py()
     test_toml()
     test_yaml()
-
