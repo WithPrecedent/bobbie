@@ -114,6 +114,7 @@ lint.ignore = [
     "EXE002",  # No shebang is present in an executable file
     "FBT001",  # Boolean positional arg in function definition
     "G004",  # Logging statement uses f-string
+    "PLC0415", # Lazy imports (which are intentionally used in this repo)
     "PGH003",  # Use specific rule codes when ignoring type issues
     "PTH123",  # `open()` should be replaced by `Path.open()`
     "PLR0911",  # Too many return statements

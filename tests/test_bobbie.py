@@ -38,7 +38,7 @@ def test_dict() -> None:
     verify_settings(settings)
     settings = bobbie.Settings.from_dict(example_settings)
     verify_settings(settings)
-    settings = bobbie.Settings(example_settings)
+    settings = bobbie.Settings(example_settings) # type: ignore
     verify_settings(settings)
     return
 

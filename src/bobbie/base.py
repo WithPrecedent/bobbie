@@ -38,12 +38,8 @@ import wonka
 
 from . import options, utilities
 
-if sys.version_info < (3, 12):
-    GenericDict: TypeAlias = MutableMapping[Hashable, Any]
-    GenericList: TypeAlias = MutableSequence[Any]
-else:
-    GenericDict: TypeAlias = MutableMapping[Hashable, Any]
-    GenericList: TypeAlias = MutableSequence[Any]
+GenericDict: TypeAlias = MutableMapping[Hashable, Any]
+GenericList: TypeAlias = MutableSequence[Any]
 
 
 @dataclasses.dataclass
