@@ -3,6 +3,8 @@
 from __future__ import annotations
 import pathlib
 
+import pytest
+
 import bobbie
 
 example_settings = {
@@ -92,6 +94,44 @@ def test_yaml() -> None:
     verify_settings(settings)
     return
 
+def test_ini_percent_sign(tmp_path: pathlib.Path) -> None:
+    file_path = tmp_path / 'percent.ini'
+    file_path.write_text('[files]\nfloat_format = %.4f\nsteps = a, b\n')
+    settings = bobbie.Settings.create(file_path)
+    assert settings['files']['float_format'] == '%.4f'
+    assert settings['files']['steps'] == ['a', 'b']
+    assert list(settings) == ['files']
+
+def test_ini_missing_file(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        bobbie.Settings.from_ini(tmp_path / 'missing.ini')
+    with pytest.raises(FileNotFoundError):
+        bobbie.Settings.create(tmp_path / 'missing.ini')
+
+def test_keys_items_values() -> None:
+    settings = bobbie.Settings.create(example_settings)
+    assert list(settings.keys()) == ['general', 'files', 'tasks']
+    assert list(settings) == list(settings.keys())
+    assert dict(settings.items()) == example_settings
+    assert list(settings.values()) == list(example_settings.values())
+
+def test_inject() -> None:
+    class Target:
+        seed = 1
+        gpu = None
+
+    settings = bobbie.Settings.create(example_settings)
+    target = settings.inject(Target(), sections = 'general')
+    assert target.seed == 43
+    assert target.gpu is False
+    assert not hasattr(target, 'source_format')
+    target = settings.inject(Target(), sections = 'general', overwrite = False)
+    assert target.seed == 1
+    assert target.gpu is False
+    target = settings.inject(Target())
+    assert target.source_format == 'csv'
+    assert target.things_to_do == ['stop', 'drop', 'roll']
+
 if __name__ == '__main__':
     test_ini()
     test_dict()
@@ -99,3 +139,4 @@ if __name__ == '__main__':
     test_py()
     test_toml()
     test_yaml()
+    test_inject()

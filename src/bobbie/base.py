@@ -252,16 +252,21 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         path = utilities._pathlibify(source)
         import configparser
 
-        try:
-            contents = configparser.ConfigParser(**kwargs)
-            contents.optionxform = lambda option: option  # type: ignore
-            contents.read(path)
-        except (KeyError, FileNotFoundError) as error:
+        if not path.is_file():
             message = f"settings file {path} not found"
-            raise FileNotFoundError(message) from error
+            raise FileNotFoundError(message)
+        # Interpolation is turned off by default so that values such as '%.4f'
+        # are not treated as `configparser` interpolation syntax.
+        kwargs.setdefault("interpolation", None)
+        parser = configparser.ConfigParser(**kwargs)
+        parser.optionxform = lambda option: option  # type: ignore
+        parser.read(path, encoding="utf-8")
+        # Uses `dict` types so that the implicit "DEFAULT" section is not
+        # included as a section of its own (its values are already part of
+        # every other section).
+        contents = {name: dict(parser[name]) for name in parser.sections()}
         if options._INFER_TYPES["ini"]:
             contents = cls._infer_types(contents)  # type: ignore
-        del contents["DEFAULT"]
         return cls(contents)  # type: ignore
 
     @classmethod
@@ -537,8 +542,10 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             Instance with modifications made.
 
         """
-        overwrite = options._OVERWRITE_ATTRIBUTES if None else overwrite
-        sections = self.keys() if None else sections
+        overwrite = (
+            options._OVERWRITE_ATTRIBUTES if overwrite is None else overwrite
+        )
+        sections = self.keys() if sections is None else sections
         for section in utilities._iterify(sections):
             with contextlib.suppress(KeyError):
                 for key, value in self.contents[section].items():
@@ -566,7 +573,7 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
             A `tuple` equivalent to `dict.keys()`.
 
         """
-        return self.keys()
+        return self.contents.keys()
 
     def setdefault(self, value: Any) -> None:
         """Sets default value to return when `get` method is used.
