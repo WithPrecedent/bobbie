@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.2.1
+
+* Fixed loading `ini` files with values that contain a "%" (such as `float_format = %.4f`), which raised a `configparser.InterpolationSyntaxError`. Interpolation is now off by default and can be turned back on with `interpolation = configparser.BasicInterpolation()`.
+* Fixed loading a missing `ini` file, which was silently ignored instead of raising a `FileNotFoundError`.
+* Fixed `Settings.inject`, which ignored its `overwrite` and `sections` arguments.
+* Fixed `Settings.keys`, which called itself forever and raised a `RecursionError`.
+
 ## 0.2.0
 
 * Stable release version with all tests and lint checks passed
