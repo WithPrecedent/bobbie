@@ -1,7 +1,19 @@
 """Settings, constants, and global types for `bobbie`.
 
 Contents:
-
+    _FILE_EXTENSIONS: maps supported file extensions to file types.
+    _INFER_TYPES: whether to infer the datatypes of loaded values for each
+        file type.
+    _LOAD_METHOD: returns the name of the `Settings` class method that loads
+        a file type.
+    _MODULE_SETTINGS_ATTRIBUTE: name of the variable that stores settings in a
+        Python module.
+    _OVERWRITE_ATTRIBUTES: whether `Settings.inject` overwrites existing
+        attributes by default.
+    _ALWAYS_RETURN_ERROR: whether `Settings.delete` raises an error for a
+        missing key by default.
+    _TYPER: function used to infer the datatypes of loaded values.
+    _MISSING: sentinel instance for a missing value or argument.
 
 To Do:
 
@@ -21,26 +33,20 @@ from . import utilities
 """ Global Variables """
 
 _FILE_EXTENSIONS: dict[str, str] = {
-    # 'env': 'env',
-    "ini": "ini",
-    "json": "json",
-    "toml": "toml",
-    "py": "module",
-    # 'xml': 'xml',
-    "yaml": "yaml",
-    "yml": "yaml",
-}
+    'ini': 'ini',
+    'json': 'json',
+    'toml': 'toml',
+    'py': 'module',
+    'yaml': 'yaml',
+    'yml': 'yaml'}
 _INFER_TYPES: dict[str, bool] = {
-    # 'env': True,
-    "ini": True,
-    "json": True,
-    "toml": False,
-    "module": False,
-    # 'xml': True,
-    "yaml": False,
-}
-_LOAD_METHOD: Callable[[str], str] = lambda x: f"from_{x}"
-_MODULE_SETTINGS_ATTRIBUTE: str = "settings"
+    'ini': True,
+    'json': True,
+    'toml': False,
+    'module': False,
+    'yaml': False}
+_LOAD_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
+_MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
 _ALWAYS_RETURN_ERROR: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify

@@ -1,3 +1,12 @@
+"""Example settings stored in a Python module for testing `bobbie`.
+
+Contents:
+    settings: example settings loaded by `Settings.from_module`.
+
+"""
+
+from __future__ import annotations
+
 settings = {
     'general': {
         'verbose': True,

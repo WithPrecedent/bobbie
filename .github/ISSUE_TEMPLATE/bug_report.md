@@ -29,8 +29,8 @@ If applicable, add screenshots to help explain your problem.
 
 **System (please complete the following information):**
 
-- `bobbie` version: [e.g. 0.2.1]
-- Python version: [e.g. 3.9]
+- `bobbie` version: [e.g. 0.3.0]
+- Python version: [e.g. 3.12]
 - OS: [Windows/Linux/MacOS]
 
 **Additional context**

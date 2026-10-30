@@ -3,7 +3,7 @@
 # Project Information
 
 site_name: bobbie
-site_description:
+site_description: Flexible, easy Python project configuration
 site_url: https://WithPrecedent.github.io/bobbie
 repo_name: WithPrecedent/bobbie
 repo_url: https://github.com/WithPrecedent/bobbie
@@ -22,7 +22,6 @@ nav:
 - Home:
   - Overview: index.md
   - Changelog: changelog.md
-  - Credits: credits.md
   - License: license.md
 - User Guide:
   - Tutorial: tutorial.md
@@ -32,7 +31,7 @@ nav:
 - Development:
   - Contributing: contributing.md
   - Code of Conduct: code_of_conduct.md
-  # - Coverage Report: coverage.md
+  - Coverage Report: coverage.md
 
 # Documentation Appearance
 
@@ -94,8 +93,8 @@ markdown_extensions:
 - md_in_html
 - pymdownx.details
 - pymdownx.emoji:
-    emoji_index: !!python/name:materialx.emoji.twemoji
-    emoji_generator: !!python/name:materialx.emoji.to_svg
+    emoji_index: !!python/name:material.extensions.emoji.twemoji
+    emoji_generator: !!python/name:material.extensions.emoji.to_svg
 - pymdownx.highlight:
     anchor_linenums: true
     line_spans: __span
@@ -121,9 +120,9 @@ markdown_extensions:
 
 plugins:
 - autorefs
-# - coverage:
-#     page_name: coverage
-#     html_report_dir: htmlcov
+# Adds the HTML report in "htmlcov" (from `pytest --cov --cov-report=html`) as
+# the "coverage" page.
+- coverage
 - gen-files:
     scripts:
     - docs/scripts/gen_ref_nav.py
@@ -137,13 +136,15 @@ plugins:
       python:
         options:
           docstring_section_style: table
+          # Leaves out private and dunder members (names that start with "_").
           filters:
-            - "!^__"
+            - "!^_"
           heading_level: 1
           # members_order: alphabetical
           merge_init_into_class: true
           separate_signature: false
           show_signature_annotations: false
+        paths: [src]
 - search:
 
 extra:

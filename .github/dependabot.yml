@@ -3,19 +3,14 @@
 version: 2
 updates:
 
-# Maintains dependencies for Python via `pip`
-- package-ecosystem: pip
+# Maintains the Python dependencies in `pyproject.toml` and `uv.lock`
+- package-ecosystem: uv
   directory: "/"
-  # Always updates to a newer version. If you want a less aggressive strategy,
-  # change the value to "increase-if-necessary"
-  versioning-strategy: increase
   schedule:
     interval: weekly
-    time: "5:00"
 
-# Maintains dependencies for GitHub Actions
+# Maintains the versions of the GitHub Actions used in `.github/workflows`
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: "weekly"
-    time: "6:00"
+    interval: weekly

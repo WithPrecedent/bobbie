@@ -1,0 +1,33 @@
+{
+  "template": "https://github.com/WithPrecedent/snickerdoodle",
+  "commit": "26c3b004cfbe99281659dee7e08a63c4d0edad93",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "bobbie",
+      "package_name": "bobbie",
+      "repo_name": "bobbie",
+      "author_name": "Corey Rayburn Yung",
+      "author_email": "coreyrayburnyung@gmail.com",
+      "github_user": "WithPrecedent",
+      "description": "Flexible, easy Python project configuration",
+      "version": "0.3.0",
+      "url": "https://github.com/WithPrecedent/bobbie",
+      "development_status": "Development Status :: 5 - Production/Stable",
+      "license": "Apache Software License 2.0",
+      "badge_style": "for-the-badge",
+      "github_actions": true,
+      "pre_commit": true,
+      "dependabot": true,
+      "mkdocs": true,
+      "mypy": true,
+      "pypi": true,
+      "code_coverage": true,
+      "commit_to_github": false,
+      "virtual_environment": false,
+      "_template": "https://github.com/WithPrecedent/snickerdoodle",
+      "_commit": "26c3b004cfbe99281659dee7e08a63c4d0edad93"
+    }
+  },
+  "directory": null
+}

@@ -2,12 +2,12 @@
 
 | | |
 | --- | --- |
-| Version | [![PyPI Latest Release](https://img.shields.io/pypi/v/bobbie.svg?style=for-the-badge&color=steelblue&label=PyPI&logo=PyPI&logoColor=yellow)](https://pypi.org/project/bobbie/) [![GitHub Latest Release](https://img.shields.io/github/v/tag/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=GitHub&logo=github)](https://github.com/WithPrecedent/bobbie/releases)
-| Status | [![Build Status](https://img.shields.io/github/actions/workflow/status/WithPrecedent/bobbie/ci.yml?branch=main&style=for-the-badge&color=cadetblue&label=Tests&logo=pytest)](https://github.com/WithPrecedent/bobbie/actions/workflows/ci.yml?query=branch%3Amain) [![Development Status](https://img.shields.io/badge/Development-Active-seagreen?style=for-the-badge&logo=git)](https://www.repostatus.org/#active) [![Project Stability](https://img.shields.io/pypi/status/bobbie?style=for-the-badge&logo=pypi&label=Stability&logoColor=yellow)](https://pypi.org/project/bobbie/)
-| Documentation | [![Hosted By](https://img.shields.io/badge/Hosted_by-Github_Pages-blue?style=for-the-badge&color=navy&logo=github)](https://WithPrecedent.github.io/bobbie)
-| Tools | [![Documentation](https://img.shields.io/badge/MkDocs-magenta?style=for-the-badge&color=deepskyblue&logo=markdown&labelColor=gray)](https://squidfunk.github.io/mkdocs-material/) [![Linter](https://img.shields.io/endpoint?style=for-the-badge&url=https://raw.githubusercontent.com/charliermarsh/Ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/Ruff) [![Dependency Manager](https://img.shields.io/badge/uv-mediumpurple?style=for-the-badge&logo=uv&labelColor=gray)](https://docs.astral.sh/uv/)  [![Pre-commit](https://img.shields.io/badge/pre--commit-darkolivegreen?style=for-the-badge&logo=pre-commit&logoColor=white&labelColor=gray)](https://github.com/TezRomacH/python-package-template/blob/master/.pre-commit-config.yaml) [![CI](https://img.shields.io/badge/GitHub_Actions-navy?style=for-the-badge&logo=githubactions&labelColor=gray&logoColor=white)](https://github.com/features/actions) [![Editor Settings](https://img.shields.io/badge/Editor_Config-paleturquoise?style=for-the-badge&logo=editorconfig&labelColor=gray)](https://editorconfig.org/) [![Repository Template](https://img.shields.io/badge/snickerdoodle-bisque?style=for-the-badge&logo=cookiecutter&labelColor=gray)](https://www.github.com/WithPrecedent/bobbie) [![Dependency Maintainer](https://img.shields.io/badge/dependabot-navy?style=for-the-badge&logo=dependabot&logoColor=white&labelColor=gray)](https://github.com/dependabot)
-| Compatibility | [![Compatible Python Versions](https://img.shields.io/pypi/pyversions/bobbie?style=for-the-badge&color=steelblue&label=Python&logo=python&logoColor=yellow)](https://pypi.python.org/pypi/bobbie/) [![Linux](https://img.shields.io/badge/Linux-lightseagreen?style=for-the-badge&logo=linux&labelColor=gray&logoColor=white)](https://www.linux.org/) [![MacOS](https://img.shields.io/badge/MacOS-snow?style=for-the-badge&logo=apple&labelColor=gray)](https://www.apple.com/macos/) [![Windows](https://img.shields.io/badge/Windows-blue?style=for-the-badge)](https://www.microsoft.com/en-us/windows?r=1)
-| Stats | [![GitHub Stars](https://img.shields.io/github/stars/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Stars%20⭐&logo=github)](https://github.com/WithPrecedent/bobbie/stargazers) [![GitHub Contributors](https://img.shields.io/github/contributors/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Contributors%20🙋&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Issues](https://img.shields.io/github/issues/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Issues%20📘&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Forks](https://img.shields.io/github/forks/WithPrecedent/bobbie?style=for-the-badge&color=navy&label=Forks%20🍴&logo=github)](https://github.com/WithPrecedent/bobbie/forks)
+| Version | [![PyPI Latest Release](https://img.shields.io/pypi/v/bobbie.svg?style=for-the-badge&color=cornflowerblue&label=PyPI&logo=PyPI&logoColor=yellow)](https://pypi.org/project/bobbie/) [![GitHub Latest Release](https://img.shields.io/github/v/tag/WithPrecedent/bobbie?style=for-the-badge&color=forestgreen&label=GitHub&logo=github)](https://github.com/WithPrecedent/bobbie/releases) |
+| Status | [![Build Status](https://img.shields.io/github/actions/workflow/status/WithPrecedent/bobbie/ci.yml?style=for-the-badge&branch=main&color=cadetblue&label=Tests&logo=pytest)](https://github.com/WithPrecedent/bobbie/actions/workflows/ci.yml?query=branch%3Amain) [![Code Coverage](https://img.shields.io/codecov/c/github/WithPrecedent/bobbie?style=for-the-badge&color=cadetblue&label=Coverage&logo=codecov)](https://app.codecov.io/gh/WithPrecedent/bobbie) [![Development Status](https://img.shields.io/badge/Development-Active-seagreen?style=for-the-badge&logo=git)](https://www.repostatus.org/#active) [![Project Stability](https://img.shields.io/pypi/status/bobbie?style=for-the-badge&logo=pypi&label=Stability&logoColor=yellow)](https://pypi.org/project/bobbie/) |
+| Documentation | [![Hosted By](https://img.shields.io/badge/Hosted_by-Github_Pages-blue?style=for-the-badge&color=forestgreen&logo=github)](https://WithPrecedent.github.io/bobbie) |
+| Tools | [![Documentation](https://img.shields.io/badge/MkDocs-magenta?style=for-the-badge&color=deepskyblue&logo=markdown&labelColor=gray)](https://squidfunk.github.io/mkdocs-material/) [![Linter](https://img.shields.io/endpoint?style=for-the-badge&url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![Type Checker](https://img.shields.io/badge/mypy-steelblue?style=for-the-badge&logo=python&logoColor=white&labelColor=gray)](https://mypy-lang.org/) [![Dependency Manager](https://img.shields.io/badge/uv-mediumpurple?style=for-the-badge&logo=uv&labelColor=gray)](https://docs.astral.sh/uv/) [![Pre-commit](https://img.shields.io/badge/pre--commit-darkolivegreen?style=for-the-badge&logo=pre-commit&logoColor=white&labelColor=gray)](https://pre-commit.com/) [![CI](https://img.shields.io/badge/GitHub_Actions-forestgreen?style=for-the-badge&logo=githubactions&labelColor=gray&logoColor=white)](https://github.com/features/actions) [![Editor Settings](https://img.shields.io/badge/Editor_Config-paleturquoise?style=for-the-badge&logo=editorconfig&labelColor=gray)](https://editorconfig.org/) [![Repository Template](https://img.shields.io/badge/snickerdoodle-bisque?style=for-the-badge&logo=cookiecutter&labelColor=gray)](https://www.github.com/WithPrecedent/snickerdoodle) [![Dependency Maintainer](https://img.shields.io/badge/dependabot-forestgreen?style=for-the-badge&logo=dependabot&logoColor=white&labelColor=gray)](https://github.com/dependabot) |
+| Compatibility | [![Compatible Python Versions](https://img.shields.io/pypi/pyversions/bobbie?style=for-the-badge&color=cornflowerblue&label=Python&logo=python&logoColor=yellow)](https://pypi.org/project/bobbie/) [![Linux](https://img.shields.io/badge/Linux-lightseagreen?style=for-the-badge&logo=linux&labelColor=gray&logoColor=white)](https://www.linux.org/) [![MacOS](https://img.shields.io/badge/MacOS-antiquewhite?style=for-the-badge&logo=apple&labelColor=gray)](https://www.apple.com/macos/) [![Windows](https://img.shields.io/badge/Windows-blue?style=for-the-badge)](https://www.microsoft.com/en-us/windows?r=1) |
+| Stats | [![PyPI Download Rate (per month)](https://img.shields.io/pypi/dm/bobbie?style=for-the-badge&color=cornflowerblue&label=Downloads%20💾&logo=pypi&logoColor=yellow)](https://pypi.org/project/bobbie/) [![GitHub Stars](https://img.shields.io/github/stars/WithPrecedent/bobbie?style=for-the-badge&color=forestgreen&label=Stars%20⭐&logo=github)](https://github.com/WithPrecedent/bobbie/stargazers) [![GitHub Contributors](https://img.shields.io/github/contributors/WithPrecedent/bobbie?style=for-the-badge&color=forestgreen&label=Contributors%20🙋&logo=github)](https://github.com/WithPrecedent/bobbie/graphs/contributors) [![GitHub Issues](https://img.shields.io/github/issues/WithPrecedent/bobbie?style=for-the-badge&color=forestgreen&label=Issues%20📘&logo=github)](https://github.com/WithPrecedent/bobbie/issues) [![GitHub Forks](https://img.shields.io/github/forks/WithPrecedent/bobbie?style=for-the-badge&color=forestgreen&label=Forks%20🍴&logo=github)](https://github.com/WithPrecedent/bobbie/forks) |
 | | |
 
 -----
@@ -97,11 +97,28 @@ settings = bobbie.Settings.create('settings_file.yaml')
 settings = bobbie.Settings.from_file('settings_file.yaml')
 # Or, the `from_yaml` method. They all do the same thing.
 settings = bobbie.Settings.from_yaml('settings_file.yaml')
-# Or,
 ```
 
 If the file is a Python module, it must contain a variable named `settings` in the module namespace
 (unless you change the global setting for the variable name).
+
+#### Type inference
+
+`ini` and `json` files often store numbers, booleans, and lists as strings, so
+`bobbie` converts their values to the matching Python types:
+
+* `'42'` becomes `42` and `'2.5'` becomes `2.5`.
+* `'true'`, `'yes'`, `'false'`, and `'no'` (in any case) become `True` or
+  `False`.
+* `'[x, y, z]'` and `'x, y, z'` become `['x', 'y', 'z']`.
+* `'{a: 1, b: [x, y]}'` becomes `{'a': 1, 'b': ['x', 'y']}`.
+
+Items in lists and dicts are converted the same way and may be nested. Put an
+item in quotes (such as `["a, b", '1']`) to keep it as a string.
+
+`toml`, `yaml`, and Python module values are not converted because those
+formats already store their own types. So, a `toml` value of `"[a, b]"` stays a
+string.
 
 ## Contributing
 
@@ -109,7 +126,7 @@ If the file is a Python module, it must contain a variable named `settings` in t
 <img src="https://media.giphy.com/media/ErQfoFJN1YNQroZUcL/giphy.gif" alt="This could be a really big deal" style="width:300px;"/>
 </p>
 
-Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/bobbie/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/bobbie/contributing.md) and [Code of Conduct](https://www.github.com/WithPrecedent/bobbie/code_of_conduct.md).
+Contributors are always welcome. Feel free to grab an [issue](https://www.github.com/WithPrecedent/bobbie/issues) to work on or make a suggested improvement. If you wish to contribute, please read the [Contribution Guide](https://www.github.com/WithPrecedent/bobbie/blob/main/CONTRIBUTING.md) and [Code of Conduct](https://www.github.com/WithPrecedent/bobbie/blob/main/CODE_OF_CONDUCT.md).
 
 ## Similar projects
 
@@ -139,12 +156,6 @@ projects and the goal of keeping its resource usage as low as possible. So, if
 you need secrets stored in your project settings, there are several good options
 linked above that you should explore.
 
-## Acknowledgments
-
-I would like to thank the University of Kansas School of Law for tolerating and
-supporting this law professor's coding efforts, an endeavor which is well
-outside the typical scholarly activities in the discipline.
-
 ## License
 
-Use of this repository is authorized under the [Apache Software License 2.0](https://www.github.com/WithPrecedent/bobbie/blog/main/LICENSE).
+Use of this repository is authorized under the [Apache Software License 2.0](https://www.github.com/WithPrecedent/bobbie/blob/main/LICENSE).
