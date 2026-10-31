@@ -20,6 +20,27 @@ uv run pre-commit install
 
 Run the tests with `uv run pytest`.
 
+Before you push, also run the linter and the type checker, which CI runs:
+
+```bash
+uv run ruff check --no-fix
+uv run mypy
+```
+
+## Documentation
+
+The documentation is built with [MkDocs](https://www.mkdocs.org/). The
+"Coverage Report" page reads the HTML coverage report in `htmlcov`, so create
+it first, and then preview the site:
+
+```bash
+uv run pytest --cov --cov-report=html
+uv run mkdocs serve
+```
+
+The API pages are generated from the docstrings in `src/bobbie`, so update
+them when you change a public class or method.
+
 ## Development
 
 Follow this basic process:

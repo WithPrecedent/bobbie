@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.3.2
+
+* Fixed type inference, which raised a `RecursionError` for strings with a ", " only inside brackets, parentheses, or quotes (such as an `ini` value of `see (a, b)`). Those strings now stay strings.
+* Fixed `Settings.create` and `Settings.from_file`, which passed `parameters` to the file parser (raising a `TypeError`) instead of to the new `Settings`, as the `Settings` docstring describes.
+* **Possibly breaking:** `ini`, `json`, and `yaml` files are now read as UTF-8 instead of the platform's default encoding for `json` and `yaml` (such as cp1252 on Windows). Pass `encoding` to read another encoding.
+* Fixed `options._ALWAYS_RETURN_ERROR`, which was read once at import, so changing it had no effect on `delete` and `del`.
+* A file type in `options._FILE_EXTENSIONS` with no `from_<type>` loader now raises the documented `TypeError` instead of an `AttributeError`. A Python module without a `settings` variable now raises an `AttributeError` that names the variable, instead of a `TypeError` saying that modules are not supported.
+* Removed the `Settings.sources` class attribute, which `create` never used (it dispatches with `functools.singledispatchmethod`).
+* Added `default_factory` to the `Settings` fields so that it appears in the API documentation and `mkdocs build --strict` passes.
+* Removed the "To Do" sections from the module docstrings so that they do not appear in the documentation.
+* Wrote the Tutorial, Advanced User Guide, and Recipes pages of the documentation, documented the `yaml` extra in the README, and fixed the README comparison table and links. Added the docs build, lint, and `mypy` commands to the Contribution Guide.
+* Added tests for the fixes above (51 tests in total).
+
 ## 0.3.1
 
 * Added the `py.typed` marker so that type checkers use the type hints in

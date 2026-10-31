@@ -15,9 +15,6 @@ Contents:
     _TYPER: function used to infer the datatypes of loaded values.
     _MISSING: sentinel instance for a missing value or argument.
 
-To Do:
-
-
 """
 
 from __future__ import annotations

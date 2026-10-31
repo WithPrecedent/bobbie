@@ -4,9 +4,6 @@ Contents:
     _PAIR_LENGTH: number of parts in a dict entry and of quotes around a
         quoted string.
 
-To Do:
-
-
 """
 
 from __future__ import annotations
@@ -74,7 +71,8 @@ def _typify(
     based upon the content of the string. A string wrapped in square brackets
     (such as '[x, y, z]') becomes a list, a string wrapped in curly braces
     (such as '{a: 1, b: 2}') becomes a dict, and any other string containing
-    ', ' becomes a list. Items in a list or dict are converted recursively and
+    ', ' outside of brackets and quotes becomes a list. Items in a list or
+    dict are converted recursively and
     may be nested. Quotes around an item in a list or dict are removed. If no
     alternative datatype is found, the item is returned in its original form.
 
@@ -112,7 +110,12 @@ def _typify(
                         for k, v in entries}
                 return item
             elif ', ' in item:
-                return [_typify(i) for i in _split_top_level(item, ', ')]
+                parts = _split_top_level(item, ', ')
+                # A ', ' that is only inside brackets or quotes (such as
+                # '(a, b)') does not split `item`, so it stays a str.
+                if parts == [stripped]:
+                    return item
+                return [_typify(i) for i in parts]
             else:
                 return item
 

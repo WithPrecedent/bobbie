@@ -34,7 +34,8 @@ So, what makes `bobbie` different?
 * **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file (ini, json, toml, and yaml formats are supported).
 * **Lightweight**: an efficient codebase ensures a very small memory footprint.
 * **Intuitive**: a `create` class method constructs `Settings` (from any data source).
-* **Convenient**: unlike `configparser`, automatic data and type validation is performed when
+* **Convenient**: unlike `configparser`, values stored as strings (such as in
+  `ini` files) are automatically converted to the matching Python types when
   `Settings` is created.
 
 The [comparison table](#feature-comparison-of-python-configuration-libraries)
@@ -53,6 +54,13 @@ To install `bobbie`, use `pip`:
 
 ```sh
 pip install bobbie
+```
+
+To load `yaml` files, install the `yaml` extra, which adds
+[`PyYAML`](https://pypi.org/project/PyYAML/):
+
+```sh
+pip install "bobbie[yaml]"
 ```
 
 ### Create a Settings instance
@@ -100,7 +108,8 @@ settings = bobbie.Settings.from_yaml('settings_file.yaml')
 ```
 
 If the file is a Python module, it must contain a variable named `settings` in the module namespace
-(unless you change the global setting for the variable name).
+(unless you [change the global setting](https://WithPrecedent.github.io/bobbie/advanced/#global-options)
+for the variable name).
 
 #### Type inference
 
@@ -110,7 +119,8 @@ If the file is a Python module, it must contain a variable named `settings` in t
 * `'42'` becomes `42` and `'2.5'` becomes `2.5`.
 * `'true'`, `'yes'`, `'false'`, and `'no'` (in any case) become `True` or
   `False`.
-* `'[x, y, z]'` and `'x, y, z'` become `['x', 'y', 'z']`.
+* `'[x, y, z]'` and `'x, y, z'` become `['x', 'y', 'z']` (a comma with no
+  space, as in `'x,y'`, does not split a string).
 * `'{a: 1, b: [x, y]}'` becomes `{'a': 1, 'b': ['x', 'y']}`.
 
 Items in lists and dicts are converted the same way and may be nested. Put an
@@ -118,7 +128,8 @@ item in quotes (such as `["a, b", '1']`) to keep it as a string.
 
 `toml`, `yaml`, and Python module values are not converted because those
 formats already store their own types. So, a `toml` value of `"[a, b]"` stays a
-string.
+string. See the [Advanced User Guide](https://WithPrecedent.github.io/bobbie/advanced/#type-inference-rules)
+for the exact rules and how to turn inference on or off for each file type.
 
 ## Contributing
 
@@ -139,12 +150,12 @@ shows the features of the leading libraries.
 | Library | Typing | Secrets | dict | ini | json | py | toml | yaml |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| [`configParser`](https://docs.python.org/3/library/configParser.html) | | | | ✅ | | | | |
+| [`configparser`](https://docs.python.org/3/library/configparser.html) | | | | ✅ | | | | |
 | [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | | ✅ | ✅ | | ✅ | ✅ |
 | [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | ✅ | ✅ | | ✅ | ✅ |
 | [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | ✅ | | | | |
-| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | |  | | |  || |
-| [`pydantic-settings`](https://docs.pydantic.dev/latest/usage/pydantic_settings/) | ✅ | ✅ | | | | | | | |
+| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | | | | |
+| [`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) | ✅ | ✅ | | | | | | |
 
 <p align="center">
 <img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:350px;"/>

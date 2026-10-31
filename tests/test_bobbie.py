@@ -12,7 +12,11 @@ Contents:
     test_load_file: tests loading every supported file type.
     test_toml_keyword_arguments: tests passing kwargs to the `toml` parser.
     test_create_from_str_path: tests loading a file from a `str` path.
+    test_create_file_with_parameters: tests passing `parameters` with a file.
     test_unsupported_extension: tests loading a file type with no loader.
+    test_extension_without_loader: tests a mapped file type with no loader.
+    test_module_without_settings: tests a module with no settings variable.
+    test_file_encoding: tests the default and chosen file encodings.
     test_missing_file: tests that every loader raises on a missing file.
     test_ini_percent_sign: tests `ini` values that contain "%".
     test_ini_lists_and_dicts: tests `ini` values that are lists and dicts.
@@ -21,6 +25,7 @@ Contents:
     test_add: tests adding new and existing sections.
     test_update_and_plus: tests `update` and the "+" and "+=" operators.
     test_delete: tests deleting present and missing keys.
+    test_delete_global_option: tests the global default for `delete`.
     test_get: tests `get` with defaults and `setdefault`.
     test_subset: tests `subset` with `include` and `exclude`.
     test_fromkeys: tests `fromkeys`.
@@ -45,7 +50,7 @@ from typing import Any
 import pytest
 
 import bobbie
-from bobbie import utilities
+from bobbie import options, utilities
 
 FOLDER = pathlib.Path('tests')
 
@@ -105,7 +110,7 @@ def verify_settings(loaded: bobbie.Settings) -> None:
 
 def test_version() -> None:
     """Tests that the package version is set."""
-    assert bobbie.__version__ == '0.3.1'
+    assert bobbie.__version__ == '0.3.2'
 
 
 def test_create_from_dict() -> None:
@@ -168,6 +173,22 @@ def test_create_from_str_path() -> None:
     verify_settings(bobbie.Settings.create('tests/project_settings.yaml'))
 
 
+def test_create_file_with_parameters() -> None:
+    """Tests that `parameters` reach `Settings` when loading a file."""
+    file_path = FOLDER / 'project_settings.toml'
+    loaded = bobbie.Settings.create(
+        file_path,
+        parameters = {'name': 'Project Settings'},
+        parse_float = decimal.Decimal)
+    assert loaded.name == 'Project Settings'
+    verify_settings(loaded)
+    loaded = bobbie.Settings.from_file(
+        file_path, parameters = {'default_factory': dict})
+    assert loaded.get('missing') == {}
+    with pytest.raises(TypeError):
+        bobbie.Settings.create(file_path, parameters = {'color': 'red'})
+
+
 def test_unsupported_extension(tmp_path: pathlib.Path) -> None:
     """Tests that a file type with no loader raises a `TypeError`.
 
@@ -179,6 +200,63 @@ def test_unsupported_extension(tmp_path: pathlib.Path) -> None:
     file_path.write_text('a,b\n1,2\n')
     with pytest.raises(TypeError):
         bobbie.Settings.create(file_path)
+
+
+def test_extension_without_loader(
+        tmp_path: pathlib.Path,
+        monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests that a mapped file type with no loader raises a `TypeError`.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        monkeypatch: pytest fixture for changing the global options.
+
+    """
+    monkeypatch.setitem(options._FILE_EXTENSIONS, 'conf', 'conf')
+    file_path = tmp_path / 'settings.conf'
+    file_path.write_text('general.seed = 43\n')
+    with pytest.raises(TypeError, match = 'conf file is not supported'):
+        bobbie.Settings.create(file_path)
+
+
+def test_module_without_settings(tmp_path: pathlib.Path) -> None:
+    """Tests that a module with no settings variable raises a clear error.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+
+    """
+    file_path = tmp_path / 'other.py'
+    file_path.write_text('config = {"general": {"seed": 43}}\n')
+    with pytest.raises(AttributeError, match = 'no variable named settings'):
+        bobbie.Settings.create(file_path)
+
+
+@pytest.mark.parametrize(
+    ('file_name', 'text'),
+    [
+        ('accents.ini', '[general]\nname = café\n'),
+        ('accents.json', '{"general": {"name": "café"}}'),
+        ('accents.yaml', 'general:\n    name: café\n')])
+def test_file_encoding(
+        tmp_path: pathlib.Path,
+        file_name: str,
+        text: str) -> None:
+    """Tests that files are read as UTF-8 unless an encoding is passed.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        file_name: name of the settings file to write.
+        text: contents of the settings file.
+
+    """
+    file_path = tmp_path / file_name
+    file_path.write_text(text, encoding = 'utf-8')
+    loaded = bobbie.Settings.create(file_path)
+    assert loaded['general']['name'] == 'café'
+    file_path.write_text(text, encoding = 'cp1252')
+    loaded = bobbie.Settings.create(file_path, encoding = 'cp1252')
+    assert loaded['general']['name'] == 'café'
 
 
 @pytest.mark.parametrize(
@@ -326,6 +404,24 @@ def test_delete(settings: bobbie.Settings) -> None:
         settings.delete('missing', return_error = True)
 
 
+def test_delete_global_option(
+        settings: bobbie.Settings,
+        monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests that `delete` reads the global default when it is called.
+
+    Args:
+        settings: `Settings` fixture.
+        monkeypatch: pytest fixture for changing the global options.
+
+    """
+    monkeypatch.setattr(options, '_ALWAYS_RETURN_ERROR', True)
+    with pytest.raises(KeyError):
+        settings.delete('missing')
+    with pytest.raises(KeyError):
+        del settings['missing']
+    settings.delete('missing', return_error = False)
+
+
 def test_get(settings: bobbie.Settings) -> None:
     """Tests `get` with a `default` and with `setdefault`.
 
@@ -471,6 +567,11 @@ def test_typify_lists_and_dicts() -> None:
     assert typify('[x, y], z') == [['x', 'y'], 'z']
     assert typify("don't, stop") == ["don't", 'stop']
     assert typify('a,b') == 'a,b'
+    assert typify('see (a, b)') == 'see (a, b)'
+    assert typify('f(x, y)') == 'f(x, y)'
+    assert typify('"a, b"') == '"a, b"'
+    assert typify('x, (a, b)') == ['x', '(a, b)']
+    assert typify('[x, (a, b)]') == ['x', '(a, b)']
 
 
 def test_split_top_level() -> None:
