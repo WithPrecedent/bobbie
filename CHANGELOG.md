@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## Unreleased
+
+* Added the `py.typed` marker so that type checkers use the type hints in
+  `bobbie`.
+
 ## 0.3.0
 
 * **Breaking:** `settings + other` now returns a new `Settings` and leaves both operands unchanged. Use `settings += other` to add `other` in place (the old behavior of "+").
