@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## Unreleased
+
+* The API documentation now has one page for each public object (the names in `__all__`), so it only documents `Settings`, and only once. Before, it had a page for every module, including the private `options` and `utilities`, and showed `Settings` twice.
+* The `Settings` page now includes the public methods inherited from `bunches.Dictionary` (`fromkeys`, `setdefault`, and `subset`) and leaves out the unused `sources` attribute inherited from `wonka.Sourcerer`.
+* Added a `griffe` extension so that section markers (such as `""" Class Methods """`) after an attribute are not shown as that attribute's description.
+
 ## 0.3.2
 
 * Fixed type inference, which raised a `RecursionError` for strings with a ", " only inside brackets, parentheses, or quotes (such as an `ini` value of `see (a, b)`). Those strings now stay strings.

@@ -346,4 +346,4 @@ loader.file_encoding  # 'utf-8'
   parsers, the global options, defaults for missing keys, and subclassing.
 * The [Recipes](recipes.md) show common patterns, such as layering default
   and local settings.
-* The [API reference](reference/bobbie/index.md) documents every method.
+* The [API reference](reference/Settings.md) documents every method.
