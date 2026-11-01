@@ -13,6 +13,7 @@ Contents:
     _ALWAYS_RETURN_ERROR: whether `Settings.delete` raises an error for a
         missing key by default.
     _TYPER: function used to infer the datatypes of loaded values.
+    _INLINE_COMMENTS: whether to remove comments after values in `ini` files.
     _MISSING: sentinel instance for a missing value or argument.
 
 """
@@ -47,6 +48,7 @@ _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
 _ALWAYS_RETURN_ERROR: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify
+_INLINE_COMMENTS: bool = True
 
 """ Missing Argument Sentinel Class and Instance """
 

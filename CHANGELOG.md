@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
-## Unreleased
+## 0.3.3
 
 * The API documentation now has one page for each public object (the names in `__all__`), so it only documents `Settings`, and only once. Before, it had a page for every module, including the private `options` and `utilities`, and showed `Settings` twice.
 * The `Settings` page now includes the public methods inherited from `bunches.Dictionary` (`fromkeys`, `setdefault`, and `subset`) and leaves out the unused `sources` attribute inherited from `wonka.Sourcerer`.
 * Added a `griffe` extension so that section markers (such as `""" Class Methods """`) after an attribute are not shown as that attribute's description.
+* Type inference now splits a list on a comma followed by any whitespace, not only a space, so an `ini` list can span several lines (`steps = a, b,` followed by an indented `c`). Before, a comma at the end of a line did not split the value.
+* **Possibly breaking:** `ini` files can have comments after values. A `#` with whitespace before and after it starts a comment that runs to the end of its line (as in `label = target # the column to predict`), on any line of a value. A `#` without whitespace on both sides (as in `#1f77b4` or `a#b`) is kept. Set `options._INLINE_COMMENTS` to `False` to keep comments in values, as before.
 
 ## 0.3.2
 

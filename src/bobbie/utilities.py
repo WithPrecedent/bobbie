@@ -3,12 +3,16 @@
 Contents:
     _PAIR_LENGTH: number of parts in a dict entry and of quotes around a
         quoted string.
+    _LIST_SEPARATOR: pattern that separates the items of a list that is not
+        in brackets.
+    _INLINE_COMMENT: pattern of a comment after a value on a line.
 
 """
 
 from __future__ import annotations
 
 import pathlib
+import re
 from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
@@ -16,6 +20,13 @@ if TYPE_CHECKING:
 
 # Number of parts in a dict entry (key and value) and quotes around a string.
 _PAIR_LENGTH = 2
+# A comma followed by whitespace (a space, tab, or line break) separates the
+# items of a list that is not in brackets, so a list can span several lines.
+_LIST_SEPARATOR = r',\s'
+# A "#" with whitespace (or the start of the line) before it and whitespace
+# (or the end of the line) after it starts a comment, so a value such as
+# "#1f77b4" is kept.
+_INLINE_COMMENT = re.compile(r'(?:^|\s)#(?=\s|$).*')
 
 """ Private Functions """
 
@@ -71,10 +82,11 @@ def _typify(
     based upon the content of the string. A string wrapped in square brackets
     (such as '[x, y, z]') becomes a list, a string wrapped in curly braces
     (such as '{a: 1, b: 2}') becomes a dict, and any other string containing
-    ', ' outside of brackets and quotes becomes a list. Items in a list or
-    dict are converted recursively and
-    may be nested. Quotes around an item in a list or dict are removed. If no
-    alternative datatype is found, the item is returned in its original form.
+    a comma followed by whitespace (such as a space or a line break) outside
+    of brackets and quotes becomes a list. Items in a list or dict are
+    converted recursively and may be nested. Quotes around an item in a list
+    or dict are removed. If no alternative datatype is found, the item is
+    returned in its original form.
 
     Args:
         item: string to be converted to appropriate datatype.
@@ -109,9 +121,9 @@ def _typify(
                         _typify_element(k): _typify_element(v)
                         for k, v in entries}
                 return item
-            elif ', ' in item:
-                parts = _split_top_level(item, ', ')
-                # A ', ' that is only inside brackets or quotes (such as
+            elif re.search(_LIST_SEPARATOR, item):
+                parts = _split_top_level(item, _LIST_SEPARATOR)
+                # A separator that is only inside brackets or quotes (such as
                 # '(a, b)') does not split `item`, so it stays a str.
                 if parts == [stripped]:
                     return item
@@ -146,7 +158,7 @@ def _split_top_level(
         item: str,
         separator: str,
         maxsplit: int = -1) -> list[str]:
-    """Splits `item` on `separator`, ignoring nested or quoted separators.
+    """Splits `item` where `separator` matches, ignoring nested or quoted ones.
 
     A `separator` inside square brackets, curly braces, parentheses, or quotes
     does not split `item`. A quote only counts if it begins a part, so an
@@ -156,7 +168,8 @@ def _split_top_level(
 
     Args:
         item: string to split.
-        separator: substring to split `item` on.
+        separator: regular expression that matches where to split `item`
+            (such as ',' or `_LIST_SEPARATOR`).
         maxsplit: maximum number of splits to make. If it is negative, there
             is no limit. Defaults to -1.
 
@@ -164,6 +177,7 @@ def _split_top_level(
         Parts of `item`.
 
     """
+    pattern = re.compile(separator)
     parts: list[str] = []
     depth = 0
     quote = None
@@ -182,12 +196,35 @@ def _split_top_level(
             depth = max(depth - 1, 0)
         elif (
                 depth == 0
-                and item.startswith(separator, index)
-                and maxsplit != len(parts)):
+                and maxsplit != len(parts)
+                and (match := pattern.match(item, index))):
             parts.append(item[start:index])
-            index += len(separator)
+            index = match.end()
             start = index
             continue
         index += 1
     parts.append(item[start:])
     return [p.strip() for p in parts if p.strip()]
+
+
+def _strip_inline_comments(item: str) -> str:
+    """Removes the comments after values from each line of `item`.
+
+    A comment starts with a "#" that has whitespace (or the start of the line)
+    before it and whitespace (or the end of the line) after it, and runs to
+    the end of the line. Whitespace left at the end of a line is removed, and
+    so is a line that only held a comment.
+
+    Args:
+        item: text of a value, which may span several lines.
+
+    Returns:
+        `item` without its comments.
+
+    """
+    lines = []
+    for line in item.split('\n'):
+        stripped = _INLINE_COMMENT.sub('', line).rstrip()
+        if stripped or not line.strip():
+            lines.append(stripped)
+    return '\n'.join(lines)

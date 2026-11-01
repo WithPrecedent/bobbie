@@ -119,8 +119,10 @@ for the variable name).
 * `'42'` becomes `42` and `'2.5'` becomes `2.5`.
 * `'true'`, `'yes'`, `'false'`, and `'no'` (in any case) become `True` or
   `False`.
-* `'[x, y, z]'` and `'x, y, z'` become `['x', 'y', 'z']` (a comma with no
-  space, as in `'x,y'`, does not split a string).
+* `'[x, y, z]'` and `'x, y, z'` become `['x', 'y', 'z']`. A comma followed by
+  a line break also splits a list, so a list can span several lines of an
+  `ini` file, but a comma with nothing after it, as in `'x,y'`, does not
+  split a string.
 * `'{a: 1, b: [x, y]}'` becomes `{'a': 1, 'b': ['x', 'y']}`.
 
 Items in lists and dicts are converted the same way and may be nested. Put an

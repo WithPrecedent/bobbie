@@ -194,6 +194,10 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
     def from_ini(cls, source: pathlib.Path | str, **kwargs: Any) -> Settings:
         """Creates a `Settings` instance from a file path to an `ini` file.
 
+        Comments after values (a "#" with whitespace before and after it, to
+        the end of its line) are removed unless `options._INLINE_COMMENTS` is
+        `False`.
+
         Args:
             source: path to file with data to store in a `Settings` instance.
             **kwargs: additional parameters and arguments to pass to the
@@ -227,6 +231,13 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         # every other section).
         contents: GenericDict = {
             name: dict(parser[name]) for name in parser.sections()}
+        if options._INLINE_COMMENTS:
+            contents = {
+                name: {
+                    key: utilities._strip_inline_comments(value)
+                    if isinstance(value, str) else value
+                    for key, value in section.items()}
+                for name, section in contents.items()}
         if options._INFER_TYPES['ini']:
             contents = cls._infer_types(contents)
         return cls(contents)

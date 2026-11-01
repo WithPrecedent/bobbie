@@ -20,6 +20,9 @@ Contents:
     test_missing_file: tests that every loader raises on a missing file.
     test_ini_percent_sign: tests `ini` values that contain "%".
     test_ini_lists_and_dicts: tests `ini` values that are lists and dicts.
+    test_ini_multiline_lists_and_comments: tests `ini` lists over several
+        lines and comments after values.
+    test_ini_inline_comments_off: tests turning off removing comments.
     test_keys_items_values: tests the `dict` views.
     test_item_access: tests getting, setting, deleting, length, and iteration.
     test_add: tests adding new and existing sections.
@@ -35,6 +38,7 @@ Contents:
     test_typify_scalars: tests converting strings to scalars.
     test_typify_lists_and_dicts: tests converting strings to lists and dicts.
     test_split_top_level: tests splitting strings outside brackets and quotes.
+    test_strip_inline_comments: tests removing comments after values.
     test_iterify: tests wrapping items in iterables.
     test_pathlibify: tests converting paths to `pathlib.Path`.
 
@@ -110,7 +114,7 @@ def verify_settings(loaded: bobbie.Settings) -> None:
 
 def test_version() -> None:
     """Tests that the package version is set."""
-    assert bobbie.__version__ == '0.3.2'
+    assert bobbie.__version__ == '0.3.3'
 
 
 def test_create_from_dict() -> None:
@@ -314,6 +318,50 @@ def test_ini_lists_and_dicts(tmp_path: pathlib.Path) -> None:
     loaded = bobbie.Settings.create(file_path)
     assert loaded['tasks']['steps'] == ['stop', 'drop', 'roll']
     assert loaded['tasks']['sizes'] == {'small': 1, 'big': 2}
+
+
+def test_ini_multiline_lists_and_comments(tmp_path: pathlib.Path) -> None:
+    """Tests `ini` lists over several lines and comments after values.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+
+    """
+    file_path = tmp_path / 'comments.ini'
+    file_path.write_text(
+        '[tasks]\n'
+        'label = target # the column to predict\n'
+        'steps = stop, drop, # the first two\n'
+        '    roll\n'
+        'ranges = [200,\n'
+        '    1000]\n'
+        "query = state not in ['GU', 'PR']\n"
+        'color = #1f77b4\n'
+        'code = a#b\n')
+    loaded = bobbie.Settings.create(file_path)
+    assert loaded['tasks']['label'] == 'target'
+    assert loaded['tasks']['steps'] == ['stop', 'drop', 'roll']
+    assert loaded['tasks']['ranges'] == [200, 1000]
+    assert loaded['tasks']['query'] == "state not in ['GU', 'PR']"
+    assert loaded['tasks']['color'] == '#1f77b4'
+    assert loaded['tasks']['code'] == 'a#b'
+
+
+def test_ini_inline_comments_off(
+        tmp_path: pathlib.Path,
+        monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests that `_INLINE_COMMENTS` turns off removing comments.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        monkeypatch: pytest fixture for changing options.
+
+    """
+    monkeypatch.setattr(options, '_INLINE_COMMENTS', False)
+    file_path = tmp_path / 'kept.ini'
+    file_path.write_text('[tasks]\nlabel = target # note\n')
+    loaded = bobbie.Settings.create(file_path)
+    assert loaded['tasks']['label'] == 'target # note'
 
 
 """ Mapping Tests """
@@ -572,6 +620,9 @@ def test_typify_lists_and_dicts() -> None:
     assert typify('"a, b"') == '"a, b"'
     assert typify('x, (a, b)') == ['x', '(a, b)']
     assert typify('[x, (a, b)]') == ['x', '(a, b)']
+    assert typify('a,\nb, c') == ['a', 'b', 'c']
+    assert typify('a,\tb') == ['a', 'b']
+    assert typify("x in ['a', 'b']") == "x in ['a', 'b']"
 
 
 def test_split_top_level() -> None:
@@ -582,6 +633,20 @@ def test_split_top_level() -> None:
     assert split('"a, b", c', ',') == ['"a, b"', 'c']
     assert split('a), b', ',') == ['a)', 'b']
     assert split('', ',') == []
+    assert split('a,\nb, (c, d)', utilities._LIST_SEPARATOR) == [
+        'a', 'b', '(c, d)']
+
+
+def test_strip_inline_comments() -> None:
+    """Tests removing comments after values, line by line."""
+    strip = utilities._strip_inline_comments
+    assert strip('a # note') == 'a'
+    assert strip('a, # note\nb') == 'a,\nb'
+    assert strip('a,\n# note\nb') == 'a,\nb'
+    assert strip('#1f77b4') == '#1f77b4'
+    assert strip('a#b') == 'a#b'
+    assert strip('a #') == 'a'
+    assert strip('a\n\nb') == 'a\n\nb'
 
 
 def test_iterify() -> None:

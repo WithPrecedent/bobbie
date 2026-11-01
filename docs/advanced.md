@@ -83,6 +83,25 @@ A few details are specific to `ini` files:
   but `bobbie` does not.
 * **The `DEFAULT` section is not a section of its own.** Its options are
   added to every other section, as `configparser` does.
+* **Comments can follow values.** A `#` with whitespace before and after it
+  starts a comment that runs to the end of its line, on the first line of a
+  value or any line after it. A `#` without whitespace on both sides (as in
+  `#1f77b4` or `a#b`) is part of the value. Set `_INLINE_COMMENTS` to `False`
+  to keep comments in values (see [Global options](#global-options)).
+* **A list can span several lines**, since a comma followed by a line break
+  separates its items (see [Type inference rules](#type-inference-rules)).
+
+```ini
+[tasks]
+label = target  # the column to predict
+steps = stop, drop,  # the first two steps
+    roll
+```
+
+```python
+settings = bobbie.Settings.create('tasks.ini')
+settings['tasks']  # {'label': 'target', 'steps': ['stop', 'drop', 'roll']}
+```
 
 ```ini
 [DEFAULT]
@@ -124,9 +143,9 @@ When type inference is on for a file type (by default, `ini` and `json`),
 5. A string in curly braces (such as `'{a: 1, b: 2}'`) becomes a `dict` if
    every entry has a key and a value separated by `:`. Otherwise, it stays a
    string.
-6. A string that contains a comma followed by a space (such as `'x, y, z'`)
-   becomes a `list`. A comma with no space (such as `'a,b'`) does not split
-   the string.
+6. A string that contains a comma followed by whitespace, such as a space or
+   a line break (as in `'x, y, z'` or `'x,\ny'`), becomes a `list`. A comma
+   with no whitespace after it (such as `'a,b'`) does not split the string.
 7. Any other string is unchanged. Values that are not strings (such as `json`
    numbers) are never changed.
 
@@ -142,6 +161,7 @@ item, and quotes around an item keep it as a string and are removed:
 | `'{a: {b: no}}'` | `{'a': {'b': False}}` |
 | `'{url: "http://x.com"}'` | `{'url': 'http://x.com'}` |
 | `'[x, y], z'` | `[['x', 'y'], 'z']` |
+| `"x not in ['a', 'b']"` | `"x not in ['a', 'b']"` |
 
 Inference reaches the values at the top level and the values in each section.
 Values nested more deeply (such as a `json` object inside a section) are left
@@ -160,6 +180,7 @@ are private (their names start with `_`), but you can change them to adjust
 | `_OVERWRITE_ATTRIBUTES` | `True` | Default for the `overwrite` argument of `inject`. |
 | `_FILE_EXTENSIONS` | `{'ini': 'ini', 'json': 'json', 'toml': 'toml', 'py': 'module', 'yaml': 'yaml', 'yml': 'yaml'}` | Maps file extensions to file types (and so to `from_<type>` loaders). |
 | `_TYPER` | `bobbie.utilities._typify` | Function used to infer the type of each value. |
+| `_INLINE_COMMENTS` | `True` | Whether to remove comments after values in `ini` files. |
 | `_ALWAYS_RETURN_ERROR` | `False` | Default for the `return_error` argument of `delete` (and so whether `del` raises a `KeyError` for a missing key). |
 
 For example:
