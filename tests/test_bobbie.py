@@ -23,6 +23,17 @@ Contents:
     test_ini_multiline_lists_and_comments: tests `ini` lists over several
         lines and comments after values.
     test_ini_inline_comments_off: tests turning off removing comments.
+    test_export_file: tests exporting every supported file type.
+    test_export_keyword_arguments: tests passing kwargs to the writer.
+    test_export_unsupported_extension: tests exporting a file type with no
+        export method.
+    test_export_extension_without_method: tests exporting a mapped file type
+        with no export method.
+    test_export_encoding: tests the default and chosen export encodings.
+    test_ini_export_requires_sections: tests `to_ini` with values outside of
+        sections.
+    test_ini_export_round_trip: tests that exported `ini` values keep their
+        types.
     test_keys_items_values: tests the `dict` views.
     test_item_access: tests getting, setting, deleting, length, and iteration.
     test_add: tests adding new and existing sections.
@@ -39,6 +50,7 @@ Contents:
     test_typify_lists_and_dicts: tests converting strings to lists and dicts.
     test_split_top_level: tests splitting strings outside brackets and quotes.
     test_strip_inline_comments: tests removing comments after values.
+    test_stringify: tests converting values to strings for `ini` files.
     test_iterify: tests wrapping items in iterables.
     test_pathlibify: tests converting paths to `pathlib.Path`.
 
@@ -114,7 +126,7 @@ def verify_settings(loaded: bobbie.Settings) -> None:
 
 def test_version() -> None:
     """Tests that the package version is set."""
-    assert bobbie.__version__ == '0.3.3'
+    assert bobbie.__version__ == '0.4.0'
 
 
 def test_create_from_dict() -> None:
@@ -362,6 +374,151 @@ def test_ini_inline_comments_off(
     file_path.write_text('[tasks]\nlabel = target # note\n')
     loaded = bobbie.Settings.create(file_path)
     assert loaded['tasks']['label'] == 'target # note'
+
+
+""" File Export Tests """
+
+
+@pytest.mark.parametrize(
+    ('extension', 'exporter'),
+    [
+        ('ini', 'to_ini'),
+        ('json', 'to_json'),
+        ('py', 'to_module'),
+        ('toml', 'to_toml'),
+        ('yaml', 'to_yaml'),
+        ('yml', 'to_yaml')])
+def test_export_file(
+        tmp_path: pathlib.Path,
+        settings: bobbie.Settings,
+        extension: str,
+        exporter: str) -> None:
+    """Tests exporting each supported file type and loading it back.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        settings: `Settings` fixture.
+        extension: file extension for the file type.
+        exporter: name of the `Settings` method for the file type.
+
+    """
+    file_path = tmp_path / f'exported.{extension}'
+    getattr(settings, exporter)(file_path)
+    verify_settings(bobbie.Settings.create(file_path))
+    file_path.unlink()
+    settings.to_file(str(file_path))
+    verify_settings(bobbie.Settings.create(file_path))
+
+
+def test_export_keyword_arguments(
+        tmp_path: pathlib.Path,
+        settings: bobbie.Settings) -> None:
+    """Tests that keyword arguments are passed to the writer.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        settings: `Settings` fixture.
+
+    """
+    file_path = tmp_path / 'exported.json'
+    settings.to_file(file_path, indent = None)
+    assert len(file_path.read_text().splitlines()) == 1
+    verify_settings(bobbie.Settings.create(file_path))
+
+
+def test_export_unsupported_extension(
+        tmp_path: pathlib.Path,
+        settings: bobbie.Settings) -> None:
+    """Tests that a file type with no export method raises a `TypeError`.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        settings: `Settings` fixture.
+
+    """
+    file_path = tmp_path / 'exported.csv'
+    with pytest.raises(TypeError, match = 'not supported'):
+        settings.to_file(file_path)
+    assert not file_path.exists()
+
+
+def test_export_extension_without_method(
+        tmp_path: pathlib.Path,
+        monkeypatch: pytest.MonkeyPatch,
+        settings: bobbie.Settings) -> None:
+    """Tests that a mapped file type with no export method raises a `TypeError`.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        monkeypatch: pytest fixture for changing the global options.
+        settings: `Settings` fixture.
+
+    """
+    monkeypatch.setitem(options._FILE_EXTENSIONS, 'conf', 'conf')
+    with pytest.raises(TypeError, match = 'conf file is not supported'):
+        settings.to_file(tmp_path / 'exported.conf')
+
+
+@pytest.mark.parametrize(
+    ('file_name', 'kwargs'),
+    [
+        ('accents.ini', {}),
+        ('accents.json', {'ensure_ascii': False}),
+        ('accents.py', {}),
+        ('accents.yaml', {'allow_unicode': True})])
+def test_export_encoding(
+        tmp_path: pathlib.Path,
+        file_name: str,
+        kwargs: dict[str, Any]) -> None:
+    """Tests that files are written as UTF-8 unless an encoding is passed.
+
+    Python modules are always written as UTF-8.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+        file_name: name of the settings file to write.
+        kwargs: keyword arguments for the writer that keep "é" in the file.
+
+    """
+    loaded = bobbie.Settings({'general': {'name': 'café'}})
+    file_path = tmp_path / file_name
+    loaded.to_file(file_path, **kwargs)
+    assert 'café' in file_path.read_text(encoding = 'utf-8')
+    assert bobbie.Settings.create(file_path)['general']['name'] == 'café'
+    if file_path.suffix != '.py':
+        loaded.to_file(file_path, encoding = 'cp1252', **kwargs)
+        assert 'café' in file_path.read_text(encoding = 'cp1252')
+        reloaded = bobbie.Settings.create(file_path, encoding = 'cp1252')
+        assert reloaded['general']['name'] == 'café'
+
+
+def test_ini_export_requires_sections(tmp_path: pathlib.Path) -> None:
+    """Tests that `to_ini` rejects top-level values that are not sections.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+
+    """
+    loaded = bobbie.Settings({'general': {'seed': 43}, 'verbose': True})
+    with pytest.raises(TypeError, match = 'verbose'):
+        loaded.to_ini(tmp_path / 'exported.ini')
+
+
+def test_ini_export_round_trip(tmp_path: pathlib.Path) -> None:
+    """Tests that `ini` values keep their types when loaded back.
+
+    Args:
+        tmp_path: temporary folder from pytest.
+
+    """
+    contents = {
+        'files': {
+            'float_format': '%.4f',
+            'steps': ['stop', 'drop, roll', '', '1', "don't"],
+            'sizes': {'small': 1, 'big': [2.5, True], 'name': 'yes'}}}
+    file_path = tmp_path / 'exported.ini'
+    bobbie.Settings(contents).to_ini(file_path)
+    assert dict(bobbie.Settings.create(file_path).contents) == contents
 
 
 """ Mapping Tests """
@@ -647,6 +804,21 @@ def test_strip_inline_comments() -> None:
     assert strip('a#b') == 'a#b'
     assert strip('a #') == 'a'
     assert strip('a\n\nb') == 'a\n\nb'
+
+
+def test_stringify() -> None:
+    """Tests converting values to strings that `_typify` converts back."""
+    stringify = utilities._stringify
+    assert stringify('csv') == 'csv'
+    assert stringify(42) == '42'
+    assert stringify(True) == 'True'
+    assert stringify(['x', 'y']) == '[x, y]'
+    assert stringify(('x',)) == '[x]'
+    assert stringify(['1', 'a, b', '', ' a']) == "['1', 'a, b', '', ' a']"
+    assert stringify(["don't"]) == '["don\'t"]'
+    assert stringify({'a': 1, 'b': [[1], {}]}) == '{a: 1, b: [[1], {}]}'
+    for item in (['1', 'a, b', 'yes', 'c'], {'a': {'b': ['no', 2.5]}}):
+        assert utilities._typify(stringify(item)) == item
 
 
 def test_iterify() -> None:

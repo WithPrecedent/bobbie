@@ -71,6 +71,8 @@ settings = bobbie.Settings.create('legacy.ini', encoding = 'cp1252')
 
 `toml` files are always UTF-8, as the `toml` format requires.
 
+The exporters take `encoding` too (see [Writer arguments](#writer-arguments)).
+
 ### `ini` files
 
 A few details are specific to `ini` files:
@@ -126,6 +128,60 @@ variable is missing, it raises an `AttributeError`. You can change the
 variable name with
 `_MODULE_SETTINGS_ATTRIBUTE` (see [Global options](#global-options)).
 
+## Writer arguments
+
+Each exporter passes its keyword arguments to a different writer, and some
+change a default so that the file is easier to read:
+
+| Exporter | Keyword arguments go to | Defaults set by `bobbie` | Useful arguments |
+| --- | --- | --- | --- |
+| `to_ini` | `configparser.ConfigParser` | `interpolation = None` | `delimiters`, `encoding` |
+| `to_json` | `json.dump` | `indent = 4` | `ensure_ascii`, `sort_keys`, `encoding` |
+| `to_module` | `pprint.pformat` | `sort_dicts = False` | `width`, `indent` |
+| `to_toml` | `tomli_w.dump` | | `indent`, `multiline_strings` |
+| `to_yaml` | `yaml.safe_dump` | `sort_keys = False` | `allow_unicode`, `default_flow_style`, `encoding` |
+
+`to_file` passes its keyword arguments to the exporter for the file type. For
+example, to write a `json` file with keys in sorted order:
+
+```python
+settings.to_file('settings.json', sort_keys = True)
+```
+
+`ini`, `json`, and `yaml` files are written as UTF-8 unless you pass
+`encoding`. `json` and `yaml` escape characters that are not ASCII unless you
+pass `ensure_ascii = False` or `allow_unicode = True`. `toml` files and Python
+modules are always UTF-8.
+
+### Exporting `ini` files
+
+`to_ini` converts each value to a string that `from_ini` converts back to the
+same value:
+
+* Lists (and tuples) are written in square brackets and dicts in curly braces,
+  such as `[stop, drop, roll]` and `{small: 1, big: [2.5, True]}`.
+* Items in a list or dict are quoted when they would otherwise be converted or
+  split, such as `['1', 'a, b', '']`.
+* Interpolation is off, as it is when loading, so values such as `%.4f` are
+  written as they are.
+
+A few values cannot be written so that they load back unchanged:
+
+* **Top-level values outside a section.** `ini` files only hold values inside
+  sections, so `to_ini` raises a `TypeError` if a top-level value is not a
+  `dict`.
+* **Strings that look like other types.** A string value of `'42'`, `'yes'`, or
+  `'a, b'` in a section is written without quotes (`ini` values have none) and
+  loads as `42`, `True`, or `['a', 'b']`. Turn off type inference for `ini`
+  files if you need these strings (see [Global options](#global-options)).
+* **Comments.** A `#` with whitespace before and after it (as in `a # b`)
+  loads as the start of a comment, even inside quotes. Set `_INLINE_COMMENTS`
+  to `False` to keep it.
+* **`None`.** It is written as `None` and loads as the string `'None'`.
+
+The other file types store their own types, so they do not have these limits
+(except that `toml` has no `None` and `json` keys must be strings).
+
 ## Type inference rules
 
 When type inference is on for a file type (by default, `ini` and `json`),
@@ -178,7 +234,7 @@ are private (their names start with `_`), but you can change them to adjust
 | `_INFER_TYPES` | `{'ini': True, 'json': True, 'toml': False, 'module': False, 'yaml': False}` | Whether to infer types for each file type. |
 | `_MODULE_SETTINGS_ATTRIBUTE` | `'settings'` | Name of the variable that holds the settings in a Python module. |
 | `_OVERWRITE_ATTRIBUTES` | `True` | Default for the `overwrite` argument of `inject`. |
-| `_FILE_EXTENSIONS` | `{'ini': 'ini', 'json': 'json', 'toml': 'toml', 'py': 'module', 'yaml': 'yaml', 'yml': 'yaml'}` | Maps file extensions to file types (and so to `from_<type>` loaders). |
+| `_FILE_EXTENSIONS` | `{'ini': 'ini', 'json': 'json', 'toml': 'toml', 'py': 'module', 'yaml': 'yaml', 'yml': 'yaml'}` | Maps file extensions to file types (and so to `from_<type>` loaders and `to_<type>` exporters). |
 | `_TYPER` | `bobbie.utilities._typify` | Function used to infer the type of each value. |
 | `_INLINE_COMMENTS` | `True` | Whether to remove comments after values in `ini` files. |
 | `_ALWAYS_RETURN_ERROR` | `False` | Default for the `return_error` argument of `delete` (and so whether `del` raises a `KeyError` for a missing key). |
@@ -282,3 +338,27 @@ settings = ProjectSettings.create('project.conf')
 
 Only `ProjectSettings` can load the new file type. Loading a ".conf" file with
 `bobbie.Settings` raises a `TypeError`, because it has no `from_conf` method.
+
+To export the new file type too, add a `to_<type>` method that takes the path
+and keyword arguments. `to_file` finds it through the same extension mapping:
+
+```python
+class ProjectSettings(bobbie.Settings):
+    """Settings that can also load and export ".conf" files."""
+
+    # from_conf as above.
+
+    def to_conf(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports the settings to a ".conf" file."""
+        lines = [
+            f'{section}.{option} = {value}'
+            for section, options in self.items()
+            for option, value in options.items()]
+        pathlib.Path(path).write_text('\n'.join(lines) + '\n', encoding = 'utf-8')
+
+
+settings.to_file('copy.conf')
+```
+
+Exporting a ".conf" file with `bobbie.Settings` raises a `TypeError`, because
+it has no `to_conf` method.

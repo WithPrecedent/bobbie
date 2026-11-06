@@ -6,6 +6,8 @@ Contents:
         file type.
     _LOAD_METHOD: returns the name of the `Settings` class method that loads
         a file type.
+    _EXPORT_METHOD: returns the name of the `Settings` method that exports to
+        a file type.
     _MODULE_SETTINGS_ATTRIBUTE: name of the variable that stores settings in a
         Python module.
     _OVERWRITE_ATTRIBUTES: whether `Settings.inject` overwrites existing
@@ -44,6 +46,7 @@ _INFER_TYPES: dict[str, bool] = {
     'module': False,
     'yaml': False}
 _LOAD_METHOD: Callable[[str], str] = lambda x: f'from_{x}'
+_EXPORT_METHOD: Callable[[str], str] = lambda x: f'to_{x}'
 _MODULE_SETTINGS_ATTRIBUTE: str = 'settings'
 _OVERWRITE_ATTRIBUTES: bool = True
 _ALWAYS_RETURN_ERROR: bool = False

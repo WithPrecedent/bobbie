@@ -29,6 +29,7 @@ dependencies = [
     "wonka >= 0.3.0"]
 
 [project.optional-dependencies]
+toml = ["tomli-w"]
 yaml = ["pyyaml"]
 
 [project.urls]
@@ -61,7 +62,8 @@ tests = [
     "pytest",
     "pytest-cov",
     "pytest-randomly",
-    "pytest-xdist"]
+    "pytest-xdist",
+    "tomli-w"]
 
 [build-system]
 # Version 1.27 is the first to support SPDX license expressions (PEP 639).

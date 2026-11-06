@@ -54,6 +54,9 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
     * `ini`, `json`, `py`, `toml`, `yaml`, and `yml`.
 
+    Settings can also be exported to any of those file types with `to_file`
+    or the method for the file type (such as `to_toml`).
+
     The best way to create a `Settings` instance is to call `Settings.create`
     and pass as the first argument either:
         1) a `pathlib` or `str` path to a compatible file (including a Python
@@ -527,6 +530,159 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         return self.contents.keys()
 
+    def to_file(self, path: pathlib.Path | str, /, **kwargs: Any) -> None:
+        """Exports `contents` to a file of the type matching its extension.
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to the
+                writer used by `bobbie` (such as `indent` for `json` files).
+
+        Raises:
+            TypeError: if no export method is found for the passed file type.
+
+        """
+        path = utilities._pathlibify(path)
+        exporter = self._get_exporter(path)
+        exporter(path, **kwargs)
+        return
+
+    def to_ini(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports `contents` to an `ini` file.
+
+        Every top-level value must be a section (a `dict`-like object) because
+        `ini` files do not allow values outside of sections. Values are
+        converted to strings that `from_ini` converts back to their datatypes
+        (for example, `['x', 'y']` becomes '[x, y]'). Because `ini` files do not
+        store types, a str that looks like another type (such as '42') is
+        loaded as that type. Unless `options._INLINE_COMMENTS` is `False`, a
+        "#" with whitespace before and after it in a value is loaded as the
+        start of a comment.
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to the
+                `configparser.ConfigParser` constructor (such as
+                `delimiters`), except for `encoding`, which is the file
+                encoding (defaults to 'utf-8').
+
+        Raises:
+            TypeError: if a top-level value in `contents` is not a `dict`-like
+                object.
+
+        """
+        path = utilities._pathlibify(path)
+        import configparser
+
+        for key, value in self.contents.items():
+            if not isinstance(value, MutableMapping):
+                message = f'{key} must be a section (a mapping) in ini files'
+                raise TypeError(message)
+        encoding = kwargs.pop('encoding', 'utf-8')
+        # Interpolation is turned off by default to match `from_ini`, so that
+        # values such as '%.4f' are written as they are.
+        kwargs.setdefault('interpolation', None)
+        parser = configparser.ConfigParser(**kwargs)
+        parser.optionxform = lambda option: option  # type: ignore
+        parser.read_dict({
+            str(name): {
+                str(key): utilities._stringify(value)
+                for key, value in section.items()}
+            for name, section in self.contents.items()})
+        with open(path, 'w', encoding = encoding) as settings_file:
+            parser.write(settings_file)
+        return
+
+    def to_json(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports `contents` to a `json` file.
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to
+                `json.dump` (`indent` defaults to 4), except for `encoding`,
+                which is the file encoding (defaults to 'utf-8').
+
+        """
+        path = utilities._pathlibify(path)
+        import json
+
+        encoding = kwargs.pop('encoding', 'utf-8')
+        kwargs.setdefault('indent', 4)
+        with open(path, 'w', encoding = encoding) as settings_file:
+            json.dump(dict(self.contents), settings_file, **kwargs)
+        return
+
+    def to_module(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports `contents` to a Python module.
+
+        The settings are stored in the module-level variable named in
+        `options._MODULE_SETTINGS_ATTRIBUTE` ('settings' by default), so that
+        `from_module` can load them.
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to
+                `pprint.pformat` (such as `width`). `sort_dicts` defaults to
+                False so that the order of `contents` is kept. The file is
+                always written as UTF-8, which Python uses to read modules.
+
+        """
+        path = utilities._pathlibify(path)
+        import pprint
+
+        kwargs.setdefault('sort_dicts', False)
+        contents = pprint.pformat(dict(self.contents), **kwargs)
+        module = (
+            '"""Project settings exported by `bobbie`."""\n\n'
+            f'{options._MODULE_SETTINGS_ATTRIBUTE} = {contents}\n')
+        with open(path, 'w', encoding = 'utf-8') as settings_file:
+            settings_file.write(module)
+        return
+
+    def to_toml(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports `contents` to a `toml` file.
+
+        This requires the `tomli-w` package, which is installed with the
+        `toml` extra (`pip install bobbie[toml]`).
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to
+                `tomli_w.dump` (such as `indent`).
+
+        """
+        path = utilities._pathlibify(path)
+        import tomli_w
+
+        # `toml` keys must be strings.
+        contents = {str(key): value for key, value in self.contents.items()}
+        with open(path, 'wb') as settings_file:
+            tomli_w.dump(contents, settings_file, **kwargs)
+        return
+
+    def to_yaml(self, path: pathlib.Path | str, **kwargs: Any) -> None:
+        """Exports `contents` to a `yaml` file.
+
+        This requires the `pyyaml` package, which is installed with the
+        `yaml` extra (`pip install bobbie[yaml]`).
+
+        Args:
+            path: path of the file to write. An existing file is overwritten.
+            **kwargs: additional parameters and arguments to pass to
+                `yaml.safe_dump` (such as `indent`), except for `encoding`,
+                which is the file encoding (defaults to 'utf-8'). `sort_keys`
+                defaults to False so that the order of `contents` is kept.
+
+        """
+        path = utilities._pathlibify(path)
+        import yaml
+
+        encoding = kwargs.pop('encoding', 'utf-8')
+        kwargs.setdefault('sort_keys', False)
+        with open(path, 'w', encoding = encoding) as settings_file:
+            yaml.safe_dump(dict(self.contents), settings_file, **kwargs)
+        return
+
     def update(self, item: GenericDict) -> Self:  # type: ignore[override]
         """Updates `contents` using the `add` method for key/value pairs.
 
@@ -586,6 +742,35 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         else:
             message = f'settings file {path} not found'
             raise FileNotFoundError(message)
+
+    def _get_exporter(self, path: pathlib.Path) -> MethodType:
+        """Returns the export method for the file type of `path`.
+
+        Args:
+            path: path of a settings file to write.
+
+        Returns:
+            The method that exports to the file type for the extension of
+                `path`.
+
+        Raises:
+            TypeError: if the extension of `path` is not supported or there
+                is no method for its file type.
+
+        """
+        extension = path.suffix[1:]
+        try:
+            file_type = options._FILE_EXTENSIONS[extension]
+        except KeyError as error:
+            message = f'Exporting to {extension} file is not supported'
+            raise TypeError(message) from error
+        try:
+            exporter: MethodType = getattr(
+                self, options._EXPORT_METHOD(file_type))
+        except AttributeError as error:
+            message = f'Exporting to {file_type} file is not supported'
+            raise TypeError(message) from error
+        return exporter
 
     @classmethod
     def _infer_types(cls, contents: GenericDict) -> GenericDict:

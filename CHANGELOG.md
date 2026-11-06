@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## 0.4.0
+
+* Added export methods to `Settings` that create a settings file from its
+  contents: `to_ini`, `to_json`, `to_module`, `to_toml`, and `to_yaml`, plus
+  `to_file`, which picks the method from the file extension (as `from_file`
+  does). Keyword arguments are passed to the writer for the file type
+  (`encoding` sets the encoding of `ini`, `json`, and `yaml` files, which
+  defaults to UTF-8, as it does for the loaders), and exported files load back
+  into the same `Settings`.
+* `to_ini` writes lists and dicts in the form that type inference reads (such
+  as `[x, y, z]`) and quotes items that would otherwise be converted. It raises
+  a `TypeError` if a top-level value is not a section.
+* Added a `toml` extra that installs `tomli-w`, which `to_toml` requires.
+* Added an "Export" column to the feature comparison in the README and
+  documented exporting in the README, Tutorial, Advanced User Guide (writer
+  arguments, `ini` limits, and exporting new file types), and Recipes.
+* Added tests for exporting every file type (70 tests in total).
+
 ## 0.3.3
 
 * The API documentation now has one page for each public object (the names in `__all__`), so it only documents `Settings`, and only once. Before, it had a page for every module, including the private `options` and `utilities`, and showed `Settings` twice.

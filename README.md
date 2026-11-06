@@ -34,6 +34,8 @@ So, what makes `bobbie` different?
 * **Flexible**: a `Settings` instance is easily built from a `dict`, Python module, or file (ini, json, toml, and yaml formats are supported).
 * **Lightweight**: an efficient codebase ensures a very small memory footprint.
 * **Intuitive**: a `create` class method constructs `Settings` (from any data source).
+* **Portable**: `Settings` can be exported to any of the supported file types, so
+  settings built in code can be saved as a settings file.
 * **Convenient**: unlike `configparser`, values stored as strings (such as in
   `ini` files) are automatically converted to the matching Python types when
   `Settings` is created.
@@ -56,11 +58,13 @@ To install `bobbie`, use `pip`:
 pip install bobbie
 ```
 
-To load `yaml` files, install the `yaml` extra, which adds
-[`PyYAML`](https://pypi.org/project/PyYAML/):
+Loading and exporting `yaml` files requires the `yaml` extra, which adds
+[`PyYAML`](https://pypi.org/project/PyYAML/). Exporting `toml` files
+requires the `toml` extra, which adds
+[`tomli-w`](https://pypi.org/project/tomli-w/):
 
 ```sh
-pip install "bobbie[yaml]"
+pip install "bobbie[toml,yaml]"
 ```
 
 ### Create a Settings instance
@@ -133,6 +137,39 @@ formats already store their own types. So, a `toml` value of `"[a, b]"` stays a
 string. See the [Advanced User Guide](https://WithPrecedent.github.io/bobbie/advanced/#type-inference-rules)
 for the exact rules and how to turn inference on or off for each file type.
 
+### Export settings to a file
+
+`bobbie` can also create a settings file from a `Settings` instance. You can
+either:
+* Call the method specific to the file type (`to_ini`, `to_json`,
+  `to_module`, `to_toml`, or `to_yaml`); or
+* Call the `to_file` method and it will pick the appropriate method from the
+  file extension.
+
+```python
+import bobbie
+
+settings = bobbie.Settings.create('settings_file.yaml')
+settings.add('general', {'seed': 7})
+# You may use the general `to_file` method.
+settings.to_file('settings_file.toml')
+# Or, the `to_toml` method. They both do the same thing.
+settings.to_toml('settings_file.toml')
+```
+
+Any additional keyword arguments are passed to the writer for the file type
+(such as `indent` for `json.dump`). An existing file is overwritten.
+
+Exported files can be loaded back into the same `Settings`. For `ini` files,
+lists and dicts are written in the form that [type inference](#type-inference)
+reads (such as `[x, y, z]`), and items that would otherwise be converted are
+quoted. Because `ini` files store everything as strings, every top-level value
+must be a section (a `dict`), and a string that looks like another type (such
+as `'42'`) is loaded as that type. A `Settings` exported with `to_module`
+stores its values in a module-level variable named `settings`. See the
+[Advanced User Guide](https://WithPrecedent.github.io/bobbie/advanced/#writer-arguments)
+for the arguments each exporter accepts and the other `ini` limits.
+
 ## Contributing
 
 <p align="center">
@@ -149,15 +186,15 @@ shows the features of the leading libraries.
 ### Feature Comparison of Python Configuration Libraries
 
 
-| Library | Typing | Secrets | dict | ini | json | py | toml | yaml |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| [`configparser`](https://docs.python.org/3/library/configparser.html) | | | | ✅ | | | | |
-| [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | | ✅ | ✅ | | ✅ | ✅ |
-| [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | ✅ | ✅ | | ✅ | ✅ |
-| [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | ✅ | | | | |
-| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | | | | |
-| [`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) | ✅ | ✅ | | | | | | |
+| Library | Typing | Secrets | Export | dict | ini | json | py | toml | yaml |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `bobbie`| ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| [`configparser`](https://docs.python.org/3/library/configparser.html) | | | ✅ | | ✅ | | | | |
+| [`dynaconf`](https://github.com/dynaconf/dynaconf) | ✅ | ✅ | ✅ | | ✅ | ✅ | | ✅ | ✅ |
+| [`Parser-it`](https://github.com/naorlivne/Parser_it) | ✅ | | | | ✅ | ✅ | | ✅ | ✅ |
+| [`python-decouple`](https://github.com/HBNetwork/python-decouple) | ✅ | ✅ | | | ✅ | | | | |
+| [`pyconfig`](https://github.com/shakefu/pyconfig) | | ✅ | | | | | | | |
+| [`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) | ✅ | ✅ | | | | | | | |
 
 <p align="center">
 <img src="https://media.giphy.com/media/l0ExlIJRtK1yr345y/giphy.gif" alt="Bobbie Draper destroys a robotic arm in an arm-wrestling match" style="width:350px;"/>

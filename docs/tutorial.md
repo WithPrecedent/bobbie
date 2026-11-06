@@ -13,12 +13,20 @@ pip install bobbie
 ```
 
 `bobbie` reads `ini`, `json`, `toml`, and Python module files with the Python
-standard library. Reading `yaml` files also requires
+standard library. Reading or writing `yaml` files also requires
 [`PyYAML`](https://pypi.org/project/PyYAML/), which you can install with the
 `yaml` extra:
 
 ```sh
 pip install "bobbie[yaml]"
+```
+
+The standard library cannot write `toml` files, so exporting settings to a
+`toml` file requires [`tomli-w`](https://pypi.org/project/tomli-w/), which
+you can install with the `toml` extra:
+
+```sh
+pip install "bobbie[toml]"
 ```
 
 ## The Settings class
@@ -340,10 +348,40 @@ loader.file_encoding  # 'utf-8'
     truthy. Attributes that are `None`, `False`, `0`, or empty are still
     replaced.
 
+## Exporting settings to a file
+
+The `to_` methods create a settings file from a `Settings` instance. There is
+one for each file type (`to_ini`, `to_json`, `to_module`, `to_toml`, and
+`to_yaml`), and `to_file` picks the right one from the file extension, just as
+`from_file` does when loading:
+
+```python
+settings = bobbie.Settings.create('settings.yaml')
+settings['general']['seed'] = 7
+
+settings.to_file('settings.toml')  # the same as settings.to_toml(...)
+settings.to_file('settings.ini')
+settings.to_file('settings.py')
+```
+
+An existing file is overwritten. An exported file loads back into the same
+settings:
+
+```python
+bobbie.Settings.create('settings.ini')['general']['seed']  # 7
+```
+
+`ini` files store every value as a string, so `to_ini` writes lists and dicts
+in the form that [type inference](#type-inference) reads back (such as
+`[stop, drop, roll]`). Because `ini` files only hold values inside sections,
+every top-level value must be a section (a `dict`), or `to_ini` raises a
+`TypeError`.
+
 ## Next steps
 
 * The [Advanced User Guide](advanced.md) covers passing arguments to the file
-  parsers, the global options, defaults for missing keys, and subclassing.
+  parsers and writers, the global options, defaults for missing keys, and
+  subclassing.
 * The [Recipes](recipes.md) show common patterns, such as layering default
   and local settings.
 * The [API reference](reference/Settings.md) documents every method.

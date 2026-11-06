@@ -6,6 +6,8 @@ Contents:
     _LIST_SEPARATOR: pattern that separates the items of a list that is not
         in brackets.
     _INLINE_COMMENT: pattern of a comment after a value on a line.
+    _SPECIAL_CHARACTERS: characters that require an item in a list or dict
+        string to be quoted.
 
 """
 
@@ -13,6 +15,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
@@ -27,6 +30,8 @@ _LIST_SEPARATOR = r',\s'
 # (or the end of the line) after it starts a comment, so a value such as
 # "#1f77b4" is kept.
 _INLINE_COMMENT = re.compile(r'(?:^|\s)#(?=\s|$).*')
+# Characters that split or nest items in a list or dict string.
+_SPECIAL_CHARACTERS = frozenset(',:[]{}()\'"')
 
 """ Private Functions """
 
@@ -205,6 +210,63 @@ def _split_top_level(
         index += 1
     parts.append(item[start:])
     return [p.strip() for p in parts if p.strip()]
+
+
+def _stringify(item: Any) -> str:
+    """Converts `item` to a string that `_typify` converts back to `item`.
+
+    This is the inverse of `_typify`. A list or tuple becomes a string wrapped
+    in square brackets (such as '[x, y, z]') and a dict becomes a string
+    wrapped in curly braces (such as '{a: 1, b: 2}'). Items in a list or dict
+    are converted with `_stringify_element` and may be nested. A str is
+    returned unchanged and any other type is converted with `str`.
+
+    Args:
+        item: value to convert to a string.
+
+    Returns:
+        String form of `item`.
+
+    """
+    if isinstance(item, str):
+        return item
+    elif isinstance(item, Mapping):
+        entries = (
+            f'{_stringify_element(k)}: {_stringify_element(v)}'
+            for k, v in item.items())
+        return '{' + ', '.join(entries) + '}'
+    elif isinstance(item, list | tuple):
+        return '[' + ', '.join(_stringify_element(i) for i in item) + ']'
+    else:
+        return str(item)
+
+
+def _stringify_element(item: Any) -> str:
+    """Converts an item in a list or dict to a string.
+
+    This is the inverse of `_typify_element`. A str is wrapped in quotes if
+    it is empty, has surrounding whitespace, contains a character in
+    `_SPECIAL_CHARACTERS`, or would be converted to another datatype by
+    `_typify` (such as '42' or 'true'). Any other type is converted with
+    `_stringify`.
+
+    Args:
+        item: item in a list or dict to convert to a string.
+
+    Returns:
+        String form of `item`.
+
+    """
+    if not isinstance(item, str):
+        return _stringify(item)
+    if (
+            item
+            and item == item.strip()
+            and _SPECIAL_CHARACTERS.isdisjoint(item)
+            and _typify(item) == item):
+        return item
+    quote = '"' if "'" in item else "'"
+    return f'{quote}{item}{quote}'
 
 
 def _strip_inline_comments(item: str) -> str:

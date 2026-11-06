@@ -161,14 +161,36 @@ settings['paths']['raw']  # '/data/raw'
 
 ## Save settings
 
-`bobbie` only loads settings. To save them, write `contents` with the
-standard library (or a `toml` or `yaml` writer):
+Use `to_file` (or the `to_` method for the file type) to save settings, such
+as after changing them in code:
 
 ```python
-import json
+settings['general']['seed'] = 7
+settings.to_file('settings.json')
+```
 
-with open('settings.json', 'w', encoding = 'utf-8') as settings_file:
-    json.dump(settings.contents, settings_file, indent = 4)
+## Convert a settings file to another format
+
+Load the file and export it with the extension of the new format:
+
+```python
+bobbie.Settings.create('settings.ini').to_file('settings.toml')
+```
+
+Values that `bobbie` infers from an `ini` or `json` file keep their inferred
+types in the new file. For example, `seed = 43` in the `ini` file becomes the
+`toml` integer `43`, not the string `"43"`.
+
+## Write a starter settings file
+
+Build the defaults in code and export them, so that users have a file to
+edit:
+
+```python
+defaults = bobbie.Settings({
+    'general': {'verbose': False, 'seed': 43},
+    'files': {'source_format': 'csv', 'file_encoding': 'utf-8'}})
+defaults.to_file('settings.yaml')
 ```
 
 ## Pass only some sections to a component
