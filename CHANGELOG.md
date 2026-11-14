@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
+## Unreleased
+
+* Added `options.file_type`, which returns the file type of a settings file
+  extension (or `None` if it is not supported), and
+  `options.file_extensions`, which lists the supported extensions, so that
+  other packages need not read `options._FILE_EXTENSIONS`.
+* Extensions of settings files are matched in any case, so "SETTINGS.JSON"
+  loads and exports like "settings.json".
+
 ## 0.4.0
 
 * Added export methods to `Settings` that create a settings file from its
