@@ -126,7 +126,7 @@ def verify_settings(loaded: bobbie.Settings) -> None:
 
 def test_version() -> None:
     """Tests that the package version is set."""
-    assert bobbie.__version__ == '0.4.0'
+    assert bobbie.__version__ == '0.5.0'
 
 
 def test_create_from_dict() -> None:

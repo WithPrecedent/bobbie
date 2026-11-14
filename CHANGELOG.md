@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 <!-- insertion marker -->
 
-## Unreleased
+## 0.5.0
 
 * Added `options.file_type`, which returns the file type of a settings file
   extension (or `None` if it is not supported), and
