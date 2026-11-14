@@ -727,11 +727,10 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
         """
         if path.is_file():
             extension = path.suffix[1:]
-            try:
-                file_type = options._FILE_EXTENSIONS[extension]
-            except KeyError as error:
+            file_type = options.file_type(extension)
+            if file_type is None:
                 message = f'Loading from {extension} file is not supported'
-                raise TypeError(message) from error
+                raise TypeError(message)
             try:
                 loader: MethodType = getattr(
                     cls, options._LOAD_METHOD(file_type))
@@ -759,11 +758,10 @@ class Settings(wonka.Sourcerer, bunches.Dictionary):
 
         """
         extension = path.suffix[1:]
-        try:
-            file_type = options._FILE_EXTENSIONS[extension]
-        except KeyError as error:
+        file_type = options.file_type(extension)
+        if file_type is None:
             message = f'Exporting to {extension} file is not supported'
-            raise TypeError(message) from error
+            raise TypeError(message)
         try:
             exporter: MethodType = getattr(
                 self, options._EXPORT_METHOD(file_type))

@@ -839,5 +839,14 @@ def test_pathlibify() -> None:
         utilities._pathlibify(5)  # type: ignore
 
 
+def test_file_types() -> None:
+    """Tests the public lookups of the supported file types."""
+    assert options.file_extensions() == list(options._FILE_EXTENSIONS)
+    assert options.file_type('json') == 'json'
+    assert options.file_type('.YML') == 'yaml'
+    assert options.file_type('py') == 'module'
+    assert options.file_type('csv') is None
+
+
 if __name__ == '__main__':
     pytest.main([__file__])

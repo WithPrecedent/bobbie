@@ -1,6 +1,8 @@
 """Settings, constants, and global types for `bobbie`.
 
 Contents:
+    file_extensions: returns the extensions of the supported file types.
+    file_type: returns the file type of an extension.
     _FILE_EXTENSIONS: maps supported file extensions to file types.
     _INFER_TYPES: whether to infer the datatypes of loaded values for each
         file type.
@@ -52,6 +54,34 @@ _OVERWRITE_ATTRIBUTES: bool = True
 _ALWAYS_RETURN_ERROR: bool = False
 _TYPER: Callable[[Any], Any] = utilities._typify
 _INLINE_COMMENTS: bool = True
+
+""" Public Functions """
+
+
+def file_extensions() -> list[str]:
+    """Returns the extensions of the file types that settings can be stored in.
+
+    Returns:
+        The extensions (without a leading "."), such as "ini" and "json".
+
+    """
+    return list(_FILE_EXTENSIONS)
+
+
+def file_type(extension: str) -> str | None:
+    """Returns the file type of an extension.
+
+    Args:
+        extension: the extension of a settings file, with or without a
+            leading "." and in any case (such as "JSON" or ".yml").
+
+    Returns:
+        The file type ("ini", "json", "module", "toml", or "yaml"), or `None`
+            if the extension is not supported.
+
+    """
+    return _FILE_EXTENSIONS.get(extension.lower().removeprefix('.'))
+
 
 """ Missing Argument Sentinel Class and Instance """
 
